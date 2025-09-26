@@ -41,14 +41,20 @@ app.use('/uploads', express.static('uploads'));
 // Rate limit whole API (you can also mount per-route)
 app.use('/api', rateLimiter);
 
-// Routes
+/// ... your existing middleware and routes ...
+
 app.use('/api/templates', templatesRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/ai',       aiRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
-// Centralized error handling
+// ✅ Root route for the Render homepage
+app.get('/', (_req, res) => {
+  res.send('Backend is running 🚀');
+});
+
+// Centralized error handling MUST stay last
 app.use(errorHandler);
 
 module.exports = app;
