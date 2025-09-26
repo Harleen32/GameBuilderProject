@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameForge Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <h2>GameForge</h2>
+    <nav>
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">My Games</a>
+      <a href="#">Templates</a>
+      <a href="#">AI Builder</a>
+      <a href="#">Gallery</a>
+      <a href="#">Settings</a>
+      <a href="#">Logout</a>
+    </nav>
+  </div>
+  <main class="main-content">
+
+    <header class="top-bar">
+      <div class="menu-toggle" id="menuToggle">☰</div>
+      <div class="top-bar-right">Welcome, Creator</div>
+    </header>
+    <section class="dashboard-grid">
+      <div class="card">
+        <h3>Total Games</h3>
+        <p>12</p>
+      </div>
+      <div class="card">
+        <h3>Published</h3>
+        <p>7</p>
+      </div>
+      <div class="card">
+        <h3>Drafts</h3>
+        <p>5</p>
+      </div>
+      <div class="card">
+        <h3>New Feedback</h3>
+        <p>3</p>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const menuToggle = document.getElementById("menuToggle");
+      const sidebar = document.getElementById("sidebar");
+
+      menuToggle.addEventListener("click", function () {
+        sidebar.classList.toggle("closed");
+      });
+    });
+  </script>
+
+</body>
+</html>

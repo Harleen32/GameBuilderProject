@@ -1,0 +1,157 @@
+{
+  "id": "racing-3d",
+  "name": "3D Racing Game",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Racing",
+  "tags": ["3d","racing","simulation"],
+  "thumbnail": "assets/racing.jpeg",
+  "description": "High-fidelity 3D racing template with advanced vehicle physics (tire model, suspension), dynamic weather, AI opponents, track editor, drift mechanics, damage model, split-screen and online multiplayer, telemetry, leaderboards, peripherals (wheel/FFB), accessibility and monetization hooks.",
+  "settings": {
+    "physics": { "fixedTimestepMs": 16, "substeps": 2, "gravity": -9.81 },
+    "vehicle": { "defaultMassKg": 1400, "suspensionStiffness": 22, "steeringResponse": 1.0, "maxSpeedKph": 320 },
+    "tireModel": { "enabled": true, "temperature": true, "pressure": true, "wear": true, "frictionCurve": "Pacejka" },
+    "tracks": { "streaming": true, "defaultTrackLengthM": 5000, "dynamicWeather": true },
+    "ai": { "opponentCount": 11, "drivingModel": "behavior_tree", "difficultyRamp": 0.06 },
+    "replay": { "enabled": true, "maxSeconds": 1200, "exportEndpoint": "/api/exportReplay" },
+    "multiplayer": { "online": true, "maxPlayers": 16, "splitScreen": { "enabled": true, "maxLocalPlayers": 4 }, "netSyncEndpoint": "/api/match", "latencyCompensation": { "mode": "hybrid", "rollback": false } },
+    "telemetry": { "enabled": true, "endpoint": "/api/telemetry", "metrics": ["lapTimes","sectorTimes","speedSamples","inputSamples","collisionEvents"] },
+    "leaderboards": { "enabled": true, "endpoint": "/api/leaderboard" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "assistDriving": true, "steeringAssist": true, "autoBrake": false, "uiScale": 1.0, "colorblindMode": "on-request" },
+    "monetization": { "ads": { "enabled": false }, "iap": { "enabled": true, "products": [{ "id": "car_skin_pack", "priceUSD": 2.99 }, { "id": "season_pass", "priceUSD": 9.99 }] }, "storeEndpoint": "/api/store" },
+    "platformPresets": { "pc": { "graphics": "ultra" }, "console": { "graphics": "high" }, "mobile": { "graphics": "medium" } }
+  },
+  "assets": {
+    "models": [
+      { "id": "car_sport_01", "src": "assets/racing/models/car_sport_01.glb" },
+      { "id": "car_rally_01", "src": "assets/racing/models/car_rally_01.glb" },
+      { "id": "track_desert", "src": "assets/racing/tracks/desert.glb" },
+      { "id": "track_city", "src": "assets/racing/tracks/city.glb" },
+      { "id": "track_night", "src": "assets/racing/tracks/night.glb" }
+    ],
+    "audio": [
+      { "id": "sfx_engine_1", "src": "assets/audio/racing/engine_1.wav" },
+      { "id": "sfx_skid", "src": "assets/audio/racing/skid.wav" },
+      { "id": "sfx_collision", "src": "assets/audio/racing/collision.wav" },
+      { "id": "bgm_menu", "src": "assets/audio/racing/bgm_menu.mp3", "loop": true }
+    ],
+    "particles": [
+      { "id": "particle_skid", "template": { "frames": 6, "lifeMs": 400, "size": 24 } },
+      { "id": "particle_sparks", "template": { "frames": 8, "lifeMs": 600, "size": 32 } }
+    ]
+  },
+  "layers": [
+    { "id": "world3d", "type": "3dScene" },
+    { "id": "vehicles", "type": "entityLayer" },
+    { "id": "particles", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "player_car",
+      "type": "vehicle",
+      "layer": "vehicles",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "properties": {
+        "model": "car_sport_01",
+        "massKg": 1350,
+        "enginePowerKw": 420,
+        "maxSpeedKph": 320,
+        "driveType": "RWD",
+        "handlingProfile": "sport",
+        "damageModel": { "enabled": true, "maxHealth": 100 }
+      }
+    },
+    {
+      "id": "ui_speed",
+      "type": "uiText",
+      "layer": "ui",
+      "x": 16,
+      "y": 16,
+      "properties": { "textTemplate": "Speed: {vehicle.speedKph} km/h", "bindTo": "vehicle.speedKph" }
+    },
+    {
+      "id": "ui_lap",
+      "type": "uiText",
+      "layer": "ui",
+      "x": 16,
+      "y": 44,
+      "properties": { "textTemplate": "Lap: {race.currentLap}/{race.totalLaps}", "bindTo": "race.currentLap" }
+    },
+    {
+      "id": "overlay_race_end",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Race Complete", "buttons": [{ "text": "Restart", "action": "restartRace" }, { "text": "Share", "action": "shareReplay" }] }
+    }
+  ],
+  "vehiclePresets": [
+    { "id": "sport", "massKg": 1350, "enginePowerKw": 420, "handlingProfile": "sport" },
+    { "id": "rally", "massKg": 1400, "enginePowerKw": 320, "handlingProfile": "rally" },
+    { "id": "truck", "massKg": 2600, "enginePowerKw": 500, "handlingProfile": "heavy" }
+  ],
+  "aiOpponents": {
+    "profiles": [
+      { "id": "ai_easy", "aggression": 0.4, "consistency": 0.75 },
+      { "id": "ai_hard", "aggression": 0.9, "consistency": 0.95 }
+    ],
+    "pathfinding": { "splineFollow": true, "overtakeLogic": true, "collisionAvoidance": true }
+  },
+  "trackEditor": {
+    "enabled": true,
+    "exportEndpoint": "/api/exportTrack",
+    "tools": ["splineEditor","surfacePainter","spawnEditor"],
+    "presets": ["desert","city","mountain"],
+    "proceduralGenerator": { "enabled": true, "seeded": true, "options": ["length","curvature","elevation"] }
+  },
+  "physics": {
+    "wheelCollider": { "radius": 0.35, "suspensionTravel": 0.2 },
+    "driftModel": { "enabled": true, "driftAssist": true, "driftSliderRange": [0,1] },
+    "damageSystem": { "enabled": true, "impactThreshold": 5.0, "visualDeformation": true }
+  },
+  "peripherals": {
+    "wheelSupport": true,
+    "forceFeedback": { "enabled": true, "mappingProfile": "default_ffb" },
+    "peripheralDetection": { "autoDetect": true, "preferredDevice": "wheel" },
+    "calibrationEndpoints": { "saveProfile": "/api/savePeripheralProfile", "loadProfile": "/api/loadPeripheralProfile" }
+  },
+  "ui": {
+    "hud": { "minimap": true, "racingLine": true, "overtakeIndicator": true, "pitTimers": true },
+    "telemetryUI": { "liveGraphs": true, "availableInReplay": true },
+    "photoMode": { "enabled": true, "cameraPresets": ["wide","cinematic","close"], "exportEndpoint": "/api/exportPhoto" }
+  },
+  "content": {
+    "ghosts": { "enabled": true, "uploadEndpoint": "/api/uploadGhost", "downloadEndpoint": "/api/getGhosts" },
+    "communityGhosts": { "enabled": true, "featuredListEndpoint": "/api/featuredGhosts" }
+  },
+  "events": [
+    { "trigger": "onLapComplete", "action": [{ "type": "recordTelemetry", "params": { "metric": "lapTime", "value": "{lap.time}" } }, { "type": "submitLeaderboard", "params": { "board": "leaderboard_lap", "score": "{lap.time}" } }] },
+    { "trigger": "onCollision", "action": [{ "type": "applyDamage", "params": { "vehicleId": "{vehicle.id}", "amountPath": "collision.force" } }, { "type": "playSound", "params": { "id": "sfx_collision" } }] },
+    { "trigger": "onRaceEnd", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_race_end" } }, { "type": "exportReplay", "params": { "endpoint": "/api/exportReplay" } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "steer": ["Axis_X"], "throttle": ["Axis_Y"], "brake": ["Space"], "handbrake": ["H"], "nitro": ["N"] }, "controllerSupport": true, "wheelSupport": true, "remappable": true },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "telemetry": { "enabled": true, "endpoint": "/api/telemetry" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "leaderboard": { "enabled": true, "endpoint": "/api/leaderboard" },
+    "multiplayer": { "netSyncEndpoint": "/api/match", "rollbackEnabled": true, "rollbackBufferMs": 120 }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "race_start": "Go!", "race_complete": "Race Complete", "pit_stop": "Pit Stop" },
+      "es-ES": { "race_start": "¡Ya!", "race_complete": "Carrera Completa", "pit_stop": "Parada en Boxes" },
+      "fr-FR": { "race_start": "Partez!", "race_complete": "Course Terminée", "pit_stop": "Arrêt au stand" }
+    }
+  },
+  "uiHints": { "controls": "Use steering axis or A/D to steer, W to accelerate, S to brake, Space for handbrake. Press N for nitro where available.", "tips": ["Brake before corners","Use nitro on straightaways","Drift to maintain speed through turns"] },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "Racing 3D v1.1.0 — Added advanced tire model (temp/pressure/wear), dynamic weather & wet grip, procedural track generator, more sample tracks, full wheel & force-feedback support (FFB mapping), peripheral auto-detection & calibration endpoints, rollback/latency compensation toggle, HUD enhancements (racing line, telemetry graphs, photo mode), ghost/community ghost endpoints, platform presets and extended telemetry/leaderboard endpoints. Production: implement telemetry/leaderboard backends, FFB mapping integrations for target wheel vendors, and platform-specific quality tuning/builds."
+  }
+}

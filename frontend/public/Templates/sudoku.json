@@ -1,0 +1,166 @@
+{
+  "id": "sudoku",
+  "name": "Sudoku",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Puzzle",
+  "tags": ["puzzle", "sudoku", "logic", "brain"],
+  "thumbnail": "assets/sudoku.jpeg",
+  "description": "Classic Sudoku template with multiple difficulties, puzzle generator, pencil-marks (notes), hint/solver integration, daily challenges, leaderboard, achievements, puzzle sharing, expanded localization, accessibility options and monetization hooks.",
+  "settings": {
+    "gridSize": 9,
+    "blockSize": 3,
+    "difficulties": ["easy", "medium", "hard", "expert"],
+    "defaultDifficulty": "medium",
+    "hintCost": 5,
+    "revealCost": 10,
+    "autoPencil": true,
+    "noteMode": true,
+    "timerEnabled": true,
+    "leaderboardEnabled": true,
+    "save": { "autoSave": true, "slots": 5, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US", "es-ES", "hi-IN", "fr-FR", "de-DE"] },
+    "accessibility": { "highContrast": false, "uiScale": 1.0, "largeDigits": true, "dyslexiaFont": false, "colorblindMode": "off" },
+    "monetization": { "ads": { "rewardedReveal": true, "intervalSec": 120 }, "iap": { "enabled": true, "products": [ { "id": "hint_pack_20", "priceUSD": 1.99, "grant": { "hints": 20 } } ] } },
+    "dailyChallenge": { "enabled": true, "resetUTC": "00:00", "reward": { "coins": 50 } }
+  },
+  "assets": {
+    "images": [
+      { "id": "bg_board", "src": "assets/sudoku/bg_board.png", "size": { "w": 1024, "h": 1024 } },
+      { "id": "cell_empty", "src": "assets/sudoku/cell_empty.png", "size": { "w": 80, "h": 80 } },
+      { "id": "cell_filled", "src": "assets/sudoku/cell_filled.png", "size": { "w": 80, "h": 80 } },
+      { "id": "pencil_mark", "src": "assets/sudoku/pencil.png", "size": { "w": 20, "h": 20 } },
+      { "id": "daily_badge", "src": "assets/sudoku/daily_badge.png", "size": { "w": 64, "h": 64 } }
+    ],
+    "audio": [
+      { "id": "sfx_place", "src": "assets/audio/sudoku/place.wav" },
+      { "id": "sfx_erase", "src": "assets/audio/sudoku/erase.wav" },
+      { "id": "sfx_hint", "src": "assets/audio/sudoku/hint.wav" },
+      { "id": "sfx_win", "src": "assets/audio/sudoku/win.wav" },
+      { "id": "bgm_loop", "src": "assets/audio/sudoku/bgm_loop.mp3", "loop": true }
+    ]
+  },
+  "layers": [
+    { "id": "background", "type": "static", "properties": { "image": "bg_board" } },
+    { "id": "grid", "type": "gridLayer", "properties": { "rows": 9, "columns": 9, "cellSize": 80 } },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "sudoku_system",
+      "type": "sudokuBoard",
+      "layer": "grid",
+      "properties": {
+        "size": 9,
+        "blockSize": 3,
+        "generator": "backtracking+pattern",
+        "solver": "dancing_links",
+        "autoPencil": true,
+        "noteMode": true,
+        "validation": { "liveCheck": true, "highlightConflicts": true }
+      }
+    },
+    {
+      "id": "ui_timer",
+      "type": "uiText",
+      "x": 16,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Time: {game.time}", "bindTo": "game.time" }
+    },
+    {
+      "id": "ui_hints",
+      "type": "uiText",
+      "x": 16,
+      "y": 48,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Hints: {player.hints}", "bindTo": "player.hints" }
+    },
+    {
+      "id": "btn_erase",
+      "type": "uiButton",
+      "x": 980,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "text": "Erase", "onClick": "eraseCell" }
+    },
+    {
+      "id": "btn_note",
+      "type": "uiToggle",
+      "x": 880,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "text": "Notes", "bindTo": "sudoku_system.noteMode" }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredSmall", "title": "Paused", "buttons": [{ "text": "Resume", "action": "togglePause" }, { "text": "Main Menu", "action": "toMainMenu" }] }
+    },
+    {
+      "id": "overlay_hint",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "bottomPanel", "title": "Hint", "buttons": [{ "text": "Use Hint (cost 5)", "action": "useHint" }, { "text": "Watch Ad to Reveal", "action": "watchAdReveal" }, { "text": "Close", "action": "closeOverlay" }] }
+    },
+    {
+      "id": "overlay_win",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredModal", "title": "Puzzle Solved!", "subtitle": "Well done.", "buttons": [{ "text": "Next", "action": "loadNextPuzzle" }, { "text": "Replay", "action": "restartPuzzle" }, { "text": "World", "action": "openWorldMap" }] }
+    },
+    {
+      "id": "world_map_panel",
+      "type": "uiPanel",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Puzzle Map", "mapImage": "assets/sudoku/world_map.png", "nodes": [ { "id": "d_easy_1", "puzzleId": "p_easy_1", "x": 200, "y": 400, "locked": false }, { "id": "d_med_1", "puzzleId": "p_med_1", "x": 420, "y": 320, "locked": false } ], "buttons": [{ "text": "Play", "action": "playSelected" }, { "text": "Close", "action": "closeOverlay" }] } }
+  ],
+  "puzzles": [
+    { "id": "p_easy_1", "difficulty": "easy", "givens": [[5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],[8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],[0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]] },
+    { "id": "p_med_1", "difficulty": "medium", "generatorSeed": "20250918_MED_01" }
+  ],
+  "dailyChallenge": { "enabled": true, "generator": "seededByDate", "sampleParams": { "difficulty": "medium" }, "reward": { "coins": 50 }, "lastGenerated": null },
+  "puzzleSharing": {
+    "enabled": true,
+    "format": "seed|difficulty",
+    "example": "20250918_MED_01|medium",
+    "importEndpoint": "/api/importPuzzle"
+  },
+  "achievements": [
+    { "id": "speed_solver", "name": "Quick Solver", "condition": "Complete a puzzle under 2 minutes" },
+    { "id": "no_hints", "name": "Pure Logic", "condition": "Solve a puzzle without hints" },
+    { "id": "daily_streak_7", "name": "7-Day Streak", "condition": "Complete daily puzzles 7 days in a row" },
+    { "id": "expert_master", "name": "Grandmaster", "condition": "Solve an expert puzzle without mistakes" }
+  ],
+  "events": [
+    { "trigger": "onPlaceNumber", "action": [{ "type": "playSound", "params": { "id": "sfx_place" } }, { "type": "validateCell", "params": {} }, { "type": "checkPuzzleComplete", "params": {} }] },
+    { "trigger": "onEraseNumber", "action": [{ "type": "playSound", "params": { "id": "sfx_erase" } }] },
+    { "trigger": "onUseHint", "action": [{ "type": "chargeCurrency", "params": { "amount": 5 } }, { "type": "revealCell", "params": { "strategy": "bestGuess" } }, { "type": "playSound", "params": { "id": "sfx_hint" } }] },
+    { "trigger": "onWatchAdReveal", "action": [{ "type": "revealCell", "params": { "strategy": "revealRandomEmpty" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "ad_reveal", "adId": "reveal_ad" } } }] },
+    { "trigger": "onPuzzleComplete", "action": [{ "type": "playSound", "params": { "id": "sfx_win" } }, { "type": "showOverlay", "params": { "overlayId": "overlay_win" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "puzzle_complete", "puzzleId": "{puzzle.id}", "time": "{game.time}" } } }, { "type": "grantAchievementCheck", "params": {} }, { "type": "grantReward", "params": { "reward": { "coins": 20 } } }] } ,
+    { "trigger": "onPauseToggled", "action": [{ "type": "toggleOverlay", "params": { "overlayId": "overlay_pause" } }] },
+    { "trigger": "onImportPuzzle", "action": [{ "type": "callAPI", "params": { "endpoint": "/api/importPuzzle", "method": "POST", "body": { "code": "{importCode}" } } }, { "type": "loadPuzzleFromSeed", "params": { "seed": "{importCode}" } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "select": ["Pointer","Touch"], "numberKeys": ["1","2","3","4","5","6","7","8","9"], "erase": ["Backspace","Delete"], "toggleNote": ["N"], "pause": ["P"] }, "controllerSupport": false },
+    "generator": { "algorithms": ["patternRemove","backtracking"], "difficultyTuning": { "easy": 36, "medium": 30, "hard": 24, "expert": 17 } },
+    "solver": { "enabled": true, "algorithm": "dancing_links" },
+    "save": { "autoSave": true, "slots": 5, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "leaderboard": { "enabled": true, "boards": [{ "id": "sudoku_fastest", "displayName": "Fastest Solvers" }] },
+    "monetization": { "ads": { "enabled": true, "rewardedAdId": "reveal_ad" }, "iap": { "enabled": true } }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "pause_title": "Paused", "hint_title": "Hint", "win_title": "Puzzle Solved!", "daily_title": "Daily Challenge" },
+      "es-ES": { "pause_title": "Pausado", "hint_title": "Pista", "win_title": "¡Puzzle Resuelto!", "daily_title": "Desafío Diario" },
+      "fr-FR": { "pause_title": "Pause", "hint_title": "Indice", "win_title": "Puzzle Résolu!", "daily_title": "Défi Quotidien" },
+      "de-DE": { "pause_title": "Pausiert", "hint_title": "Hinweis", "win_title": "Rätsel Gelöst!", "daily_title": "Tägliche Herausforderung" }
+    }
+  },
+  "uiHints": { "controls": "Tap a cell then press a number key to fill. Use N to toggle pencil/notes. Hints cost coins; reveal a cell by watching an ad.", "tips": ["Use pencil marks to track candidates","Start with naked singles and easy strategies","Use generator seeds for reproducible puzzles"] },
+  "meta": { "created_at": "2025-09-18T00:00:00Z", "updated_at": "2025-09-18T00:00:00Z", "notes": "v1.1.0 — Added achievements, puzzle sharing/import, extended localization (FR, DE), additional accessibility toggles (dyslexia font), tutorial hooks and daily challenge metadata. Implement /api/importPuzzle endpoint and ad/IAP SDKs as needed." }
+}

@@ -1,0 +1,330 @@
+{
+  "id": "base-builder-full-v1",
+  "name": "Base Builder Full",
+  "type": "base",
+  "version": "3.0.0",
+  "author": "GameForge Template",
+  "description": "Comprehensive single-file starter template including core systems, editor metadata, assets manifest, entity templates, levels, UI, audio, input, persistence, networking hooks, analytics, achievements, localization, scripting hooks, monetization placeholders, and demo scenes. Designed to be extended into any 2D genre.",
+  "createdAt": "2025-09-19T00:00:00Z",
+  "compat": { "engine": "GameForge-Editor", "minEditorVersion": "0.6.0" },
+  "paths": {
+    "self": "/templates/base_builder_full.json",
+    "cover": "/assets/templates/covers/base-builder-full-cover.png",
+    "thumbnail": "/assets/templates/thumbs/base-builder-full-thumb.png",
+    "spriteDir": "/assets/sprites/base",
+    "tilemapDir": "/assets/tilemaps",
+    "audioDir": "/assets/audio/base",
+    "uiDir": "/assets/ui"
+  },
+  "tags": ["base", "starter", "complete", "2D", "multigenre", "network-ready"],
+  "uiCard": {
+    "title": "Base Builder (Full)",
+    "subtitle": "Complete starter with everything you need to prototype and ship 2D games.",
+    "thumbnail": "/assets/templates/thumbs/base-builder-full-thumb.png",
+    "cover": "/assets/templates/covers/base-builder-full-cover.png",
+    "badges": ["Full-Stack", "Editor-Ready", "Multiplatform"],
+    "buttons": [
+      { "id": "preview", "label": "Preview", "kind": "primary", "action": { "type": "open-preview", "payload": { "templateSource": "/templates/base_builder_full.json" } } },
+      { "id": "edit", "label": "Edit", "kind": "accent", "action": { "type": "open-editor", "payload": { "templateSource": "/templates/base_builder_full.json", "hash": "base-builder-full-v1" } } },
+      { "id": "download", "label": "Download", "kind": "ghost", "action": { "type": "download", "payload": { "href": "/templates/base_builder_full.json", "filename": "base_builder_full.json" } } }
+    ]
+  },
+  "settings": {
+    "canvasWidth": 1280,
+    "canvasHeight": 720,
+    "backgroundColor": "#0b1220",
+    "pixelRatioPolicy": "device",
+    "grid": { "enabled": true, "size": 32, "snap": true },
+    "physics": {
+      "gravityY": 0.5,
+      "globalFriction": 0.98,
+      "collisionIterations": 6,
+      "maxDeltaMs": 33,
+      "useContinuousCollision": true,
+      "defaultBody": "aabb"
+    },
+    "camera": {
+      "mode": "side",
+      "follow": "player-main",
+      "zoom": 1.0,
+      "zoomMin": 0.5,
+      "zoomMax": 2.0,
+      "deadzone": { "x": 0.35, "y": 0.3, "w": 0.3, "h": 0.2 }
+    },
+    "performance": { "targetFPS": 60, "lowSpecMode": { "maxParticles": 0, "shadowQuality": "low" } },
+    "platformTargets": ["web", "desktop", "mobile"]
+  },
+  "editor": {
+    "tools": {
+      "select": true,
+      "move": true,
+      "scale": true,
+      "rotate": true,
+      "tilemap": true,
+      "physics": true,
+      "playtest": true,
+      "replay": true,
+      "entityBrush": true,
+      "scriptingConsole": true
+    },
+    "panels": { "hierarchy": true, "inspector": true, "assets": true, "scene": true, "console": true, "timeline": true, "profiler": true },
+    "shortcuts": {
+      "undo": ["Meta+Z", "Ctrl+Z"],
+      "redo": ["Shift+Meta+Z", "Ctrl+Y"],
+      "playPause": ["Space"],
+      "stepFrame": ["Ctrl+."],
+      "snapToggle": ["G"],
+      "toggleGrid": ["Shift+G"],
+      "openScripting": ["Ctrl+K"]
+    },
+    "importRules": { "imageExt": [".png", ".jpg", ".jpeg", ".webp"], "audioExt": [".mp3", ".wav", ".ogg"], "tilemapExt": [".json", ".tmx"], "maxImageSizeMB": 16 }
+  },
+  "assets": {
+    "images": [
+      { "id": "bg-solid", "path": "/assets/backgrounds/solid-0b1220.png", "preload": true },
+      { "id": "player-idle", "path": "/assets/sprites/base/player-idle.png", "preload": true },
+      { "id": "player-walk", "path": "/assets/sprites/base/player-walk.png", "preload": false },
+      { "id": "enemy-basic", "path": "/assets/sprites/base/enemy-basic.png", "preload": false },
+      { "id": "item-coin", "path": "/assets/sprites/base/item-coin.png", "preload": false },
+      { "id": "tile-tileset", "path": "/assets/tilemaps/tileset.png", "preload": false },
+      { "id": "ui-panel", "path": "/assets/ui/panel.png", "preload": false },
+      { "id": "thumb", "path": "/assets/templates/thumbs/base-builder-full-thumb.png", "preload": true }
+    ],
+    "audio": [
+      { "id": "sfx-jump", "path": "/assets/audio/base/jump.wav", "preload": true },
+      { "id": "sfx-coin", "path": "/assets/audio/base/coin.wav", "preload": false },
+      { "id": "sfx-hit", "path": "/assets/audio/base/hit.wav", "preload": false },
+      { "id": "music-loop", "path": "/assets/audio/base/music-loop.mp3", "preload": false }
+    ],
+    "fonts": [
+      { "id": "ui-font", "family": "Orbitron, sans-serif" },
+      { "id": "fallback-font", "family": "system-ui, sans-serif" }
+    ],
+    "tilemaps": [
+      { "id": "level-1-tmx", "path": "/assets/tilemaps/level1.json", "preload": false }
+    ],
+    "shaders": [],
+    "data": []
+  },
+  "input": {
+    "axes": [
+      { "id": "horizontal", "negative": ["ArrowLeft", "a"], "positive": ["ArrowRight", "d"], "type": "digital" },
+      { "id": "vertical", "negative": ["ArrowUp", "w"], "positive": ["ArrowDown", "s"], "type": "digital" },
+      { "id": "analogX", "gamepadAxis": 0, "type": "analog" }
+    ],
+    "actions": [
+      { "id": "jump", "keys": ["Space", "w", "ArrowUp"], "gamepadButtons": [0], "mobile": ["tap"] },
+      { "id": "attack", "keys": ["KeyJ", "x"], "gamepadButtons": [2], "mobile": ["tap_two_finger"] },
+      { "id": "dash", "keys": ["ShiftLeft", "ShiftRight"], "gamepadButtons": [1], "mobile": ["swipe_right"] },
+      { "id": "interact", "keys": ["KeyE", "Enter"], "gamepadButtons": [3], "mobile": ["tap"] }
+    ],
+    "touch": {
+      "joystick": { "enabled": true, "position": "bottom-left", "size": 120 },
+      "actionButtons": { "enabled": true, "position": "bottom-right", "buttons": ["jump", "attack", "dash"] },
+      "gesture": { "swipeThresholdPx": 30, "doubleTapThresholdMs": 250 }
+    },
+    "gamepad": { "vibration": true }
+  },
+  "entities": {
+    "templates": {
+      "player": {
+        "id": "player-template",
+        "type": "player",
+        "transform": { "width": 48, "height": 48 },
+        "render": { "mode": "sprite-or-color", "color": "#00bcd4", "sprites": { "idle": "player-idle", "walk": "player-walk" }, "currentAnim": "idle" },
+        "physics": { "body": "aabb", "mass": 1, "gravityScale": 1, "maxSpeed": 8, "jumpVelocity": -12 },
+        "controller": { "moveAxis": "horizontal", "speed": 5, "actions": { "jump": "jump", "dash": "dash" } },
+        "stats": { "hp": 100, "stamina": 100, "defense": 0 },
+        "tags": ["player", "controllable"]
+      },
+      "enemy-basic": {
+        "id": "enemy-basic-template",
+        "type": "npc",
+        "render": { "image": "enemy-basic" },
+        "physics": { "body": "aabb", "mass": 1, "maxSpeed": 3 },
+        "ai": { "behavior": "patrol", "patrolRange": 120 },
+        "stats": { "hp": 30, "damage": 10 },
+        "loot": { "dropTable": [{ "item": "item-coin", "chance": 0.6 }] },
+        "tags": ["enemy"]
+      },
+      "item-coin": {
+        "id": "item-coin-template",
+        "type": "item",
+        "render": { "image": "item-coin" },
+        "physics": { "body": "sensor" },
+        "onPickup": { "action": "addScore", "payload": { "score": 10 } },
+        "tags": ["collectible"]
+      }
+    },
+    "instances": {
+      "player-main": {
+        "ref": "player-template",
+        "id": "player-main",
+        "transform": { "x": 120, "y": 360 }
+      },
+      "ground-large": {
+        "id": "ground-0",
+        "type": "platform",
+        "transform": { "x": 0, "y": 600, "width": 2560, "height": 120 },
+        "render": { "mode": "tile", "tileImage": "tile-tileset", "tileSize": [64, 16] },
+        "physics": { "static": true, "body": "aabb" },
+        "tags": ["ground", "solid"]
+      }
+    },
+    "tilemapLevels": [
+      {
+        "id": "level-1",
+        "name": "Level 1 - Meadow",
+        "tilemap": "level-1-tmx",
+        "spawnPoints": [{ "id": "start", "x": 120, "y": 360 }],
+        "metadata": { "music": "music-loop", "parallax": [] }
+      }
+    ],
+    "spawners": []
+  },
+  "ui": {
+    "showScore": true,
+    "hudElements": [
+      { "id": "score", "type": "text", "x": 16, "y": 16, "text": "Score: 0", "bind": "gameState.score" },
+      { "id": "lives", "type": "text", "x": 16, "y": 44, "text": "Lives: 3", "bind": "gameState.lives" },
+      { "id": "minimap", "type": "minimap", "x": 1160, "y": 16, "width": 100, "height": 80, "visible": false }
+    ],
+    "menus": {
+      "main": { "items": ["Play", "Level Select", "Settings", "Exit"] },
+      "pause": { "items": ["Resume", "Restart", "Settings", "Quit"] },
+      "settings": { "audio": true, "controls": true, "graphics": true }
+    },
+    "theme": { "font": "ui-font", "primary": "#7dd3fc", "accent": "#00bcd4", "panelImage": "ui-panel" }
+  },
+  "audio": {
+    "music": { "master": null, "tracks": { "loop": "music-loop" } },
+    "sfx": { "jump": "sfx-jump", "coin": "sfx-coin", "hit": "sfx-hit" },
+    "volume": { "music": 0.7, "sfx": 1.0, "master": 1.0 },
+    "audioSettings": { "spatial": false, "maxSimultaneous": 16 }
+  },
+  "gameState": {
+    "score": 0,
+    "lives": 3,
+    "levelId": "level-1",
+    "flags": {},
+    "timeElapsedMs": 0,
+    "checkpoint": null
+  },
+  "rules": {
+    "winConditions": [{ "id": "reachExit", "type": "entityOverlap", "targetTag": "exit" }],
+    "loseConditions": [{ "id": "noLives", "type": "gameState", "key": "lives", "operator": "<=", "value": 0 }]
+  },
+  "systems": {
+    "initializers": ["applySettings", "mountAssets", "createEntities", "setupInput", "loadLevel", "initAudio", "initPersistence"],
+    "runtime": ["inputProcessing", "aiDecision", "physicsStep", "collisionResolution", "gameRules", "animationTick", "cameraUpdate", "renderFrame", "audioTick", "persistenceTick", "networkSync", "debugTick"],
+    "shutdown": ["saveState", "unmountAssets"]
+  },
+  "persistence": {
+    "saveSlots": 5,
+    "autosaveIntervalSec": 30,
+    "storageKeyPrefix": "gf_base_full_v1_",
+    "cloudSync": { "enabled": false, "provider": null },
+    "saveOnExit": true,
+    "formats": ["json"]
+  },
+  "network": {
+    "enabled": false,
+    "multiplayer": {
+      "enabled": false,
+      "modes": ["local", "client-server", "peer-to-peer"],
+      "syncStrategy": { "authority": "server", "interpolationMs": 80, "predictionMs": 120 },
+      "latencyCompensation": { "enabled": true, "maxPredictionMs": 200 }
+    },
+    "placeholders": {
+      "serverEndpoint": "https://api.yourgame.example/match",
+      "authHook": "/auth",
+      "replayUpload": "/replay"
+    }
+  },
+  "analytics": {
+    "enabled": false,
+    "events": ["sessionStart", "sessionEnd", "levelComplete", "purchase", "achievement"],
+    "userProperties": { "template": "base-builder-full-v1" }
+  },
+  "achievements": [
+    { "id": "first_win", "title": "First Win", "desc": "Complete your first level.", "reward": { "xp": 50 } },
+    { "id": "collector", "title": "Collector", "desc": "Collect 100 coins.", "reward": { "xp": 200 } }
+  ],
+  "localization": {
+    "defaultLang": "en",
+    "languages": ["en", "es", "pt", "fr", "hi"],
+    "strings": {
+      "en": {
+        "play": "Play",
+        "pause": "Pause",
+        "resume": "Resume",
+        "settings": "Settings",
+        "score": "Score",
+        "lives": "Lives"
+      },
+      "es": {
+        "play": "Jugar",
+        "pause": "Pausa",
+        "resume": "Continuar",
+        "settings": "Configuración",
+        "score": "Puntuación",
+        "lives": "Vidas"
+      }
+    }
+  },
+  "scripting": {
+    "scriptHooks": [
+      { "hook": "onInit", "description": "Called once when scene initializes" },
+      { "hook": "onUpdate", "description": "Called each frame with delta time" },
+      { "hook": "onEntitySpawn", "description": "Called when an entity is spawned" },
+      { "hook": "onSave", "description": "Called before saving state" }
+    ],
+    "examples": {
+      "onCollectCoin": "function(entity, state) { state.score += 10; playSfx('coin'); }"
+    }
+  },
+  "tools": {
+    "debug": { "showCollision": true, "showFPS": true, "showNavGrid": false, "logLevel": "info" },
+    "tuning": { "exposeParams": ["player.speed", "player.jumpVelocity", "physics.gravityY", "audio.volume.music"] },
+    "replay": { "enabled": true, "bufferSec": 20, "exportFormats": ["json"] },
+    "profiler": { "enabled": true }
+  },
+  "monetization": {
+    "enabled": false,
+    "inAppPurchase": { "enabled": false, "products": [] },
+    "ads": { "enabled": false, "providers": [], "testMode": true },
+    "storeHooks": { "purchaseHook": "/purchase" }
+  },
+  "security": {
+    "cheatDetection": { "enabled": true, "thresholds": { "speedHack": 2.0, "scoreBurst": 10 } },
+    "antiTamper": { "enabled": false }
+  },
+  "platformOverrides": {
+    "mobile": { "graphics": { "maxParticles": 32 }, "input": { "touch": { "joystick": { "size": 100 } } } },
+    "desktop": { "graphics": { "shadows": true }, "input": { "gamepad": { "vibration": true } } }
+  },
+  "demoScenes": [
+    {
+      "id": "demo-1",
+      "name": "Minimal Demo",
+      "layers": [{ "id": "bg", "z": 0 }, { "id": "world", "z": 1 }, { "id": "ui", "z": 2 }],
+      "spawn": [
+        { "type": "background", "layer": "bg", "image": "bg-solid" },
+        { "type": "entity-ref", "layer": "world", "ref": "ground-large" },
+        { "type": "entity-ref", "layer": "world", "ref": "player-main" },
+        { "type": "entity-ref", "layer": "world", "ref": "enemy-basic-template" }
+      ],
+      "camera": { "mode": "side", "follow": "player-main", "zoom": 1.0 }
+    }
+  ],
+  "versionHistory": [
+    { "version": "1.0.0", "date": "2025-06-01", "notes": "Initial base template." },
+    { "version": "2.0.0", "date": "2025-09-10", "notes": "Added editor metadata, more assets, tilemap support." },
+    { "version": "3.0.0", "date": "2025-09-19", "notes": "Full feature expansion (networking, analytics, scripting hooks)." }
+  ],
+  "notes": [
+    "This file is intentionally exhaustive so you can enable/disable subsystems as needed.",
+    "To make a lighter-weight game, remove unused assets, disable networking, and set lowSpec mode.",
+    "Replace placeholder asset paths with your own artwork and sounds."
+  ]
+}

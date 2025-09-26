@@ -1,0 +1,303 @@
+{
+  "id": "topdown-shooter",
+  "name": "2D Top-down Shooter",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Shooters",
+  "tags": ["2d", "shooter", "topdown", "arcade"],
+  "thumbnail": "assets/topdown.jpeg",
+  "description": "A polished top-down shooter template with player movement, multiple weapons, enemy waves, AI behaviors (including bosses/turrets/spawners), pickups, loot tables, HUD (minimap, ammo counter), controller remapping, achievements, analytics metrics, detailed particle systems, multiple levels, co-op hooks, leaderboards, accessibility and monetization hooks.",
+  "settings": {
+    "world": { "width": 4096, "height": 4096, "wrap": false },
+    "player": { "baseSpeed": 280, "startHealth": 100, "lives": 3, "ammoDefaults": { "bullet": 999, "spread": 50, "laser": 10 } },
+    "weapons": { "default": "bullet", "weaponSlots": 3 },
+    "enemyDifficultyRamp": 0.07,
+    "leaderboardEnabled": true,
+    "save": { "autoSave": true, "slots": 3, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "detailedMetrics": true },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "highContrast": false, "uiScale": 1.0, "invertAim": false, "colorblindMode": "off", "textToSpeech": false },
+    "monetization": { "ads": { "rewardedAmmo": true }, "iap": { "enabled": true, "products": [{ "id": "ammo_pack_100", "priceUSD": 0.99, "grant": { "ammo": 100 } }, { "id": "remove_ads", "priceUSD": 1.99, "grant": { "adsDisabled": true } }] } },
+    "multiplayer": { "coOp": true, "maxPlayers": 4, "netSyncEndpoint": "/api/match" }
+  },
+  "assets": {
+    "images": [
+      { "id": "player_top", "src": "assets/topdown/player_top.png", "size": { "w": 64, "h": 64 } },
+      { "id": "enemy_basic", "src": "assets/topdown/enemy_basic.png", "size": { "w": 56, "h": 56 } },
+      { "id": "enemy_tank", "src": "assets/topdown/enemy_tank.png", "size": { "w": 80, "h": 80 } },
+      { "id": "enemy_turret", "src": "assets/topdown/enemy_turret.png", "size": { "w": 72, "h": 72 } },
+      { "id": "enemy_spawner", "src": "assets/topdown/enemy_spawner.png", "size": { "w": 96, "h": 96 } },
+      { "id": "boss_alpha", "src": "assets/topdown/boss_alpha.png", "size": { "w": 200, "h": 200 } },
+      { "id": "bullet_small", "src": "assets/topdown/bullet_small.png", "size": { "w": 16, "h": 16 } },
+      { "id": "bullet_heavy", "src": "assets/topdown/bullet_heavy.png", "size": { "w": 24, "h": 24 } },
+      { "id": "bg_tiles", "src": "assets/topdown/bg_tiles.png", "size": { "w": 1024, "h": 1024 } },
+      { "id": "pickup_health", "src": "assets/topdown/pickup_health.png", "size": { "w": 32, "h": 32 } },
+      { "id": "pickup_ammo", "src": "assets/topdown/pickup_ammo.png", "size": { "w": 32, "h": 32 } },
+      { "id": "explosion_anim", "src": "assets/topdown/explosion.png", "frames": 16, "size": { "w": 128, "h": 128 } },
+      { "id": "muzzle_flash", "src": "assets/topdown/muzzle_flash.png", "frames": 6, "size": { "w": 64, "h": 32 } },
+      { "id": "minimap_bg", "src": "assets/topdown/minimap.png", "size": { "w": 256, "h": 256 } }
+    ],
+    "audio": [
+      { "id": "sfx_shoot", "src": "assets/audio/topdown/shoot.wav" },
+      { "id": "sfx_hit", "src": "assets/audio/topdown/hit.wav" },
+      { "id": "sfx_explode", "src": "assets/audio/topdown/explode.wav" },
+      { "id": "sfx_pickup", "src": "assets/audio/topdown/pickup.wav" },
+      { "id": "sfx_reward", "src": "assets/audio/topdown/reward.wav" },
+      { "id": "bgm_loop", "src": "assets/audio/topdown/bgm_loop.mp3", "loop": true }
+    ],
+    "particles": [
+      { "id": "particle_hit", "template": { "frames": 6, "lifeMs": 400, "size": 16, "sprite": "explosion_anim" } },
+      { "id": "particle_trail", "template": { "frames": 4, "lifeMs": 250, "size": 8, "sprite": "bullet_small" } },
+      { "id": "particle_muzzle", "template": { "frames": 6, "lifeMs": 120, "size": 24, "sprite": "muzzle_flash" } }
+    ]
+  },
+  "layers": [
+    { "id": "background", "type": "tileLayer" },
+    { "id": "worldObjects", "type": "entityLayer" },
+    { "id": "enemies", "type": "entityLayer" },
+    { "id": "bullets", "type": "entityLayer" },
+    { "id": "particles", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "minimap", "type": "minimapLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "player_1",
+      "type": "player",
+      "layer": "worldObjects",
+      "x": 512,
+      "y": 512,
+      "properties": {
+        "sprite": "player_top",
+        "speed": 280,
+        "health": 100,
+        "maxHealth": 100,
+        "weapons": ["bullet","spread","laser"],
+        "activeWeapon": "bullet",
+        "ammo": { "bullet": 999, "spread": 50, "laser": 10 },
+        "score": 0
+      }
+    },
+    {
+      "id": "ui_health",
+      "type": "uiBar",
+      "layer": "ui",
+      "x": 16,
+      "y": 16,
+      "properties": { "bindTo": "player_1.health", "max": "player_1.maxHealth", "label": "HP" }
+    },
+    {
+      "id": "ui_ammo",
+      "type": "uiText",
+      "layer": "ui",
+      "x": 16,
+      "y": 44,
+      "properties": { "textTemplate": "Ammo: {player.ammo[activeWeapon]}", "bindTo": "player.ammo" }
+    },
+    {
+      "id": "ui_score",
+      "type": "uiText",
+      "layer": "ui",
+      "x": 16,
+      "y": 72,
+      "properties": { "textTemplate": "Score: {player.score}", "bindTo": "player.score" }
+    },
+    {
+      "id": "ui_minimap",
+      "type": "minimap",
+      "layer": "minimap",
+      "x": 1180,
+      "y": 16,
+      "properties": { "size": 160, "background": "minimap_bg", "scale": 0.12, "anchor": "top-right" }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Paused", "buttons": [{ "text": "Resume", "action": "togglePause" }, { "text": "Main Menu", "action": "toMainMenu" }] }
+    },
+    {
+      "id": "overlay_gameover",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Game Over", "subtitle": "You were defeated.", "buttons": [{ "text": "Retry", "action": "restartLevel" }, { "text": "Main Menu", "action": "toMainMenu" }] }
+    },
+    {
+      "id": "overlay_victory",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Mission Accomplished", "subtitle": "Good job!", "buttons": [{ "text": "Next", "action": "loadNextLevel" }, { "text": "Replay", "action": "restartLevel" }] }
+    },
+    {
+      "id": "controller_remap_panel",
+      "type": "uiPanel",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Controller Remap", "bindings": ["move","aim","shoot","switchWeapon","pause"], "buttons": [{ "text": "Save", "action": "saveBindings" }, { "text": "Reset", "action": "resetBindings" }] }
+    }
+  ],
+  "enemyTypes": [
+    {
+      "id": "enemy_basic",
+      "sprite": "enemy_basic",
+      "health": 20,
+      "speed": 120,
+      "damage": 10,
+      "ai": "chase",
+      "spawnScore": 50,
+      "lootTable": [{ "pickup": "pickup_ammo", "chance": 0.12 }, { "pickup": "pickup_health", "chance": 0.03 }]
+    },
+    {
+      "id": "enemy_tank",
+      "sprite": "enemy_tank",
+      "health": 120,
+      "speed": 60,
+      "damage": 30,
+      "ai": "patrol_shoot",
+      "weapon": "cannon",
+      "spawnScore": 300,
+      "lootTable": [{ "pickup": "pickup_ammo", "chance": 0.25 }]
+    },
+    {
+      "id": "enemy_turret",
+      "sprite": "enemy_turret",
+      "health": 80,
+      "speed": 0,
+      "damage": 20,
+      "ai": "fixed_turret",
+      "weapon": "heavy_bullet",
+      "spawnScore": 180,
+      "lootTable": [{ "pickup": "pickup_ammo", "chance": 0.18 }]
+    },
+    {
+      "id": "enemy_spawner",
+      "sprite": "enemy_spawner",
+      "health": 200,
+      "speed": 10,
+      "damage": 0,
+      "ai": "spawner",
+      "spawnScore": 500,
+      "spawnBehavior": { "spawnType": "enemy_basic", "intervalSec": 6, "maxSimultaneous": 4 },
+      "lootTable": [{ "pickup": "pickup_health", "chance": 0.35 }]
+    },
+    {
+      "id": "boss_alpha",
+      "sprite": "boss_alpha",
+      "health": 2500,
+      "speed": 40,
+      "damage": 40,
+      "ai": "boss_alpha_ai",
+      "phases": 3,
+      "spawnScore": 5000,
+      "lootTable": [{ "pickup": "pickup_ammo", "chance": 1.0 }, { "pickup": "pickup_health", "chance": 0.8 }, { "reward": "weapon_unlock_spread", "chance": 0.25 }]
+    }
+  ],
+  "weapons": [
+    {
+      "id": "bullet",
+      "name": "Standard Bullet",
+      "fireRate": 300,
+      "projectile": { "speed": 900, "damage": 12, "sprite": "bullet_small", "lifeMs": 1200 },
+      "ammoCost": 1
+    },
+    {
+      "id": "spread",
+      "name": "Spread Shot",
+      "fireRate": 600,
+      "projectile": { "speed": 700, "damage": 8, "sprite": "bullet_small", "lifeMs": 900 },
+      "spread": 5,
+      "ammoCost": 2
+    },
+    {
+      "id": "laser",
+      "name": "Energy Laser",
+      "fireRate": 1200,
+      "projectile": { "speed": 1400, "damage": 40, "sprite": "bullet_small", "lifeMs": 600 },
+      "ammoCost": 5
+    },
+    {
+      "id": "cannon",
+      "name": "Cannon",
+      "fireRate": 1400,
+      "projectile": { "speed": 500, "damage": 60, "sprite": "bullet_heavy", "lifeMs": 1600 },
+      "ammoCost": 6
+    }
+  ],
+  "pickups": [
+    { "id": "pickup_health", "type": "health", "amount": 25, "sprite": "pickup_health" },
+    { "id": "pickup_ammo", "type": "ammo", "amount": 30, "sprite": "pickup_ammo" }
+  ],
+  "lootTables": {
+    "basic_enemy": [{ "pickup": "pickup_ammo", "chance": 0.12 }],
+    "tank_enemy": [{ "pickup": "pickup_ammo", "chance": 0.25 }],
+    "boss_drop": [{ "reward": "weapon_unlock_spread", "chance": 0.25 }, { "pickup": "pickup_health", "chance": 1.0 }]
+  },
+  "levels": [
+    {
+      "id": "l1_arena",
+      "name": "Training Arena",
+      "size": { "w": 1024, "h": 1024 },
+      "playerStart": { "x": 512, "y": 512 },
+      "waves": [
+        { "timeSec": 5, "spawns": [{ "enemyId": "enemy_basic", "count": 6, "spawnArea": { "x": 100, "y": 100, "w": 824, "h": 824 } }] },
+        { "timeSec": 20, "spawns": [{ "enemyId": "enemy_basic", "count": 10, "spawnArea": { "x": 0, "y": 0, "w": 1024, "h": 1024 } }, { "enemyId": "enemy_tank", "count": 1, "spawnArea": { "x": 900, "y": 0, "w": 124, "h": 124 } }] }
+      ],
+      "objectives": [{ "type": "survive_waves", "waves": 2 }],
+      "timeLimitSec": null,
+      "ambient": { "music": "bgm_loop" }
+    },
+    {
+      "id": "l2_boss_outskirts",
+      "name": "Outskirts Ambush",
+      "size": { "w": 2048, "h": 2048 },
+      "playerStart": { "x": 200, "y": 200 },
+      "waves": [
+        { "timeSec": 3, "spawns": [{ "enemyId": "enemy_spawner", "count": 1, "spawnArea": { "x": 1500, "y": 1500, "w": 400, "h": 400 } }] },
+        { "timeSec": 25, "spawns": [{ "enemyId": "enemy_turret", "count": 4, "spawnArea": { "x": 600, "y": 600, "w": 800, "h": 800 } }, { "enemyId": "enemy_basic", "count": 20, "spawnArea": { "x": 0, "y": 0, "w": 2048, "h": 2048 } }] },
+        { "timeSec": 60, "spawns": [{ "enemyId": "boss_alpha", "count": 1, "spawnArea": { "x": 1024, "y": 1024, "w": 200, "h": 200 } }] }
+      ],
+      "objectives": [{ "type": "defeat_boss", "bossId": "boss_alpha" }],
+      "timeLimitSec": 1800,
+      "ambient": { "music": "bgm_loop" }
+    }
+  ],
+  "achievements": [
+    { "id": "first_blood", "name": "First Blood", "condition": "Kill your first enemy" },
+    { "id": "survivor_10", "name": "Wave Master", "condition": "Complete 10 waves across sessions" },
+    { "id": "boss_slayer", "name": "Boss Slayer", "condition": "Defeat boss_alpha" },
+    { "id": "no_damage_run", "name": "Ghost", "condition": "Complete a level without taking damage" }
+  ],
+  "events": [
+    { "trigger": "onEnemyKilled", "action": [{ "type": "addScore", "params": { "amountPath": "enemy.spawnScore" } }, { "type": "maybeSpawnPickup", "params": { "chancePath": "enemy.lootTable" } }, { "type": "playSound", "params": { "id": "sfx_explode" } }, { "type": "recordMetric", "params": { "metric": "enemy_killed" } }] },
+    { "trigger": "onPlayerHit", "action": [{ "type": "screenShake", "params": { "intensity": 6 } }, { "type": "playSound", "params": { "id": "sfx_hit" } }, { "type": "recordMetric", "params": { "metric": "player_hit" } }] },
+    { "trigger": "onPickupCollected", "action": [{ "type": "applyPickup", "params": { "pickupId": "{pickup.id}" } }, { "type": "playSound", "params": { "id": "sfx_pickup" } }, { "type": "recordMetric", "params": { "metric": "pickup_collected" } }] },
+    { "trigger": "onWaveComplete", "action": [{ "type": "playSound", "params": { "id": "sfx_reward" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "wave_complete", "levelId": "{level.id}", "waveIndex": "{wave.index}" } } }, { "type": "recordMetric", "params": { "metric": "wave_complete" } }] },
+    { "trigger": "onLevelComplete", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_victory" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "level_complete", "levelId": "{level.id}", "score": "{player.score}" } } }, { "type": "recordMetric", "params": { "metric": "level_complete" } }] },
+    { "trigger": "onGameOver", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_gameover" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "game_over", "reason": "{reason}" } } }, { "type": "recordMetric", "params": { "metric": "game_over" } }] },
+    { "trigger": "onAchievementUnlocked", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_achievement" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "achievement_unlocked", "id": "{achievement.id}" } } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "move": ["W","A","S","D","ArrowKeys"], "aim": ["Pointer","Mouse"], "shoot": ["Pointer","Space"], "switchWeapon": ["Q","E"], "pause": ["P"] }, "controllerSupport": true, "autoAimAssist": true, "remappableBindings": true },
+    "ai": { "pathfinding": "navmesh", "tickRateMs": 80, "presets": { "easy": { "aggression": 0.6, "accuracy": 0.5 }, "normal": { "aggression": 0.8, "accuracy": 0.65 }, "hard": { "aggression": 1.0, "accuracy": 0.8 } } },
+    "save": { "autoSave": true, "slots": 3, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "metrics": ["enemy_killed","player_hit","pickup_collected","wave_complete","level_complete","game_over","accuracy","session_length"] },
+    "leaderboard": { "enabled": true, "boards": [{ "id": "topdown_global", "displayName": "Top Scores" }, { "id": "topdown_speedrun", "displayName": "Fastest Clears" }] },
+    "multiplayer": { "coOp": true, "maxPlayers": 4, "netSyncEndpoint": "/api/match" },
+    "monetization": { "ads": { "enabled": true, "rewardedAdId": "ammo_ad" }, "iap": { "enabled": true } }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "pause_title": "Paused", "game_over": "Game Over", "victory": "Victory", "score": "Score", "achievement_unlocked": "Achievement Unlocked!" },
+      "es-ES": { "pause_title": "Pausado", "game_over": "Juego Terminado", "victory": "Victoria", "score": "Puntuación", "achievement_unlocked": "¡Logro Desbloqueado!" }
+    }
+  },
+  "uiHints": {
+    "controls": "WASD to move, mouse/pointer to aim, click or Space to shoot. Q/E to switch weapons. Controller remapping available in settings.",
+    "tips": ["Conserve ammo for bosses","Use cover to avoid heavy fire","Collect health pickups when low","Use turret flanks to avoid frontal fire"]
+  },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "v1.1.0 — Added boss, turret, spawner enemies; AI presets; particle templates; loot tables; HUD elements (minimap, ammo counter); controller remapping; achievements; extended analytics metrics; two levels including boss encounter; improved accessibility and optional aim assist. Backend endpoints required: /api/savecloud, /api/analytics, /api/match, /api/leaderboard."
+  }
+}

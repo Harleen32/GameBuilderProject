@@ -1,0 +1,308 @@
+{
+  "id": "space-shooter",
+  "name": "2D Space Shooter",
+  "version": "1.0.1",
+  "author": "GameForge",
+  "category": "2D",
+  "tags": ["2d", "shooter", "arcade"],
+  "thumbnail": "assets/space-shooter1.png",
+  "description": "Classic arcade-style space shooter with enemies, power-ups, boss fights and leaderboards.",
+  "settings": {
+    "screenWidth": 1024,
+    "screenHeight": 768,
+    "playerStart": { "x": 512, "y": 680 },
+    "spawnInterval": 1.2,
+    "difficultyRamp": 0.02,
+    "maxEnemies": 12,
+    "leaderboardEnabled": true,
+    "maxLives": 5,
+    "pauseKey": "P"
+  },
+  "assets": {
+    "images": [
+      { "id": "player", "src": "assets/space/player_ship.png", "size": { "w": 64, "h": 64 } },
+      { "id": "enemy_small", "src": "assets/space/enemy_small.png", "size": { "w": 48, "h": 48 } },
+      { "id": "enemy_big", "src": "assets/space/enemy_big.png", "size": { "w": 96, "h": 96 } },
+      { "id": "bullet_player", "src": "assets/space/bullet_player.png", "size": { "w": 8, "h": 16 } },
+      { "id": "bullet_enemy", "src": "assets/space/bullet_enemy.png", "size": { "w": 10, "h": 18 } },
+      { "id": "power_shield", "src": "assets/space/power_shield.png", "size": { "w": 32, "h": 32 } },
+      { "id": "power_double", "src": "assets/space/power_double.png", "size": { "w": 32, "h": 32 } },
+      { "id": "power_health", "src": "assets/space/power_health.png", "size": { "w": 32, "h": 32 } },
+      { "id": "bg", "src": "assets/space/bg_starfield.png", "size": { "w": 2048, "h": 768 } },
+      { "id": "explosion_small", "src": "assets/space/explosion_small.png", "frames": 8, "size": { "w": 64, "h": 64 } },
+      { "id": "explosion_big", "src": "assets/space/explosion_big.png", "frames": 12, "size": { "w": 128, "h": 128 } },
+      { "id": "bullet_trail", "src": "assets/space/bullet_trail.png", "size": { "w": 6, "h": 12 } }
+    ],
+    "audio": [
+      { "id": "sfx_shoot", "src": "assets/audio/space/shoot.wav" },
+      { "id": "sfx_explosion", "src": "assets/audio/space/explosion.wav" },
+      { "id": "sfx_powerup", "src": "assets/audio/space/powerup.wav" },
+      { "id": "sfx_enemy_shoot", "src": "assets/audio/space/enemy_shoot.wav" },
+      { "id": "bgm_loop", "src": "assets/audio/space/bgm_loop.mp3", "loop": true }
+    ]
+  },
+  "layers": [
+    { "id": "background", "type": "parallax", "properties": { "image": "bg", "speed": 0.15 } },
+    { "id": "gameplay", "type": "entityLayer" },
+    { "id": "effects", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "player1",
+      "type": "player",
+      "x": 512,
+      "y": 680,
+      "width": 64,
+      "height": 64,
+      "sprite": "player",
+      "layer": "gameplay",
+      "properties": {
+        "health": 5,
+        "lives": 5,
+        "speed": 420,
+        "fireRate": 0.18,
+        "bulletSprite": "bullet_player",
+        "bulletSpeed": 900,
+        "bulletPierce": 0,
+        "collisionBox": { "w": 40, "h": 40 },
+        "invulnerableOnRespawn": 1.5,
+        "score": 0,
+        "bind": { "score": "ui_score", "lives": "ui_lives" }
+      }
+    },
+    {
+      "id": "enemy_spawn_system",
+      "type": "spawnSystem",
+      "x": 512,
+      "y": -50,
+      "layer": "gameplay",
+      "properties": {
+        "patterns": ["wave", "sine", "cluster"],
+        "weights": [0.55, 0.3, 0.15],
+        "spawnInterval": 1.2,
+        "maxSimultaneous": 8,
+        "enemyTypes": [
+          { "type": "enemy_small", "weight": 0.6, "health": 10, "speed": 80, "fireRate": 1.8, "bullet": "bullet_enemy" },
+          { "type": "enemy_big", "weight": 0.4, "health": 40, "speed": 40, "fireRate": 2.4, "bullet": "bullet_enemy" }
+        ],
+        "powerupChance": 0.06,
+        "powerups": ["power_shield", "power_double", "power_health"]
+      }
+    },
+    {
+      "id": "boss_1",
+      "type": "enemy",
+      "x": 512,
+      "y": -250,
+      "sprite": "enemy_big",
+      "layer": "gameplay",
+      "properties": {
+        "health": 650,
+        "behavior": "bossPhase",
+        "phases": [
+          { "phase": 1, "pattern": "spread", "fireRate": 0.7 },
+          { "phase": 2, "pattern": "spiral", "fireRate": 0.5 },
+          { "phase": 3, "pattern": "burst", "fireRate": 0.35 }
+        ],
+        "rewardOnDefeat": { "score": 5000, "powerup": "power_double" },
+        "spawnBullets": { "bulletSprite": "bullet_enemy", "bulletSpeed": 480 }
+      }
+    },
+    {
+      "id": "enemy_bullet_template",
+      "type": "projectileTemplate",
+      "sprite": "bullet_enemy",
+      "layer": "gameplay",
+      "properties": { "speed": 420, "damage": 1, "trail": "bullet_trail" }
+    },
+    {
+      "id": "explosion_small_template",
+      "type": "particleTemplate",
+      "sprite": "explosion_small",
+      "layer": "effects",
+      "properties": { "frames": 8, "fps": 30, "autoDestroy": true }
+    },
+    {
+      "id": "explosion_big_template",
+      "type": "particleTemplate",
+      "sprite": "explosion_big",
+      "layer": "effects",
+      "properties": { "frames": 12, "fps": 24, "autoDestroy": true }
+    },
+    {
+      "id": "ui_score",
+      "type": "uiText",
+      "x": 16,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Score: {score}", "fontSize": 20, "bindTo": "player1.score" }
+    },
+    {
+      "id": "ui_lives",
+      "type": "uiLives",
+      "x": 1008,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-right", "bindTo": "player1.lives" }
+    },
+    {
+      "id": "ui_pause_button",
+      "type": "uiButton",
+      "x": 16,
+      "y": 56,
+      "layer": "ui",
+      "properties": { "text": "Pause (P)", "onClick": "togglePause" }
+    },
+    {
+      "id": "overlay_gameover",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Game Over",
+        "subtitle": "Your run has ended",
+        "buttons": [
+          { "text": "Retry", "action": "restartGame" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    },
+    {
+      "id": "overlay_victory",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Victory!",
+        "subtitle": "Boss defeated — well played!",
+        "buttons": [
+          { "text": "Next Level", "action": "nextLevel" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredSmall",
+        "title": "Paused",
+        "buttons": [
+          { "text": "Resume", "action": "togglePause" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "trigger": "onEnemyDestroyed",
+      "action": { "type": "addScore", "params": { "amount": 100 } }
+    },
+    {
+      "trigger": "onEnemyDestroyed",
+      "conditions": { "enemyType": "boss" },
+      "action": { "type": "showOverlay", "params": { "overlayId": "overlay_victory" } }
+    },
+    {
+      "trigger": "onPlayerHit",
+      "action": {
+        "type": "playerDamage",
+        "params": { "damage": 1 },
+        "sideEffects": [
+          { "type": "playSound", "params": { "id": "sfx_explosion" } },
+          { "type": "spawnParticle", "params": { "template": "explosion_small_template", "atTarget": true } },
+          { "type": "screenShake", "params": { "intensity": 6, "duration": 0.35 } }
+        ]
+      }
+    },
+    {
+      "trigger": "onPlayerDeath",
+      "conditions": { "playerLives": 0 },
+      "action": { "type": "showOverlay", "params": { "overlayId": "overlay_gameover" } }
+    },
+    {
+      "trigger": "onPlayerDeath",
+      "conditions": { "playerLives": { "gt": 0 } },
+      "action": { "type": "respawnPlayer", "params": { "invulnerable": 1.5 } }
+    },
+    {
+      "trigger": "onCollect",
+      "target": "power_shield",
+      "action": { "type": "grantPower", "params": { "power": "shield", "duration": 8 }, "sideEffects": [{ "type": "playSound", "params": { "id": "sfx_powerup" } }] }
+    },
+    {
+      "trigger": "onCollect",
+      "target": "power_double",
+      "action": { "type": "grantPower", "params": { "power": "doubleFire", "duration": 12 }, "sideEffects": [{ "type": "playSound", "params": { "id": "sfx_powerup" } }] }
+    },
+    {
+      "trigger": "onCollect",
+      "target": "power_health",
+      "action": { "type": "addLives", "params": { "amount": 1 }, "sideEffects": [{ "type": "playSound", "params": { "id": "sfx_powerup" } }] }
+    },
+    {
+      "trigger": "onScoreThreshold",
+      "conditions": { "score": 10000 },
+      "action": { "type": "spawnBoss", "params": { "bossId": "boss_1" } }
+    },
+    {
+      "trigger": "onBossDefeated",
+      "action": { "type": "addScore", "params": { "amount": 5000 } }
+    },
+    {
+      "trigger": "onPauseToggled",
+      "action": {
+        "type": "toggleOverlay",
+        "params": { "overlayId": "overlay_pause" }
+      }
+    }
+  ],
+  "systems": {
+    "input": {
+      "bindings": {
+        "moveLeft": ["ArrowLeft", "A"],
+        "moveRight": ["ArrowRight", "D"],
+        "moveUp": ["ArrowUp", "W"],
+        "moveDown": ["ArrowDown", "S"],
+        "shoot": ["Space"],
+        "pause": ["P"]
+      },
+      "onKey": [
+        { "key": "P", "action": "togglePause" }
+      ]
+    },
+    "ai": {
+      "enemy_fire": {
+        "enabled": true,
+        "behavior": {
+          "small": { "fireInterval": 1.8, "pattern": "aimed" },
+          "big": { "fireInterval": 2.4, "pattern": "spread" },
+          "boss": { "fireInterval": 0.6, "pattern": "phased" }
+        }
+      }
+    },
+    "spawn": {
+      "autoPowerupSpawner": {
+        "enabled": true,
+        "interval": 8,
+        "pool": ["power_shield", "power_double", "power_health"]
+      }
+    }
+  },
+  "uiHints": {
+    "controls": "Arrow keys / WASD to move, Space to shoot, P to pause",
+    "tips": ["Collect power-ups to increase firepower", "Dodge enemy fire — learn patterns", "Bosses have multiple phases — watch the patterns"]
+  },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "Polished template: enemy bullets, particles, game over/victory overlays, pause system, score binding. Tune spawnInterval/difficultyRamp to balance. Version bumped to 1.0.1."
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "id": "bike-racing",
+  "name": "Bike Racing",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Racing / Sports",
+  "tags": ["3d","racing","bike","motorcycle","stunts"],
+  "thumbnail": "assets/bike.jpeg",
+  "description": "3D motorcycle racing template with realistic bike physics, expanded stunt system, surface-dependent traction, dynamic weather, replay/ghosts, leaderboards, force-feedback, online & split-screen multiplayer, telemetry, live-ops and monetization endpoints.",
+  "settings": {
+    "physics": { "fixedTimestepMs": 16, "substeps": 3, "gravity": -9.81 },
+    "bike": { "defaultMassKg": 220, "suspensionStiffness": 18, "steeringResponse": 0.95, "maxSpeedKph": 240, "wheelieTorque": 120 },
+    "stunts": { "enabled": true, "trickMultiplier": 1.0, "comboWindowMs": 1200, "expandedTricks": true, "mocapReady": true },
+    "tireModel": { "enabled": true, "temperature": true, "pressure": true, "wear": true, "surfaceGripProfiles": ["road","dirt","wet","snow"] },
+    "tracks": { "streaming": true, "defaultLengthM": 4000, "offroadSupport": true, "dynamicWeather": true, "proceduralGenerator": { "enabled": true, "seeded": true } },
+    "ai": { "opponentCount": 11, "drivingModel": "behavior_tree", "difficultyRamp": 0.05 },
+    "multiplayer": { "online": true, "maxPlayers": 16, "splitScreen": { "enabled": true, "maxLocalPlayers": 2 }, "netSyncEndpoint": "/api/match", "matchmaking": "/api/matchmaking", "ranked": true, "crossplay": true },
+    "telemetry": { "enabled": true, "endpoint": "/api/telemetry", "metrics": ["lapTimes","stuntScores","airTime","crashCounts","ffbEvents"] },
+    "leaderboards": { "enabled": true, "endpoint": "/api/leaderboard" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "steeringAssist": true, "stabilityAssist": true, "uiScale": 1.0, "colorblindMode": "on-request" },
+    "monetization": { "ads": { "enabled": false }, "iap": { "enabled": true }, "storeEndpoint": "/api/store" },
+    "liveOps": { "dailyMissionsEndpoint": "/api/daily", "seasonalEventsEndpoint": "/api/liveEvents" },
+    "peripherals": { "wheelSupport": true, "forceFeedback": { "enabled": true, "mappingProfile": "default_ffb", "calibrationEndpoint": "/api/savePeripheralProfile" } },
+    "performance": { "dynamicResolution": true, "profilingHooks": { "enabled": true, "endpoint": "/api/profiling" }, "autotune": { "enabled": true, "metricsEndpoint": "/api/perf-autotune" } }
+  },
+  "assets": {
+    "models": [
+      { "id": "bike_sport_01", "src": "assets/bike/models/bike_sport_01.glb" },
+      { "id": "bike_dirt_01", "src": "assets/bike/models/bike_dirt_01.glb" },
+      { "id": "track_road_01", "src": "assets/bike/tracks/road_01.glb" },
+      { "id": "track_offroad_01", "src": "assets/bike/tracks/offroad_01.glb" },
+      { "id": "track_rainy_night", "src": "assets/bike/tracks/rainy_night.glb" }
+    ],
+    "animations": [
+      { "id": "anim_wheelie_mocap", "src": "assets/bike/anims/wheelie_mocap.fbx" },
+      { "id": "anim_backflip_mocap", "src": "assets/bike/anims/backflip_mocap.fbx" },
+      { "id": "anim_superman_mocap", "src": "assets/bike/anims/superman_mocap.fbx" }
+    ],
+    "audio": [
+      { "id": "sfx_engine_bike", "src": "assets/audio/bike/engine_bike.wav" },
+      { "id": "sfx_stunt_land", "src": "assets/audio/bike/stunt_land.wav" },
+      { "id": "sfx_crash", "src": "assets/audio/bike/crash.wav" },
+      { "id": "sfx_rain_splash", "src": "assets/audio/bike/rain_splash.wav" },
+      { "id": "bgm_menu", "src": "assets/audio/bike/bgm_menu.mp3", "loop": true }
+    ],
+    "particles": [
+      { "id": "particle_dust", "template": { "frames": 6, "lifeMs": 600, "size": 28 } },
+      { "id": "particle_sparks", "template": { "frames": 8, "lifeMs": 400, "size": 20 } },
+      { "id": "particle_rain_splash", "template": { "frames": 6, "lifeMs": 300, "size": 16 } }
+    ]
+  },
+  "layers": [
+    { "id": "world3d", "type": "3dScene" },
+    { "id": "vehicles", "type": "entityLayer" },
+    { "id": "particles", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" },
+    { "id": "cinematic", "type": "cinematicLayer" }
+  ],
+  "objects": [
+    {
+      "id": "player_bike",
+      "type": "vehicle",
+      "layer": "vehicles",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "properties": {
+        "model": "bike_sport_01",
+        "massKg": 220,
+        "enginePowerKw": 150,
+        "maxSpeedKph": 240,
+        "handlingProfile": "sport",
+        "stabilityAssist": true,
+        "stuntSystem": { "enabled": true }
+      }
+    },
+    {
+      "id": "ui_speed",
+      "type": "uiText",
+      "layer": "ui",
+      "x": 16,
+      "y": 16,
+      "properties": { "textTemplate": "Speed: {vehicle.speedKph} km/h", "bindTo": "vehicle.speedKph" }
+    },
+    {
+      "id": "ui_stunt_score",
+      "type": "uiText",
+      "layer": "ui",
+      "x": 16,
+      "y": 44,
+      "properties": { "textTemplate": "Trick: {player.currentTrickScore}", "bindTo": "player.currentTrickScore" }
+    },
+    {
+      "id": "overlay_race_end",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Race Complete", "buttons": [{ "text": "Restart", "action": "restartRace" }, { "text": "Share", "action": "shareReplay" }] }
+    }
+  ],
+  "stunts": {
+    "tricks": [
+      { "id": "wheelie", "score": 100, "input": "pull_back", "mocap": "anim_wheelie_mocap" },
+      { "id": "backflip", "score": 300, "input": "rotate_back", "mocap": "anim_backflip_mocap" },
+      { "id": "superman", "score": 500, "input": "extend", "mocap": "anim_superman_mocap" },
+      { "id": "tailwhip", "score": 200, "input": "twist", "mocap": null }
+    ],
+    "comboRules": { "maxCombo": 8, "decayMs": 1500 }
+  },
+  "tireModel": {
+    "profiles": {
+      "road": { "baseGrip": 1.0, "wetMultiplier": 0.75 },
+      "dirt": { "baseGrip": 0.8, "wetMultiplier": 0.65 },
+      "snow": { "baseGrip": 0.6, "wetMultiplier": 0.5 }
+    },
+    "wear": { "enabled": true, "ratePerKm": 0.01 }
+  },
+  "aiOpponents": {
+    "profiles": [
+      { "id": "ai_easy", "aggression": 0.4, "consistency": 0.75 },
+      { "id": "ai_hard", "aggression": 0.9, "consistency": 0.95 }
+    ],
+    "pathfinding": { "splineFollow": true, "overtakeLogic": true, "crashAvoidance": true }
+  },
+  "tracks": [
+    { "id": "road_01", "model": "track_road_01", "type": "road", "lengthM": 3600 },
+    { "id": "offroad_01", "model": "track_offroad_01", "type": "offroad", "lengthM": 4200 },
+    { "id": "rainy_night", "model": "track_rainy_night", "type": "road", "lengthM": 3800, "weather": "rain" }
+  ],
+  "replay": { "enabled": true, "ghosts": true, "uploadEndpoint": "/api/uploadGhost", "downloadEndpoint": "/api/getGhosts", "shareEndpoint": "/api/shareReplay" },
+  "photoMode": { "enabled": true, "cameraPresets": ["wide","cinematic","close"], "exportEndpoint": "/api/exportPhoto" },
+  "events": [
+    { "trigger": "onTrickPerformed", "action": [{ "type": "addScore", "params": { "player": "{player.id}", "amount": "{trick.score}" } }, { "type": "playSound", "params": { "id": "sfx_stunt_land" } }, { "type": "recordMetric", "params": { "metric": "trick_performed" } }] },
+    { "trigger": "onLapComplete", "action": [{ "type": "recordTelemetry", "params": { "metric": "lapTime", "value": "{lap.time}" } }, { "type": "submitLeaderboard", "params": { "board": "bike_lap", "score": "{lap.time}" } }] },
+    { "trigger": "onCrash", "action": [{ "type": "applyDamage", "params": { "vehicleId": "{vehicle.id}", "amount": "{crash.severity}" } }, { "type": "playSound", "params": { "id": "sfx_crash" } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "steer": ["Axis_X"], "throttle": ["Axis_Y"], "brake": ["Space"], "stunt": ["Space"], "lean": ["Q","E"] }, "controllerSupport": true, "remappable": true, "forceFeedback": { "enabled": true, "mappingProfile": "bike_default" } },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "telemetry": { "enabled": true, "endpoint": "/api/telemetry" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "leaderboard": { "enabled": true, "endpoint": "/api/leaderboard" },
+    "multiplayer": { "netSyncEndpoint": "/api/match", "rollbackEnabled": true, "rollbackBufferMs": 120, "antiCheat": { "enabled": true, "reportEndpoint": "/api/anticheat/report" } }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "race_start": "Go!", "race_complete": "Race Complete", "stunt": "Trick" },
+      "es-ES": { "race_start": "¡Ya!", "race_complete": "Carrera Completa", "stunt": "Acrobacia" },
+      "fr-FR": { "race_start": "Partez!", "race_complete": "Course Terminée", "stunt": "Acrobatie" }
+    }
+  },
+  "uiHints": { "controls": "Use analog or keys to steer, throttle for speed, press stunt button while airborne to perform tricks. Lean to balance wheelies.", "tips": ["Chain tricks in the air for combos","Use offroad sections for high airtime","Avoid crashes to keep combo multiplier"] },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "Bike Racing v1.1.0 — Added expanded stunt animations (mocap-ready), surface-dependent tire/traction model, dynamic weather & rainy-night track, replay/ghost upload/download, force-feedback mapping & calibration hooks, rollback networking toggle, photo mode, procedural track generator and live-ops endpoints. For production: add more stunt mocap clips, tune tire/surface parameters, integrate FFB drivers for wheel vendors, and implement anti-cheat and telemetry backends."
+  }
+}

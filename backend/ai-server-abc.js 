@@ -1,0 +1,46 @@
+// ai-server.js
+import { runAIOrchestrator } from "./ai-orchestrator.js";
+import path from "path";
+import fs from "fs";
+
+export async function generateGame(prompt) {
+    console.log(`🤖 AI-Server: Generating game for prompt "${prompt}"`);
+
+    // Step 1: Get AI-generated game blueprint, scripts, and assets list
+    const aiOutput = await runAIOrchestrator(prompt);
+
+    // Step 2: Create a folder for the game
+    const folderName = prompt.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
+    const gameFolder = path.join("public", "generated-games", folderName);
+
+    fs.mkdirSync(gameFolder, { recursive: true });
+
+    // Step 3: Save index.html (basic template for now)
+    fs.writeFileSync(
+        path.join(gameFolder, "index.html"),
+        aiOutput.html || "<h1>Game loading...</h1>"
+    );
+
+    // Step 4: Save scripts
+    if (aiOutput.scripts) {
+        fs.writeFileSync(
+            path.join(gameFolder, "game.js"),
+            aiOutput.scripts
+        );
+    }
+
+    // Step 5: Save assets (mock for now)
+    if (aiOutput.assets) {
+        const assetsFolder = path.join(gameFolder, "assets");
+        fs.mkdirSync(assetsFolder, { recursive: true });
+
+        aiOutput.assets.forEach(asset => {
+            const assetPath = path.join(assetsFolder, asset.fileName);
+            fs.writeFileSync(assetPath, asset.data || ""); // Placeholder
+        });
+    }
+
+    console.log(`✅ Game generated in: ${gameFolder}`);
+
+    return { folder: folderName };
+}

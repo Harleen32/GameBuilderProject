@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GameForge — AI Game Creator</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="use-ai.css" />
+</head>
+<body>
+  <!-- Top Nav -->
+  <nav class="top-nav" role="navigation" aria-label="Main">
+    <div class="nav-inner">
+      <div class="brand">
+        <a href="index.html">
+          <img src="assets/logo.png" alt="GameForge logo" class="site-logo" />
+        </a>
+        <span class="visually-hidden">GameForge</span>
+      </div>
+
+      <ul class="nav-links" role="menubar">
+        <li role="none"><a role="menuitem" href="index.html">Home</a></li>
+        <li role="none"><a role="menuitem" href="#features">Features</a></li>
+        <li role="none"><a role="menuitem" href="#docs">Docs</a></li>
+        <li role="none"><a role="menuitem" href="#community">Community</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a class="btn ghost" href="signup.html">Sign up</a>
+        <a class="btn filled" href="#login" id="loginLink">Log in</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero" role="banner">
+    <div class="hero-vignette" aria-hidden="true"></div>
+
+    <div class="hero-content">
+      <h1 class="hero-title">Your AI <span class="accent">Assistant</span><br>for Everyday Game Creation</h1>
+      <p class="hero-sub">Turn your ideas into playable 2D & 3D games with AI — instant prototypes, templates, and exportable projects.</p>
+
+      <div class="hero-ctas">
+        <button id="primaryCta" class="btn primary">Start Free Trial</button>
+        <button id="demoCta" class="btn outline">Watch Demo</button>
+      </div>
+
+      <!-- Search form: submit on Enter or button -->
+      <form id="promptForm" class="search-section hero-search" aria-label="Generate game" autocomplete="off">
+        <label for="gamePrompt" class="visually-hidden">Enter Game Idea</label>
+        <input type="text" id="gamePrompt" name="prompt" placeholder="Type your game idea... (e.g., Space Shooter with enemies)" aria-label="Game idea prompt" required>
+        <button id="generateBtn" class="btn generate" type="submit">⚡ Generate Game</button>
+      </form>
+
+      <p id="status" class="status info" role="status" aria-live="polite">💡 Waiting for input...</p>
+    </div>
+
+    <!-- Floating cards (decorative) -->
+    <div class="floating-cards" aria-hidden="true">
+      <div class="card card-left" aria-hidden="true">
+        <div class="card-tag">Your earnings</div>
+        <div class="card-value">$68.86</div>
+        <div class="card-mini">Next payout in 12:51 pm</div>
+      </div>
+
+      <div class="card card-center" aria-hidden="true">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M2 12h20" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="card card-right" aria-hidden="true">
+        <div class="bubble-line">What tasks took most of my time this week?</div>
+        <div class="bubble-line small">Get smarter with your time and work better, every day.</div>
+      </div>
+    </div>
+
+    <div class="scroll-hint" aria-hidden="true">[ SCROLL ] ↓</div>
+  </header>
+
+  <!-- Main content area -->
+  <main class="container" role="main">
+    <section class="content-block">
+      <h2 class="section-title">Create in seconds</h2>
+      <p class="section-sub">Use the AI builder above to generate prototypes, then open your preview page to test the build.</p>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <p>Made with ❤️ using AI • © 2025 GameBuilder</p>
+  </footer>
+
+  <script src="use-ai.js" defer></script>
+</body>
+</html>

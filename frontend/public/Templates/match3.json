@@ -1,0 +1,368 @@
+{
+  "id": "match3",
+  "name": "Match-3 Puzzle",
+  "version": "1.0.2",
+  "author": "GameForge",
+  "category": "Puzzle",
+  "tags": ["2d", "puzzle", "match3", "casual"],
+  "thumbnail": "assets/match3.jpeg",
+  "description": "A polished Match-3 template with combos, boosters, special tiles, obstacles, level objectives, world progression, daily challenges, tutorial system, store and monetization/leaderboard hooks.",
+  "settings": {
+    "grid": { "rows": 8, "columns": 8, "tileSize": 72 },
+    "movesPerLevelDefault": 30,
+    "timeLimitDefaultSec": null,
+    "comboMultiplierBase": 1.0,
+    "maxChainDepth": 12,
+    "difficultyRamp": 0.05,
+    "leaderboardEnabled": true,
+    "save": { "autoSave": true, "slots": 3, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": false, "endpoint": "/api/analytics" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US", "es-ES", "hi-IN"] },
+    "accessibility": { "colorblindMode": "off", "highContrast": false, "uiScale": 1.0, "hints": true },
+    "monetization": { "adsCheckpointSec": 90, "offerAdsRevive": true, "iapStoreEnabled": true },
+    "dailyChallenge": { "enabled": true, "reward": { "coins": 100 }, "resetUTC": "00:00" }
+  },
+  "assets": {
+    "images": [
+      { "id": "tile_red", "src": "assets/match3/red.png", "size": { "w": 72, "h": 72 } },
+      { "id": "tile_blue", "src": "assets/match3/blue.png", "size": { "w": 72, "h": 72 } },
+      { "id": "tile_green", "src": "assets/match3/green.png", "size": { "w": 72, "h": 72 } },
+      { "id": "tile_yellow", "src": "assets/match3/yellow.png", "size": { "w": 72, "h": 72 } },
+      { "id": "tile_purple", "src": "assets/match3/purple.png", "size": { "w": 72, "h": 72 } },
+      { "id": "booster_bomb", "src": "assets/match3/booster_bomb.png", "size": { "w": 64, "h": 64 } },
+      { "id": "booster_color", "src": "assets/match3/booster_color.png", "size": { "w": 64, "h": 64 } },
+      { "id": "bg_board", "src": "assets/match3/bg_board.png", "size": { "w": 1024, "h": 768 } },
+      { "id": "particle_pop", "src": "assets/match3/particles/pop.png", "frames": 8, "size": { "w": 48, "h": 48 } },
+      { "id": "tile_line_h", "src": "assets/match3/special_line_h.png", "size": { "w": 72, "h": 72 } },
+      { "id": "tile_line_v", "src": "assets/match3/special_line_v.png", "size": { "w": 72, "h": 72 } },
+      { "id": "tile_wrapped", "src": "assets/match3/special_wrapped.png", "size": { "w": 72, "h": 72 } },
+      { "id": "tile_rainbow", "src": "assets/match3/special_rainbow.png", "size": { "w": 72, "h": 72 } },
+      { "id": "obstacle_ice", "src": "assets/match3/obstacles/ice.png", "size": { "w": 72, "h": 72 } },
+      { "id": "obstacle_crate", "src": "assets/match3/obstacles/crate.png", "size": { "w": 72, "h": 72 } },
+      { "id": "obstacle_locked", "src": "assets/match3/obstacles/locked.png", "size": { "w": 72, "h": 72 } },
+      { "id": "world_map", "src": "assets/match3/world_map.png", "size": { "w": 1200, "h": 800 } }
+    ],
+    "audio": [
+      { "id": "sfx_match", "src": "assets/audio/match3/match.wav" },
+      { "id": "sfx_booster", "src": "assets/audio/match3/booster.wav" },
+      { "id": "sfx_win", "src": "assets/audio/match3/win.wav" },
+      { "id": "sfx_fail", "src": "assets/audio/match3/fail.wav" },
+      { "id": "bgm_loop", "src": "assets/audio/match3/bgm_loop.mp3", "loop": true }
+    ]
+  },
+  "layers": [
+    { "id": "background", "type": "static", "properties": { "image": "bg_board" } },
+    { "id": "board", "type": "gridLayer", "properties": { "rows": 8, "columns": 8, "tileSize": 72 } },
+    { "id": "particles", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" },
+    { "id": "world", "type": "worldMapLayer", "properties": { "image": "world_map" } }
+  ],
+  "objects": [
+    {
+      "id": "board_system",
+      "type": "match3Board",
+      "x": 0,
+      "y": 0,
+      "layer": "board",
+      "properties": {
+        "rows": 8,
+        "columns": 8,
+        "tileSize": 72,
+        "tileTypes": ["tile_red", "tile_blue", "tile_green", "tile_yellow", "tile_purple"],
+        "refillStrategy": "cascade",
+        "shuffleOnNoMoves": true,
+        "hintDelaySec": 6,
+        "matchRule": { "minMatch": 3 },
+        "specialTileRules": {
+          "line": { "createdBy": "match4_line", "clears": "row_or_col" },
+          "wrapped": { "createdBy": "tShape", "clears": "3x3_twice" },
+          "rainbow": { "createdBy": "match5", "clears": "allOfColor" }
+        },
+        "obstacleTypes": ["obstacle_ice", "obstacle_crate", "obstacle_locked"],
+        "obstacleBehavior": {
+          "ice": { "layers": 1, "requiresMatchUnder": true, "releaseOnAdjacentMatch": true },
+          "crate": { "layers": 2, "breakOnMatchUnder": true },
+          "locked": { "requiresKey": true }
+        }
+      }
+    },
+    {
+      "id": "ui_moves",
+      "type": "uiText",
+      "x": 24,
+      "y": 24,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Moves: {level.movesLeft}", "bindTo": "level.movesLeft", "fontSize": 18 }
+    },
+    {
+      "id": "ui_score",
+      "type": "uiText",
+      "x": 24,
+      "y": 56,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Score: {level.score}", "bindTo": "level.score", "fontSize": 18 }
+    },
+    {
+      "id": "booster_bomb_template",
+      "type": "boosterTemplate",
+      "sprite": "booster_bomb",
+      "layer": "ui",
+      "properties": { "effect": "explode3x3", "cooldownSec": 0 }
+    },
+    {
+      "id": "booster_color_template",
+      "type": "boosterTemplate",
+      "sprite": "booster_color",
+      "layer": "ui",
+      "properties": { "effect": "clearColor", "cooldownSec": 0 }
+    },
+    {
+      "id": "particle_pop_template",
+      "type": "particleTemplate",
+      "sprite": "particle_pop",
+      "layer": "particles",
+      "properties": { "frames": 8, "fps": 30, "autoDestroy": true }
+    },
+    {
+      "id": "tutorial_overlay",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "bottomPanel",
+        "title": "Tutorial",
+        "steps": [
+          { "id": "t1", "text": "Swap two adjacent tiles to make a line of 3." },
+          { "id": "t2", "text": "Make a match of 4 to create a line-clear tile." },
+          { "id": "t3", "text": "Match 5 to create a Rainbow tile that clears a whole color." },
+          { "id": "t4", "text": "Use boosters to clear tricky obstacles." }
+        ],
+        "buttons": [{ "text": "Next", "action": "tutorialNext" }, { "text": "Close", "action": "closeOverlay" }]
+      }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredSmall",
+        "title": "Paused",
+        "buttons": [{ "text": "Resume", "action": "togglePause" }, { "text": "Main Menu", "action": "toMainMenu" }]
+      }
+    },
+    {
+      "id": "overlay_level_complete",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Level Complete",
+        "subtitle": "Great! Move to next level or replay.",
+        "buttons": [{ "text": "Next", "action": "loadNextLevel" }, { "text": "Replay", "action": "restartLevel" }]
+      }
+    },
+    {
+      "id": "overlay_level_failed",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Level Failed",
+        "subtitle": "Try again or use boosters.",
+        "buttons": [{ "text": "Retry", "action": "restartLevel" }, { "text": "Main Menu", "action": "toMainMenu" }]
+      }
+    },
+    {
+      "id": "world_map_panel",
+      "type": "uiPanel",
+      "layer": "world",
+      "properties": {
+        "visible": false,
+        "title": "World Map",
+        "mapImage": "world_map",
+        "nodes": [
+          { "id": "w1", "levelId": "m1_tutorial", "x": 200, "y": 300, "locked": false },
+          { "id": "w2", "levelId": "m2_gems", "x": 420, "y": 300, "locked": false },
+          { "id": "w3", "levelId": "m3_obstacles", "x": 650, "y": 300, "locked": true }
+        ],
+        "buttons": [{ "text": "Play", "action": "playSelectedLevel" }, { "text": "Close", "action": "closeOverlay" }]
+      }
+    },
+    {
+      "id": "store_panel",
+      "type": "uiPanel",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "title": "Store",
+        "items": [
+          { "id": "coins_100", "name": "100 Coins", "priceUSD": 0.99, "type": "currency", "grant": { "coins": 100 } },
+          { "id": "booster_pack", "name": "Booster Pack", "priceUSD": 2.99, "type": "consumable", "grant": { "booster_bomb": 3 } }
+        ],
+        "buttons": [{ "text": "Buy", "action": "purchaseItem" }, { "text": "Close", "action": "closeOverlay" }]
+      }
+    }
+  ],
+  "levels": [
+    {
+      "id": "m1_tutorial",
+      "name": "Tutorial 1",
+      "rows": 6,
+      "columns": 6,
+      "moves": 15,
+      "objectives": [{ "type": "score", "target": 500 }],
+      "allowedBoosters": ["booster_bomb", "booster_color"],
+      "layoutHint": "provide a simple 3-in-a-row available at start",
+      "useTutorial": true
+    },
+    {
+      "id": "m2_gems",
+      "name": "Gem Rush",
+      "rows": 8,
+      "columns": 8,
+      "moves": 25,
+      "objectives": [{ "type": "collect", "tile": "tile_red", "count": 20 }],
+      "allowedBoosters": ["booster_bomb"],
+      "obstacles": [{ "type": "obstacle_crate", "x": 3, "y": 2 }, { "type": "obstacle_ice", "x": 5, "y": 4 }]
+    },
+    {
+      "id": "m3_obstacles",
+      "name": "Blocked Paths",
+      "rows": 8,
+      "columns": 8,
+      "moves": 28,
+      "objectives": [{ "type": "clearBlocks", "count": 12 }],
+      "allowedBoosters": ["booster_bomb", "booster_color"],
+      "obstacles": [{ "type": "obstacle_locked", "x": 2, "y": 2, "requiresKey": true }]
+    }
+  ],
+  "events": [
+    {
+      "trigger": "onMatch",
+      "action": [
+        { "type": "evaluateMatch", "params": {} },
+        { "type": "addScore", "params": { "amountFormula": "base*comboMultiplier" } },
+        { "type": "playSound", "params": { "id": "sfx_match" } },
+        { "type": "spawnParticle", "params": { "template": "particle_pop_template", "at": "matchCenter" } }
+      ]
+    },
+    {
+      "trigger": "onSpecialTileCreated",
+      "action": [
+        { "type": "spawnSpecialTile", "params": { "tileType": "{specialType}", "at": "{pos}" } },
+        { "type": "showToast", "params": { "text": "Special tile created!" } }
+      ]
+    },
+    {
+      "trigger": "onSpecialTileActivated",
+      "action": [
+        { "type": "applySpecialEffect", "params": { "tileType": "{specialType}", "at": "{pos}" } },
+        { "type": "playSound", "params": { "id": "sfx_booster" } }
+      ]
+    },
+    {
+      "trigger": "onObstacleHit",
+      "action": [
+        { "type": "damageObstacle", "params": { "at": "{pos}", "damage": 1 } },
+        { "type": "spawnParticle", "params": { "template": "particle_pop_template", "at": "{pos}" } }
+      ]
+    },
+    {
+      "trigger": "onLevelObjectiveComplete",
+      "action": [
+        { "type": "showOverlay", "params": { "overlayId": "overlay_level_complete" } },
+        { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "level_complete", "levelId": "{level.id}", "score": "{level.score}" } } },
+        { "type": "submitLeaderboard", "params": { "board": "match3_global", "score": "{level.score}" } },
+        { "type": "unlockWorldNode", "params": { "levelId": "{nextLevelId}" } }
+      ]
+    },
+    {
+      "trigger": "onLevelFail",
+      "action": [
+        { "type": "showOverlay", "params": { "overlayId": "overlay_level_failed" } },
+        { "type": "playSound", "params": { "id": "sfx_fail" } }
+      ]
+    },
+    {
+      "trigger": "onBoosterUsed",
+      "action": [
+        { "type": "applyBooster", "params": { "boosterId": "{boosterId}" } },
+        { "type": "playSound", "params": { "id": "sfx_booster" } },
+        { "type": "decrementBoosterCount", "params": { "boosterId": "{boosterId}" } }
+      ]
+    },
+    {
+      "trigger": "onShuffle",
+      "action": [
+        { "type": "shuffleBoard", "params": {} },
+        { "type": "showToast", "params": { "text": "Board shuffled" } }
+      ]
+    },
+    {
+      "trigger": "onOpenStore",
+      "action": [
+        { "type": "showOverlay", "params": { "overlayId": "store_panel" } }
+      ]
+    },
+    {
+      "trigger": "onWatchAdForRevive",
+      "action": [
+        { "type": "grantRevive", "params": { "lives": 1 } },
+        { "type": "playSound", "params": { "id": "sfx_powerup" } }
+      ]
+    },
+    {
+      "trigger": "onPauseToggled",
+      "action": [{ "type": "toggleOverlay", "params": { "overlayId": "overlay_pause" } }]
+    }
+  ],
+  "systems": {
+    "input": {
+      "bindings": { "tap": ["Pointer", "Touch"], "swap": ["drag"], "pause": ["P"] },
+      "controllerSupport": false
+    },
+    "save": { "autoSave": true, "slots": 3, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "leaderboard": { "enabled": true, "boards": [{ "id": "match3_global", "displayName": "Global High Scores" }] },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US", "es-ES", "hi-IN"] },
+    "accessibility": { "colorblindMode": "on-request", "highContrast": false, "uiScaleRange": { "min": 0.8, "max": 1.4 } },
+    "monetization": { "ads": { "enabled": true, "provider": "your_ad_provider", "rewardedAdId": "revive_ad" }, "iap": { "enabled": true, "provider": "your_iap_provider" } },
+    "dailyChallenge": { "enabled": true, "generator": "seededByDate", "reward": { "coins": 100 } }
+  },
+  "localization": {
+    "strings": {
+      "en-US": {
+        "pause_title": "Paused",
+        "level_complete": "Level Complete",
+        "level_failed": "Level Failed",
+        "use_booster": "Use Booster",
+        "moves_left": "Moves: {moves}",
+        "score": "Score: {score}",
+        "tutorial_step_1": "Swap two adjacent tiles to make a line of 3.",
+        "tutorial_step_2": "Make a match of 4 to create a line-clear tile.",
+        "tutorial_step_3": "Match 5 to create a Rainbow tile that clears a whole color."
+      },
+      "es-ES": {
+        "pause_title": "Pausado",
+        "level_complete": "Nivel Completado",
+        "level_failed": "Nivel Fallado",
+        "use_booster": "Usar Potenciador",
+        "moves_left": "Movimientos: {moves}",
+        "score": "Puntuación: {score}"
+      }
+    }
+  },
+  "uiHints": {
+    "controls": "Tap tiles to swap (or drag). Use boosters to clear tough situations. Pause with the top-right button.",
+    "tips": ["Plan combos for high score", "Boosters help clear obstacles", "Some levels have limited moves — focus objectives"]
+  },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "v1.0.2 — Added special tiles (line, wrapped, rainbow), obstacles (ice/crate/locked), world progression map UI, daily challenge generator, tutorial overlay steps, store/IAP hooks and ads/rewarded revive. Engine must implement match evaluation for special tile creation, obstacle damage layers, store purchases and ad SDK callbacks."
+  }
+}

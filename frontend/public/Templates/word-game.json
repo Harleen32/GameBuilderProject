@@ -1,0 +1,102 @@
+{
+  "id": "word-game",
+  "name": "Word Game",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Puzzle",
+  "tags": ["2d", "puzzle", "word", "wordgame", "educational"],
+  "thumbnail": "assets/word-game.jpeg",
+  "description": "Advanced word-game template with multiple modes (timed, moves, crossword), daily challenges, world progression, dictionary integration, power-ups, hints, achievements, monetization, analytics, localization, and save slots.",
+  "settings": {
+    "modes": ["timed", "moves", "endless", "crossword"],
+    "defaultMode": "timed",
+    "timed": { "defaultSeconds": 60 },
+    "moves": { "defaultMoves": 40 },
+    "dictionarySources": ["assets/wordlists/english_small.txt"],
+    "minWordLength": 3,
+    "scoring": { "basePerLetter": 10, "bonusPerLongWord": 20, "comboMultiplier": 1.2 },
+    "hints": { "enabled": true, "cost": 5, "revealLetterCost": 2 },
+    "powerups": ["shuffle", "bonus_x2", "reveal_word"],
+    "leaderboardEnabled": true,
+    "save": { "autoSave": true, "slots": 5, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US", "es-ES", "hi-IN", "fr-FR", "de-DE"] },
+    "accessibility": { "highContrast": false, "textSize": "medium", "colorblindMode": "off" },
+    "monetization": { "ads": { "rewardedHint": true }, "iap": { "enabled": true, "products": [{ "id": "hint_pack_20", "priceUSD": 1.99, "grant": { "hints": 20 } }] } },
+    "dailyChallenge": { "enabled": true, "resetUTC": "00:00", "reward": { "coins": 50 } }
+  },
+  "assets": {
+    "images": [
+      { "id": "bg_board", "src": "assets/wordgame/bg_board.png", "size": { "w": 1024, "h": 768 } },
+      { "id": "letter_tile", "src": "assets/wordgame/tile_letter.png", "size": { "w": 72, "h": 72 } },
+      { "id": "power_shuffle", "src": "assets/wordgame/power_shuffle.png", "size": { "w": 48, "h": 48 } },
+      { "id": "power_bonus", "src": "assets/wordgame/power_bonus.png", "size": { "w": 48, "h": 48 } },
+      { "id": "world_map", "src": "assets/wordgame/world_map.png", "size": { "w": 1200, "h": 800 } },
+      { "id": "daily_badge", "src": "assets/wordgame/daily_badge.png", "size": { "w": 64, "h": 64 } }
+    ],
+    "audio": [
+      { "id": "sfx_select", "src": "assets/audio/wordgame/select.mp3" },
+      { "id": "sfx_submit", "src": "assets/audio/wordgame/submit.mp3" },
+      { "id": "sfx_invalid", "src": "assets/audio/wordgame/invalid.mp3" },
+      { "id": "sfx_reward", "src": "assets/audio/wordgame/reward.mp3" },
+      { "id": "bgm_loop", "src": "assets/audio/wordgame/bgm_loop.mp3", "loop": true }
+    ],
+    "wordlists": [
+      { "id": "english_small", "src": "assets/wordlists/english_small.txt", "language": "en-US" }
+    ]
+  },
+  "layers": [
+    { "id": "background", "type": "static", "properties": { "image": "bg_board" } },
+    { "id": "board", "type": "gridLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" },
+    { "id": "world", "type": "worldMapLayer" }
+  ],
+  "objects": [
+    { "id": "board_system", "type": "letterGrid", "layer": "board", "properties": { "rows": 4, "columns": 4, "letterDistribution": "english_frequency", "tileSize": 72, "minWordLength": 3, "shuffleOnNoWords": true } },
+    { "id": "ui_timer", "type": "uiText", "x": 16, "y": 16, "layer": "ui", "properties": { "anchor": "top-left", "textTemplate": "Time: {game.time}", "bindTo": "game.time" } },
+    { "id": "ui_score", "type": "uiText", "x": 16, "y": 48, "layer": "ui", "properties": { "anchor": "top-left", "textTemplate": "Score: {game.score}", "bindTo": "game.score" } },
+    { "id": "powerup_shuffle", "type": "powerup", "sprite": "power_shuffle", "layer": "ui", "properties": { "id": "shuffle", "cooldownSec": 10 } },
+    { "id": "powerup_bonus", "type": "powerup", "sprite": "power_bonus", "layer": "ui", "properties": { "id": "bonus_x2", "cooldownSec": 20 } },
+    { "id": "overlay_pause", "type": "uiOverlay", "layer": "overlays", "properties": { "visible": false, "style": "centeredSmall", "title": "Paused", "buttons": [{ "text": "Resume", "action": "togglePause" }, { "text": "Main Menu", "action": "toMainMenu" }] } },
+    { "id": "overlay_level_complete", "type": "uiOverlay", "layer": "overlays", "properties": { "visible": false, "style": "centeredModal", "title": "Round Complete", "buttons": [{ "text": "Next", "action": "loadNextRound" }, { "text": "Main Menu", "action": "toMainMenu" }] } },
+    { "id": "overlay_invalid", "type": "uiOverlay", "layer": "overlays", "properties": { "visible": false, "style": "toast", "duration": 1400, "title": "Invalid Word" } },
+    { "id": "world_map_panel", "type": "uiPanel", "layer": "world", "properties": { "visible": false, "title": "Word Map", "mapImage": "world_map", "nodes": [ { "id": "w1", "roundId": "r1_easy", "x": 200, "y": 400, "locked": false }, { "id": "w2", "roundId": "r2_two", "x": 400, "y": 320, "locked": false }, { "id": "w3", "roundId": "r3_crossword", "x": 600, "y": 260, "locked": false } ], "buttons": [{ "text": "Play", "action": "playSelectedRound" }, { "text": "Close", "action": "closeOverlay" }] } },
+    { "id": "daily_challenge_panel", "type": "uiPanel", "layer": "ui", "properties": { "visible": false, "title": "Daily Challenge", "badge": "daily_badge", "description": "Solve today's puzzle for a reward.", "buttons": [{ "text": "Play", "action": "playDaily" }, { "text": "Close", "action": "closeOverlay" }] } },
+    { "id": "store_panel", "type": "uiPanel", "layer": "overlays", "properties": { "visible": false, "title": "Store", "items": [{ "id": "hint_pack_20", "name": "20 Hints", "priceUSD": 1.99, "grant": { "hints": 20 } }], "buttons": [{ "text": "Buy", "action": "purchaseItem" }, { "text": "Close", "action": "closeOverlay" }] } }
+  ],
+  "rounds": [
+    { "id": "r1_easy", "name": "Starter", "mode": "timed", "time": 60, "targetScore": 500 },
+    { "id": "r2_two", "name": "Double Trouble", "mode": "moves", "moves": 40, "targetScore": 800 },
+    { "id": "r3_crossword", "name": "Crossword Mini", "mode": "crossword", "layout": { "rows": 5, "cols": 5 }, "targetScore": 1200 },
+    { "id": "daily_1", "name": "Daily Puzzle", "mode": "timed", "time": 45, "targetScore": 600 }
+  ],
+  "worldMap": { "nodes": [ { "id": "w1", "roundId": "r1_easy", "x": 200, "y": 400 }, { "id": "w2", "roundId": "r2_two", "x": 400, "y": 320 }, { "id": "w3", "roundId": "r3_crossword", "x": 600, "y": 260 } ], "background": "assets/wordgame/world_map.png" },
+  "dailyChallenge": { "generator": "seededByDate", "reward": { "coins": 50 }, "resetUTC": "00:00" },
+  "achievements": [ { "id": "long_words", "name": "Wordsmith", "condition": "Form 10 words with 7+ letters" }, { "id": "scorer_1k", "name": "High Scorer", "condition": "Score 1000 points in one round" } ],
+  "events": [
+    { "trigger": "onWordFormed", "action": [{ "type": "validateWord", "params": {} }, { "type": "addScore", "params": { "amountFormula": "letters*basePerLetter + (letters>5?bonusPerLongWord:0)" } }, { "type": "playSound", "params": { "id": "sfx_submit" } }] },
+    { "trigger": "onInvalidWord", "action": [{ "type": "playSound", "params": { "id": "sfx_invalid" } }, { "type": "showOverlay", "params": { "overlayId": "overlay_invalid" } }] },
+    { "trigger": "onRoundComplete", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_level_complete" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "round_complete", "roundId": "{round.id}", "score": "{game.score}" } } }, { "type": "submitLeaderboard", "params": { "board": "word_global", "score": "{game.score}" } }, { "type": "grantReward", "params": { "reward": { "coins": 10 } } }] },
+    { "trigger": "onDailyStart", "action": [{ "type": "loadRound", "params": { "roundId": "daily_1" } }, { "type": "playSound", "params": { "id": "sfx_reward" } }] },
+    { "trigger": "onPauseToggled", "action": [{ "type": "toggleOverlay", "params": { "overlayId": "overlay_pause" } }] },
+    { "trigger": "onWatchAdForHint", "action": [{ "type": "grantReward", "params": { "reward": { "hints": 1 } } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "ad_watched", "reward": "hint" } } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "select": ["Pointer","Touch"], "submit": ["Enter"], "pause": ["P"] }, "controllerSupport": true },
+    "dictionary": { "sources": ["assets/wordlists/english_small.txt"], "minWordLength": 3 },
+    "save": { "autoSave": true, "slots": 5, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "leaderboard": { "enabled": true, "boards": [{ "id": "word_global", "displayName": "Top Words" }] },
+    "monetization": { "ads": { "enabled": true, "rewardedAdId": "hint_ad" }, "iap": { "enabled": true, "provider": "your_iap_provider" } }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "pause_title": "Paused", "round_complete": "Round Complete", "invalid_word": "Invalid Word", "submit": "Submit", "daily_title": "Daily Challenge" },
+      "es-ES": { "pause_title": "Pausado", "round_complete": "Ronda Completa", "invalid_word": "Palabra inválida", "submit": "Enviar", "daily_title": "Desafío Diario" },
+      "fr-FR": { "pause_title": "Pause", "round_complete": "Manche Terminée", "invalid_word": "Mot invalide", "submit": "Valider", "daily_title": "Défi Quotidien" }
+    }
+  },
+  "uiHints": { "controls": "Tap letters to form words, press Enter to submit. Use shuffle or reveal power-ups to assist.", "tips": ["Longer words = more points","Use power-ups strategically","Play daily challenge for bonus coins"] },
+  "meta": { "created_at": "2025-09-18T00:00:00Z", "updated_at": "2025-09-18T00:00:00Z", "notes": "v1.1.0 — Added world map progression, daily challenge, achievements, monetization hooks (rewarded ads + IAP), extended localization (FR, DE), controller support. Backend endpoints required: /api/savecloud, /api/analytics, IAP + ads integration." }
+}

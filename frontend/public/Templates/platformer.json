@@ -1,0 +1,230 @@
+{
+  "id": "platformer",
+  "name": "2D Platformer",
+  "version": "1.0.1",
+  "author": "GameForge",
+  "category": "2D",
+  "tags": ["2d", "platformer", "adventure"],
+  "thumbnail": "assets/platformer.jpeg",
+  "description": "Responsive side-scrolling platformer with tilemap support, moving platforms, enemies, collectibles, checkpoints, polished camera behavior, particle effects and advanced abilities (dash, double-jump).",
+  "settings": {
+    "screenWidth": 1280,
+    "screenHeight": 720,
+    "gravity": 1600,
+    "playerStart": { "x": 140, "y": 320 },
+    "camera": { "mode": "follow", "lerp": 0.12, "boundsPadding": 48 },
+    "maxJumpCoyote": 0.12,
+    "doubleJumpEnabled": true,
+    "dashEnabled": true,
+    "checkpointAutoSave": true,
+    "levels": ["level1.json", "level2.json"],
+    "hud": { "showVelocity": false }
+  },
+  "assets": {
+    "images": [
+      { "id": "tileset", "src": "assets/platformer/tileset_full.png", "tileSize": 32 },
+      { "id": "bg_far", "src": "assets/platformer/bg_far.png", "size": { "w": 2048, "h": 720 } },
+      { "id": "bg_near", "src": "assets/platformer/bg_near.png", "size": { "w": 2048, "h": 720 } },
+      { "id": "player_idle", "src": "assets/platformer/player_idle.png", "frames": 4, "size": { "w": 48, "h": 64 } },
+      { "id": "player_run", "src": "assets/platformer/player_run.png", "frames": 6 },
+      { "id": "player_jump", "src": "assets/platformer/player_jump.png" },
+      { "id": "coin", "src": "assets/platformer/coin_gold.png", "size": { "w": 24, "h": 24 } },
+      { "id": "slime", "src": "assets/platformer/slime.png", "frames": 4, "size": { "w": 40, "h": 28 } },
+      { "id": "spike", "src": "assets/platformer/spike.png", "size": { "w": 32, "h": 32 } },
+      { "id": "flag", "src": "assets/platformer/flag.png", "size": { "w": 48, "h": 96 } },
+      { "id": "platform_small", "src": "assets/platformer/platform_small.png", "size": { "w": 128, "h": 24 } },
+      { "id": "dust", "src": "assets/platformer/particles/dust.png", "frames": 6, "size": { "w": 16, "h": 16 } },
+      { "id": "coin_sparkle", "src": "assets/platformer/particles/coin_sparkle.png", "frames": 8, "size": { "w": 32, "h": 32 } },
+      { "id": "enemy_death", "src": "assets/platformer/particles/enemy_death.png", "frames": 10, "size": { "w": 64, "h": 48 } }
+    ],
+    "audio": [
+      { "id": "sfx_jump", "src": "assets/audio/platformer/jump.wav" },
+      { "id": "sfx_land", "src": "assets/audio/platformer/land.wav" },
+      { "id": "sfx_coin", "src": "assets/audio/platformer/coin.wav" },
+      { "id": "sfx_hurt", "src": "assets/audio/platformer/hurt.wav" },
+      { "id": "bgm", "src": "assets/audio/platformer/bgm_loop.mp3", "loop": true }
+    ],
+    "tilemaps": [
+      { "id": "level_1_map", "src": "assets/platformer/level1.json" },
+      { "id": "level_2_map", "src": "assets/platformer/level2.json" }
+    ]
+  },
+  "layers": [
+    { "id": "bg_far", "type": "parallax", "properties": { "image": "bg_far", "speed": 0.15 } },
+    { "id": "bg_near", "type": "parallax", "properties": { "image": "bg_near", "speed": 0.45 } },
+    { "id": "tilemap", "type": "tilemap", "properties": { "tilemapId": "level_1_map", "tileset": "tileset" } },
+    { "id": "entities", "type": "entityLayer" },
+    { "id": "particles", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "player1",
+      "type": "player",
+      "x": 140,
+      "y": 320,
+      "width": 48,
+      "height": 64,
+      "sprite": "player_idle",
+      "layer": "entities",
+      "properties": {
+        "health": 5,
+        "lives": 3,
+        "speed": 240,
+        "accel": 2400,
+        "friction": 0.9,
+        "jumpForce": 520,
+        "doubleJump": true,
+        "dash": { "enabled": true, "distance": 220, "cooldown": 1.2 },
+        "coyoteTime": 0.12,
+        "animations": {
+          "idle": { "frames": [0, 1], "fps": 6, "loop": true },
+          "run": { "frames": [0, 1, 2, 3, 4, 5], "fps": 14 },
+          "jump": { "frames": [0], "fps": 1 }
+        },
+        "collisionBox": { "w": 32, "h": 56 },
+        "respawnOnDeath": true,
+        "respawnPoint": "checkpoint_start",
+        "bind": { "health": "ui_health", "score": "ui_score", "lives": "ui_lives" }
+      }
+    },
+    {
+      "id": "checkpoint_start",
+      "type": "checkpoint",
+      "x": 140,
+      "y": 360,
+      "layer": "entities",
+      "properties": { "activateOnEnter": true, "savePlayerState": true }
+    },
+    {
+      "id": "moving_platform_01",
+      "type": "platform",
+      "x": 420,
+      "y": 380,
+      "width": 160,
+      "height": 24,
+      "sprite": "platform_small",
+      "layer": "entities",
+      "properties": { "path": [ { "x": 420, "y": 380 }, { "x": 760, "y": 380 } ], "speed": 80, "oneWay": true }
+    },
+    {
+      "id": "coin_01",
+      "type": "pickup",
+      "x": 320,
+      "y": 260,
+      "sprite": "coin",
+      "layer": "entities",
+      "properties": { "score": 10, "collectSound": "sfx_coin", "particle": "coin_sparkle_template" }
+    },
+    {
+      "id": "slime_01",
+      "type": "enemy",
+      "x": 560,
+      "y": 320,
+      "sprite": "slime",
+      "layer": "entities",
+      "properties": { "health": 2, "patrol": { "left": 520, "right": 700 }, "damage": 1, "animations": { "walk": { "frames": [0, 1, 2, 3], "fps": 8 } }, "deathParticle": "enemy_death_template" }
+    },
+    {
+      "id": "spike_01",
+      "type": "obstacle",
+      "x": 480,
+      "y": 352,
+      "sprite": "spike",
+      "layer": "entities",
+      "properties": { "damage": 1, "oneHitKill": false }
+    },
+    {
+      "id": "flag_goal",
+      "type": "goal",
+      "x": 1280,
+      "y": 280,
+      "sprite": "flag",
+      "layer": "entities",
+      "properties": { "onReach": "level_complete", "showOverlayOnReach": "overlay_victory" }
+    },
+
+    { "id": "dust_template", "type": "particleTemplate", "sprite": "dust", "layer": "particles", "properties": { "frames": 6, "fps": 30, "autoDestroy": true, "emitOn": "playerLand" } },
+    { "id": "coin_sparkle_template", "type": "particleTemplate", "sprite": "coin_sparkle", "layer": "particles", "properties": { "frames": 8, "fps": 20, "autoDestroy": true } },
+    { "id": "enemy_death_template", "type": "particleTemplate", "sprite": "enemy_death", "layer": "particles", "properties": { "frames": 10, "fps": 18, "autoDestroy": true } },
+
+    {
+      "id": "ui_score",
+      "type": "uiText",
+      "x": 16,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Score: {player.score}", "fontSize": 20, "bindTo": "player1.score" }
+    },
+    {
+      "id": "ui_health",
+      "type": "uiHealth",
+      "x": 16,
+      "y": 44,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "bindTo": "player1.health", "max": 5 }
+    },
+    {
+      "id": "ui_lives",
+      "type": "uiLives",
+      "x": 1008,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-right", "bindTo": "player1.lives" }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredSmall", "title": "Paused", "buttons": [ { "text": "Resume", "action": "togglePause" }, { "text": "Main Menu", "action": "toMainMenu" } ] }
+    },
+    {
+      "id": "overlay_gameover",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Game Over",
+        "subtitle": "You lost all your lives.",
+        "buttons": [
+          { "text": "Retry", "action": "restartLevel" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    },
+    {
+      "id": "overlay_victory",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Level Complete",
+        "subtitle": "Great job!",
+        "buttons": [
+          { "text": "Next Level", "action": "loadNextLevel" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    }
+  ],
+  "events": [
+    { "trigger": "onCollect", "target": "coin_01", "action": { "type": "addScore", "params": { "amount": 10 }, "sideEffects": [ { "type": "playSound", "params": { "id": "sfx_coin" } }, { "type": "spawnParticle", "params": { "template": "coin_sparkle_template", "at": "coin_01" } } ] } },
+    { "trigger": "onEnterArea", "target": "checkpoint_start", "action": { "type": "saveGame", "params": {} } },
+    { "trigger": "onPlayerDeath", "conditions": { "playerLives": 0 }, "action": { "type": "showOverlay", "params": { "overlayId": "overlay_gameover" } } },
+    { "trigger": "onPlayerDeath", "conditions": { "playerLives": { "gt": 0 } }, "action": { "type": "respawnPlayer", "params": { "toCheckpoint": true } } },
+    { "trigger": "onEnterArea", "target": "flag_goal", "action": { "type": "showOverlay", "params": { "overlayId": "overlay_victory" } } },
+    { "trigger": "onEnemyDeath", "action": { "type": "spawnParticle", "params": { "template": "enemy_death_template", "at": "enemy" } } },
+    { "trigger": "onPlayerLand", "action": { "type": "spawnParticle", "params": { "template": "dust_template", "at": "player1" } } }
+  ],
+  "systems": {
+    "physics": { "enabled": true, "gravity": 1600, "maxFallSpeed": 900, "frictionGround": 0.85 },
+    "input": { "bindings": { "left": ["ArrowLeft", "A"], "right": ["ArrowRight", "D"], "jump": ["Space", "W", "ArrowUp"], "dash": ["Shift"] }, "coyoteTime": 0.12 },
+    "camera": { "type": "smoothFollow", "target": "player1", "lerp": 0.12, "boundsPadding": 48 },
+    "abilities": { "doubleJump": true, "dash": { "enabled": true, "distance": 220 } }
+  },
+  "uiHints": { "controls": "Arrow keys / A D to move, Space to jump, Shift to dash (if enabled)", "tips": [ "Collect coins to increase score", "Use moving platforms to reach secret areas", "Checkpoints auto-save your progress", "Use dash to cross wider gaps or dodge hazards" ] },
+  "meta": { "created_at": "2025-09-18T00:00:00Z", "updated_at": "2025-09-18T00:00:00Z", "notes": "Patched: added Game Over & Victory overlays, particle effects (dust, coin sparkle, enemy death), dash & double-jump ability toggles, and level progression (level1/level2). Version bumped to 1.0.1." }
+}

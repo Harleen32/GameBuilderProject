@@ -1,0 +1,200 @@
+{
+  "id": "jigsaw",
+  "name": "Jigsaw Puzzle",
+  "version": "1.1.2",
+  "author": "GameForge",
+  "category": "Puzzle",
+  "tags": ["puzzle", "jigsaw", "casual", "creative"],
+  "thumbnail": "assets/jigsaw.jpeg",
+  "description": "Drag-and-drop jigsaw puzzle template with piece snapping, rotation, preview, multiple difficulties, daily puzzles, achievements, sharing/import, zoom/pan, piece-tray, tutorial, monetization, accessibility and cloud save.",
+  "settings": {
+    "canvas": { "width": 1280, "height": 720 },
+    "defaultPieceSize": 96,
+    "rotationEnabled": true,
+    "snapTolerancePx": 16,
+    "shuffleOnStart": true,
+    "difficultyPresets": { "easy": 24, "medium": 48, "hard": 96, "legendary": 200 },
+    "save": { "autoSave": true, "slots": 5, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "detailedMetrics": true },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US", "es-ES", "fr-FR", "de-DE", "hi-IN"] },
+    "accessibility": { "highContrast": false, "uiScale": 1.0, "colorblindMode": "off", "dyslexiaFont": false, "largeHitboxes": true },
+    "monetization": {
+      "ads": { "rewardedHint": true },
+      "iap": {
+        "enabled": true,
+        "products": [
+          { "id": "remove_ads", "priceUSD": 1.99, "grant": { "adsDisabled": true } }
+        ]
+      }
+    },
+    "dailyChallenge": { "enabled": true, "resetUTC": "00:00", "reward": { "coins": 50 } },
+    "sharing": { "enabled": true, "format": "puzzle://{id}?seed={seed}&pieces={count}", "importEndpoint": "/api/importPuzzle" }
+  },
+  "assets": {
+    "images": [
+      { "id": "puzzle_preview", "src": "assets/jigsaw/preview_board.png", "size": { "w": 1024, "h": 576 } },
+      { "id": "piece_back", "src": "assets/jigsaw/piece_back.png", "size": { "w": 96, "h": 96 } },
+      { "id": "ui_hint_icon", "src": "assets/jigsaw/hint.png", "size": { "w": 48, "h": 48 } },
+      { "id": "daily_badge", "src": "assets/jigsaw/daily_badge.png", "size": { "w": 64, "h": 64 } }
+    ],
+    "audio": [
+      { "id": "sfx_pick", "src": "assets/audio/jigsaw/pick.wav" },
+      { "id": "sfx_place", "src": "assets/audio/jigsaw/place.wav" },
+      { "id": "sfx_snap", "src": "assets/audio/jigsaw/snap.wav" },
+      { "id": "sfx_win", "src": "assets/audio/jigsaw/win.wav" },
+      { "id": "sfx_hint", "src": "assets/audio/jigsaw/hint.wav" }
+    ],
+    "puzzles": [
+      { "id": "pz_landscape_01", "src": "assets/jigsaw/images/landscape_01.jpg", "size": { "w": 1920, "h": 1080 } },
+      { "id": "pz_art_01", "src": "assets/jigsaw/images/art_01.jpg", "size": { "w": 1600, "h": 1600 } }
+    ]
+  },
+  "layers": [
+    { "id": "background", "type": "static", "properties": { "image": "puzzle_preview" } },
+    { "id": "board", "type": "boardLayer" },
+    { "id": "pieces", "type": "entityLayer" },
+    { "id": "tray", "type": "trayLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "jigsaw_system",
+      "type": "jigsawBoard",
+      "layer": "board",
+      "properties": {
+        "selectedPuzzle": "pz_landscape_01",
+        "pieceCount": 48,
+        "pieceSize": 96,
+        "rotation": true,
+        "snapTolerance": 16,
+        "shuffle": true,
+        "allowRotationSnap": true,
+        "autoMergeOnSnap": true,
+        "zoom": { "min": 0.5, "max": 2.5, "default": 1.0 },
+        "pan": { "enabled": true }
+      }
+    },
+    {
+      "id": "piece_tray",
+      "type": "pieceTray",
+      "layer": "tray",
+      "properties": {
+        "layout": "grid",
+        "sortable": true,
+        "groupByEdge": true,
+        "collapseIfSmallScreen": true
+      }
+    },
+    {
+      "id": "ui_hint_button",
+      "type": "uiButton",
+      "layer": "ui",
+      "x": 1200,
+      "y": 16,
+      "properties": { "text": "Hint", "onClick": "showHint", "icon": "ui_hint_icon" }
+    },
+    {
+      "id": "ui_preview_toggle",
+      "type": "uiToggle",
+      "layer": "ui",
+      "x": 1200,
+      "y": 64,
+      "properties": { "text": "Preview", "bindTo": "jigsaw_system.showPreview" }
+    },
+    {
+      "id": "ui_zoom_controls",
+      "type": "uiPanel",
+      "layer": "ui",
+      "x": 1100,
+      "y": 16,
+      "properties": { "visible": true, "buttons": [{ "text": "+", "action": "zoomIn" }, { "text": "-", "action": "zoomOut" }, { "text": "Reset", "action": "resetZoom" }] }
+    },
+    {
+      "id": "tutorial_overlay",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "bottomPanel",
+        "title": "How to Play",
+        "steps": [
+          { "id": "t1", "text": "Drag edge pieces to corners and build the frame first." },
+          { "id": "t2", "text": "Use Preview to see the completed image." },
+          { "id": "t3", "text": "Rotate pieces with R (if rotation enabled)." },
+          { "id": "t4", "text": "Use the tray to organize pieces by color or edge." }
+        ],
+        "buttons": [{ "text": "Next", "action": "tutorialNext" }, { "text": "Close", "action": "closeOverlay" }]
+      }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredSmall", "title": "Paused", "buttons": [{ "text": "Resume", "action": "togglePause" }, { "text": "Main Menu", "action": "toMainMenu" }] }
+    },
+    {
+      "id": "overlay_win",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredModal", "title": "Puzzle Complete!", "subtitle": "Nice work.", "buttons": [{ "text": "Next Puzzle", "action": "loadNextPuzzle" }, { "text": "Replay", "action": "restartPuzzle" }, { "text": "Share", "action": "sharePuzzle" }] }
+    },
+    {
+      "id": "world_map_panel",
+      "type": "uiPanel",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Puzzle Map", "mapImage": "assets/jigsaw/world_map.png", "nodes": [ { "id": "n1", "puzzleId": "pz_landscape_01", "x": 200, "y": 300, "locked": false }, { "id": "n2", "puzzleId": "pz_art_01", "x": 420, "y": 300, "locked": true } ], "buttons": [{ "text": "Play", "action": "playSelectedPuzzle" }, { "text": "Close", "action": "closeOverlay" }] }
+    },
+    {
+      "id": "daily_panel",
+      "type": "uiPanel",
+      "layer": "ui",
+      "properties": { "visible": false, "title": "Daily Puzzle", "badge": "daily_badge", "description": "Complete today's puzzle to earn coins.", "buttons": [{ "text": "Play", "action": "playDaily" }, { "text": "Close", "action": "closeOverlay" }] }
+    },
+    {
+      "id": "share_panel",
+      "type": "uiPanel",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Share Puzzle", "fields": [{ "label": "Share Code", "value": "{shareCode}" }], "buttons": [{ "text": "Copy", "action": "copyShareCode" }, { "text": "Close", "action": "closeOverlay" }] }
+    }
+  ],
+  "puzzles": [
+    { "id": "pz_landscape_01", "imageId": "pz_landscape_01", "sizes": [24,48,96], "defaultPieces": 48 },
+    { "id": "pz_art_01", "imageId": "pz_art_01", "sizes": [24,48,96,200], "defaultPieces": 96 }
+  ],
+  "achievements": [
+    { "id": "fast_solver", "name": "Speed Assembler", "condition": "Complete a puzzle under 5 minutes" },
+    { "id": "no_hints", "name": "Pure Patience", "condition": "Complete a puzzle without hints" },
+    { "id": "collector_100", "name": "Piece Collector", "condition": "Complete 100 puzzles" }
+  ],
+  "events": [
+    { "trigger": "onPickPiece", "action": [{ "type": "playSound", "params": { "id": "sfx_pick" } }, { "type": "recordMetric", "params": { "metric": "pick_count" } }] },
+    { "trigger": "onPlacePiece", "action": [{ "type": "playSound", "params": { "id": "sfx_place" } }, { "type": "checkCompletion", "params": {} }, { "type": "recordMetric", "params": { "metric": "place_count" } }] },
+    { "trigger": "onSnap", "action": [{ "type": "playSound", "params": { "id": "sfx_snap" } }, { "type": "maybeAutoMerge", "params": {} }, { "type": "recordMetric", "params": { "metric": "snap_count" } }] },
+    { "trigger": "onPuzzleComplete", "action": [{ "type": "playSound", "params": { "id": "sfx_win" } }, { "type": "showOverlay", "params": { "overlayId": "overlay_win" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "puzzle_complete", "puzzleId": "{puzzle.id}", "time": "{session.time}", "pieces": "{puzzle.pieces}" } } }, { "type": "grantReward", "params": { "reward": { "coins": 20 } } }, { "type": "unlockAchievement", "params": { "achievementId": "collector_100" } }] },
+    { "trigger": "onRequestHint", "action": [{ "type": "chargeCurrency", "params": { "amount": 5 } }, { "type": "highlightPiece", "params": { "pieceId": "{pieceId}" } }] },
+    { "trigger": "onWatchAdForHint", "action": [{ "type": "grantReward", "params": { "reward": { "hints": 1 } } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "ad_watched", "adId": "hint_ad" } } }] },
+    { "trigger": "onSharePuzzle", "action": [{ "type": "generateShareCode", "params": { "puzzleId": "{puzzle.id}", "seed": "{seed}", "pieces": "{puzzle.pieces}" } }, { "type": "showOverlay", "params": { "overlayId": "share_panel" } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "pointer": ["Pointer","Touch"], "keyboardArrows": ["ArrowKeys"], "rotateCW": ["R"] }, "controllerSupport": false },
+    "save": { "autoSave": true, "slots": 5, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "detailedMetrics": true },
+    "leaderboard": { "enabled": true, "boards": [{ "id": "jigsaw_fastest", "displayName": "Fastest Solvers" }] },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "monetization": { "ads": { "enabled": true, "rewardedAdId": "hint_ad" }, "iap": { "enabled": true } },
+    "dailyChallenge": { "enabled": true, "generator": "seededByDate" },
+    "sharing": { "enabled": true, "importEndpoint": "/api/importPuzzle", "exportEndpoint": "/api/exportPuzzle" }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "pause_title": "Paused", "puzzle_complete": "Puzzle Complete", "daily_title": "Daily Puzzle", "hint": "Hint", "share_title": "Share Puzzle" },
+      "es-ES": { "pause_title": "Pausado", "puzzle_complete": "Rompecabezas Completo", "daily_title": "Rompecabezas Diario", "hint": "Pista", "share_title": "Compartir" },
+      "fr-FR": { "pause_title": "Pause", "puzzle_complete": "Puzzle Terminé", "daily_title": "Puzzle Quotidien", "hint": "Indice", "share_title": "Partager" },
+      "de-DE": { "pause_title": "Pausiert", "puzzle_complete": "Puzzle Fertig", "daily_title": "Tägliches Puzzle", "hint": "Hinweis", "share_title": "Teilen" },
+      "hi-IN": { "pause_title": "बंद करें", "puzzle_complete": "पहेली पूरी हुई", "daily_title": "दैनिक पजल", "hint": "सूचना", "share_title": "साझा करें" }
+    }
+  },
+  "uiHints": { "controls": "Drag pieces to assemble the image. Use R to rotate (if enabled). Use the tray to organize pieces. Zoom and pan with pinch or mouse wheel.", "tips": ["Start from corners and edges","Use the tray to group similar pieces","Zoom in for details on large puzzles"] },
+  "meta": { "created_at": "2025-09-18T00:00:00Z", "updated_at": "2025-09-18T00:00:00Z", "notes": "v1.1.2 — Fixed remaining JSON issues and validated structure. Implement /api/importPuzzle and /api/exportPuzzle for full sharing support, and ad/IAP SDKs for monetization." }
+}

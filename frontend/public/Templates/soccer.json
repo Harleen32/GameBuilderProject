@@ -1,0 +1,166 @@
+{
+  "id": "soccer",
+  "name": "Soccer Game",
+  "version": "1.2.0",
+  "author": "GameForge",
+  "category": "Sports",
+  "tags": ["3d","sports","soccer","multiplayer"],
+  "thumbnail": "assets/soccer.jpeg",
+  "description": "Full-featured 3D Soccer/Football simulation template with player physics, animation-driven controls, team AI, career/manager mode, online multiplayer/club management, VAR & referee systems, dynamic weather & pitch wear, replays/highlights, broadcast spectator, commentary hooks, accessibility and monetization.",
+  "settings": {
+    "physics": { "fixedTimestepMs": 16, "playerCollision": true, "ballPhysics": { "drag": 0.02, "spinFactor": 0.4 } },
+    "player": { "staminaMax": 100, "sprintDrainPerSec": 8, "tackleCooldownMs": 600, "maxPlayersPerTeam": 11 },
+    "match": { "matchTimeMin": 90, "halftimeMin": 15, "injurySystem": true, "substitutionsPerMatch": 5, "penaltyShootout": true, "VAR": { "enabled": true, "challengeLimit": 2 } },
+    "ai": { "teamTactics": ["defensive","balanced","attacking"], "adaptiveAI": true, "difficultyRamp": 0.05 },
+    "multiplayer": { "online": true, "maxPlayers": 22, "clubSystem": true, "ranked": true, "netSyncEndpoint": "/api/match", "crossplay": true, "lobbies": true },
+    "career": { "enabled": true, "seasonsPerYear": 1, "transferWindowEnabled": true, "managerMode": true, "playerProgression": true, "contracts": true, "morale": true },
+    "replay": { "enabled": true, "highlights": true, "uploadEndpoint": "/api/uploadReplay" },
+    "broadcast": { "spectatorServer": true, "liveStatsEndpoint": "/api/liveStats", "commentaryHooks": true, "cameraDirector": true },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "metrics": ["possession","passAccuracy","heatmap","VARChallenges","injuryRates"] },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","pt-BR","hi-IN"] },
+    "accessibility": { "cameraAssist": true, "simplifiedControls": true, "subtitles": true, "uiScaleRange": { "min": 0.8, "max": 1.6 }, "colorblindTeamIndicators": true, "voiceCommands": true },
+    "monetization": { "cosmetics": true, "seasonPass": true, "iap": { "enabled": true }, "storeEndpoint": "/api/store" },
+    "liveOps": { "dailyMissions": true, "liveTournaments": true, "eventsEndpoint": "/api/liveEvents" },
+    "presentation": { "dynamicWeather": true, "pitchWear": true, "crowdDynamics": true }
+  },
+  "assets": {
+    "models": [
+      { "id": "player_generic_male", "src": "assets/soccer/models/player_generic_male.glb" },
+      { "id": "player_generic_female", "src": "assets/soccer/models/player_generic_female.glb" },
+      { "id": "stadium_standard", "src": "assets/soccer/stadiums/standard.glb" },
+      { "id": "ball_fifa", "src": "assets/soccer/ball/ball_fifa.glb" }
+    ],
+    "animations": [
+      { "id": "anim_pass", "src": "assets/soccer/anims/pass.fbx" },
+      { "id": "anim_shot", "src": "assets/soccer/anims/shot.fbx" },
+      { "id": "anim_tackle", "src": "assets/soccer/anims/tackle.fbx" },
+      { "id": "anim_goal_celebrate", "src": "assets/soccer/anims/goal_celebrate.fbx" },
+      { "id": "anim_header_mocap", "src": "assets/soccer/anims/header_mocap.fbx" },
+      { "id": "anim_bicycle_kick_mocap", "src": "assets/soccer/anims/bicycle_kick_mocap.fbx" }
+    ],
+    "audio": [
+      { "id": "sfx_kick", "src": "assets/audio/soccer/kick.wav" },
+      { "id": "sfx_whistle", "src": "assets/audio/soccer/whistle.wav" },
+      { "id": "sfx_crowd_cheer", "src": "assets/audio/soccer/crowd_cheer.wav" },
+      { "id": "bgm_menu", "src": "assets/audio/soccer/bgm_menu.mp3", "loop": true }
+    ],
+    "particles": [
+      { "id": "particle_dust_kick", "template": { "frames": 6, "lifeMs": 300, "size": 24 } }
+    ]
+  },
+  "layers": [
+    { "id": "world3d", "type": "3dScene" },
+    { "id": "players", "type": "entityLayer" },
+    { "id": "ball", "type": "entityLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" },
+    { "id": "broadcast", "type": "broadcastLayer" }
+  ],
+  "objects": [
+    {
+      "id": "ball",
+      "type": "ball",
+      "layer": "ball",
+      "x": 0,
+      "y": 0.2,
+      "z": 0,
+      "properties": { "model": "ball_fifa", "mass": 0.43, "drag": 0.02, "spinFactor": 0.4 }
+    },
+    {
+      "id": "team_home",
+      "type": "team",
+      "layer": "players",
+      "properties": { "name": "Home United", "colorKit": "blue", "players": 11, "tactics": "balanced" }
+    },
+    {
+      "id": "team_away",
+      "type": "team",
+      "layer": "players",
+      "properties": { "name": "Away FC", "colorKit": "white", "players": 11, "tactics": "defensive" }
+    },
+    {
+      "id": "ui_score",
+      "type": "uiScore",
+      "layer": "ui",
+      "x": 560,
+      "y": 16,
+      "properties": { "bindTo": "match.score", "fontSize": 28 }
+    },
+    {
+      "id": "overlay_subs",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Substitutions", "buttons": [{ "text": "Confirm", "action": "applySubs" }, { "text": "Cancel", "action": "closeOverlay" }] }
+    }
+  ],
+  "ai": {
+    "roles": ["attacker","midfielder","defender","goalkeeper"],
+    "tactics": {
+      "defensive": { "pressing": 0.2, "lineDepth": 0.8, "width": 0.6 },
+      "balanced": { "pressing": 0.5, "lineDepth": 0.5, "width": 0.5 },
+      "attacking": { "pressing": 0.8, "lineDepth": 0.3, "width": 0.4 }
+    },
+    "adaptive": { "enabled": true, "adjustFrequencySec": 20 },
+    "playerAttributes": ["pace","shooting","passing","dribbling","defending","physical","vision"]
+  },
+  "career": {
+    "leagues": [{ "id": "div1", "name": "Premier Division", "teamsPerLeague": 20 }],
+    "transfers": { "enabled": true, "windowOpen": true, "aiTransferBudgetMultiplier": 1.0 },
+    "seasons": { "lengthMatches": 38 },
+    "training": { "enabled": true, "drillsEndpoint": "/api/training" }
+  },
+  "multiplayer": {
+    "modes": ["kickabout","fullmatch","tournament"],
+    "clubSystem": { "createClubEndpoint": "/api/createClub", "clubInviteEndpoint": "/api/inviteClub", "customStadiums": true },
+    "spectator": { "enabled": true, "maxViewers": 5000 }
+  },
+  "commentary": {
+    "enabled": true,
+    "liveScriptingEndpoint": "/api/commentaryScript",
+    "ttsFallback": true,
+    "samplePhrases": ["What a strike!","Unbelievable save!","Into the top corner!"]
+  },
+  "replay": {
+    "highlights": true,
+    "autoClipOnGoal": true,
+    "uploadEndpoint": "/api/uploadReplay",
+    "downloadEndpoint": "/api/getReplay",
+    "photoMode": { "enabled": true, "cameraPresets": ["wide","broadcast","close"], "exportEndpoint": "/api/exportPhoto" }
+  },
+  "presentation": {
+    "dynamicWeather": true,
+    "pitchWear": true,
+    "crowdDynamics": true,
+    "dynamicCameraAngles": true
+  },
+  "broadcast": {
+    "spectatorUI": { "scoreboard": true, "liveStats": true, "cameraDirector": true },
+    "streamingEndpoints": { "rtmp": "/api/stream/rtmp" }
+  },
+  "systems": {
+    "input": { "bindings": { "pass": ["Key_X"], "shoot": ["Key_C"], "sprint": ["LeftShift"], "tackle": ["Space"], "pause": ["P"] }, "controllerSupport": true, "remappable": true },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "heatmapEndpoint": "/api/heatmap" },
+    "matchmaking": { "endpoint": "/api/matchmaking", "ranked": true },
+    "antiCheat": { "enabled": true, "reportEndpoint": "/api/anticheat/report" },
+    "store": { "endpoint": "/api/store" }
+  },
+  "events": [
+    { "trigger": "onGoalScored", "action": [{ "type": "playSound", "params": { "id": "sfx_crowd_cheer" } }, { "type": "autoClip", "params": { "clipType": "goal" } }, { "type": "recordMetric", "params": { "metric": "goal" } }] },
+    { "trigger": "onVARChallenge", "action": [{ "type": "openVARPanel", "params": {} }, { "type": "recordMetric", "params": { "metric": "VARChallenge" } }] },
+    { "trigger": "onSubstitution", "action": [{ "type": "applySub", "params": { "team": "{team.id}", "playerOut": "{out.id}", "playerIn": "{in.id}" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "substitution", "team": "{team.id}" } } }] },
+    { "trigger": "onMatchEnd", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_match_end" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "match_end", "score": "{match.score}" } } }] }
+  ],
+  "localization": {
+    "strings": {
+      "en-US": { "kickoff": "Kick-off", "half_time": "Half-time", "full_time": "Full-time", "substitute": "Substitute", "var_prompt": "VAR review in progress" },
+      "es-ES": { "kickoff": "Comienzo", "half_time": "Medio Tiempo", "full_time": "Tiempo Completo", "substitute": "Sustituto", "var_prompt": "Revisión VAR en curso" }
+    }
+  },
+  "uiHints": { "controls": "Use pass/shoot/tackle inputs. Press sprint to run. Use tactical menu to change team shape.", "tips": ["Keep possession to control the game","Use through balls to split defenses","Substitute tired players to maintain intensity"] },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "Soccer v1.2.0 — Added VAR & penalty systems, dynamic weather & pitch wear, player attributes & progression, training drills endpoints, stadium/custom stadiums for clubs, expanded broadcast/camera director features, motion-captured special animations (headers/bicycle kicks), crossplay & ranked ladders, live-ops endpoints, photo mode & cinematic replay features, and enhanced accessibility options. Production: integrate live commentary feeds, streaming infra, persistent club backend, VAR decision authority server rules, and match integrity anti-cheat systems."
+  }
+}

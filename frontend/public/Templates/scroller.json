@@ -1,0 +1,312 @@
+{
+  "id": "side-scroller",
+  "name": "Side Scroller",
+  "version": "1.0.1",
+  "author": "GameForge",
+  "category": "2D",
+  "tags": ["2d", "platformer", "side-scroller", "adventure"],
+  "thumbnail": "assets/sidescroller.jpeg",
+  "description": "Classic side-scrolling adventure with enemies, checkpoints, collectibles, multiple levels, smooth camera follow, controller support, accessibility options, save slots, analytics and localization-ready strings.",
+  "settings": {
+    "screenWidth": 1280,
+    "screenHeight": 720,
+    "gravity": 1600,
+    "maxLives": 3,
+    "checkpointAutoSave": true,
+    "cameraFollow": true,
+    "levelProgression": ["level1", "level2", "level3"],
+    "save": { "slots": 3, "autoSave": true, "autoSaveIntervalSec": 120, "cloudSync": { "enabled": false, "endpoint": "/api/savecloud" } },
+    "controller": { "enabled": true, "defaultMapping": { "left": "dpad_left", "right": "dpad_right", "jump": "button_a", "attack": "button_x", "pause": "start" }, "rebindable": true },
+    "accessibility": { "subtitles": true, "subtitleSize": "medium", "colorblindMode": "off", "uiScale": 1.0, "highContrast": false },
+    "analytics": { "enabled": false, "endpoint": "/api/analytics" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US", "es-ES", "hi-IN"] },
+    "performance": { "qualityPresets": ["low", "medium", "high"], "default": "high" },
+    "levelEditor": { "snapGrid": 32, "allowedSpawnObjects": ["enemy", "pickup", "platform", "checkpoint", "interactive"], "exportFormat": "tiled-json" }
+  },
+  "assets": {
+    "images": [
+      { "id": "tileset", "src": "assets/sidescroller/tileset.png", "tileSize": 32 },
+      { "id": "bg_far", "src": "assets/sidescroller/bg_far.png", "size": { "w": 2048, "h": 720 } },
+      { "id": "bg_near", "src": "assets/sidescroller/bg_near.png", "size": { "w": 2048, "h": 720 } },
+      { "id": "player", "src": "assets/sidescroller/player_sheet.png", "frames": 6, "size": { "w": 48, "h": 64 } },
+      { "id": "enemy_slime", "src": "assets/sidescroller/enemy_slime.png", "frames": 4, "size": { "w": 40, "h": 32 } },
+      { "id": "checkpoint_flag", "src": "assets/sidescroller/checkpoint_flag.png", "size": { "w": 48, "h": 96 } },
+      { "id": "coin", "src": "assets/sidescroller/coin.png", "size": { "w": 24, "h": 24 } },
+      { "id": "particle_dust", "src": "assets/sidescroller/particles/dust.png", "frames": 6, "size": { "w": 16, "h": 16 } },
+      { "id": "particle_coin", "src": "assets/sidescroller/particles/coin_sparkle.png", "frames": 8, "size": { "w": 32, "h": 32 } },
+      { "id": "boss_big", "src": "assets/sidescroller/boss_big.png", "frames": 10, "size": { "w": 160, "h": 128 } }
+    ],
+    "audio": [
+      { "id": "sfx_jump", "src": "assets/audio/sidescroller/jump.wav" },
+      { "id": "sfx_hit", "src": "assets/audio/sidescroller/hit.wav" },
+      { "id": "sfx_coin", "src": "assets/audio/sidescroller/coin.wav" },
+      { "id": "sfx_checkpoint", "src": "assets/audio/sidescroller/checkpoint.wav" },
+      { "id": "bgm_level", "src": "assets/audio/sidescroller/bgm_level.mp3", "loop": true }
+    ],
+    "tilemaps": [
+      { "id": "level1", "src": "assets/sidescroller/level1.json" },
+      { "id": "level2", "src": "assets/sidescroller/level2.json" },
+      { "id": "level3", "src": "assets/sidescroller/level3.json" }
+    ]
+  },
+  "layers": [
+    { "id": "bg_far", "type": "parallax", "properties": { "image": "bg_far", "speed": 0.15 } },
+    { "id": "bg_near", "type": "parallax", "properties": { "image": "bg_near", "speed": 0.4 } },
+    { "id": "tilemap", "type": "tilemap", "properties": { "tilemapId": "level1", "tileset": "tileset" } },
+    { "id": "entities", "type": "entityLayer" },
+    { "id": "particles", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "player1",
+      "type": "player",
+      "x": 160,
+      "y": 480,
+      "width": 48,
+      "height": 64,
+      "sprite": "player",
+      "layer": "entities",
+      "properties": {
+        "lives": 3,
+        "speed": 200,
+        "jumpForce": 520,
+        "gravity": 1600,
+        "animations": {
+          "idle": { "frames": [0], "fps": 1 },
+          "run": { "frames": [1, 2, 3], "fps": 12 },
+          "jump": { "frames": [4], "fps": 1 },
+          "hurt": { "frames": [5], "fps": 1 }
+        },
+        "bind": { "lives": "ui_lives", "score": "ui_score" },
+        "controls": { "gamepad": true }
+      }
+    },
+    {
+      "id": "enemy_slime_1",
+      "type": "enemy",
+      "x": 480,
+      "y": 480,
+      "sprite": "enemy_slime",
+      "layer": "entities",
+      "properties": { "health": 2, "damage": 1, "patrolDistance": 120, "speed": 60 }
+    },
+    {
+      "id": "boss_1",
+      "type": "enemy",
+      "x": 1800,
+      "y": 420,
+      "sprite": "boss_big",
+      "layer": "entities",
+      "properties": { "isBoss": true, "health": 800, "phases": 3, "behaviors": ["charge", "summonMinions", "slam"], "rewardOnDefeat": { "gold": 1000, "achievement": "beat_boss_1" } }
+    },
+    {
+      "id": "checkpoint_1",
+      "type": "checkpoint",
+      "x": 960,
+      "y": 480,
+      "sprite": "checkpoint_flag",
+      "layer": "entities",
+      "properties": { "activateOnEnter": true, "sound": "sfx_checkpoint" }
+    },
+    {
+      "id": "coin_template",
+      "type": "pickupTemplate",
+      "sprite": "coin",
+      "layer": "entities",
+      "properties": { "score": 10, "collectSound": "sfx_coin", "particle": "particle_coin_template" }
+    },
+    {
+      "id": "particle_dust_template",
+      "type": "particleTemplate",
+      "sprite": "particle_dust",
+      "layer": "particles",
+      "properties": { "frames": 6, "fps": 24, "autoDestroy": true }
+    },
+    {
+      "id": "particle_coin_template",
+      "type": "particleTemplate",
+      "sprite": "particle_coin",
+      "layer": "particles",
+      "properties": { "frames": 8, "fps": 20, "autoDestroy": true }
+    },
+    {
+      "id": "ui_score",
+      "type": "uiText",
+      "x": 16,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Score: {player.score}", "bindTo": "player1.score" }
+    },
+    {
+      "id": "ui_lives",
+      "type": "uiLives",
+      "x": 1200,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-right", "bindTo": "player1.lives" }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredSmall",
+        "title": "Paused",
+        "buttons": [
+          { "text": "Resume", "action": "togglePause" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    },
+    {
+      "id": "overlay_gameover",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Game Over",
+        "subtitle": "You lost all lives.",
+        "buttons": [
+          { "text": "Retry", "action": "restartLevel" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    },
+    {
+      "id": "overlay_victory",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Level Complete!",
+        "buttons": [
+          { "text": "Next Level", "action": "loadNextLevel" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    },
+    {
+      "id": "settings_menu",
+      "type": "uiPanel",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "rightPanel",
+        "title": "Settings",
+        "sections": [
+          { "id": "audio", "title": "Audio", "controls": [ { "type": "slider", "label": "Master Volume", "bindTo": "settings.audio.master" }, { "type": "slider", "label": "Music", "bindTo": "settings.audio.music" } ] },
+          { "id": "controls", "title": "Controls", "controls": [ { "type": "rebind", "label": "Jump", "bindTo": "bindings.jump" }, { "type": "rebind", "label": "Attack", "bindTo": "bindings.attack" } ] },
+          { "id": "accessibility", "title": "Accessibility", "controls": [ { "type": "toggle", "label": "Subtitles", "bindTo": "settings.accessibility.subtitles" }, { "type": "select", "label": "Colorblind Mode", "bindTo": "settings.accessibility.colorblindMode", "options": ["off", "protanopia", "deuteranopia", "tritanopia"] }, { "type": "slider", "label": "UI Scale", "bindTo": "settings.accessibility.uiScale", "min": 0.8, "max": 1.5 } ] }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "trigger": "onCollect",
+      "target": "coin",
+      "action": {
+        "type": "addScore",
+        "params": { "amount": 10 },
+        "sideEffects": [
+          { "type": "playSound", "params": { "id": "sfx_coin" } },
+          { "type": "spawnParticle", "params": { "template": "particle_coin_template", "at": "coin" } }
+        ]
+      }
+    },
+    {
+      "trigger": "onHitEnemy",
+      "target": "player1",
+      "action": {
+        "type": "playerDamage",
+        "params": { "damage": 1 },
+        "sideEffects": [ { "type": "playSound", "params": { "id": "sfx_hit" } } ]
+      }
+    },
+    {
+      "trigger": "onPlayerDeath",
+      "conditions": { "playerLives": 0 },
+      "action": [
+        { "type": "showOverlay", "params": { "overlayId": "overlay_gameover" } },
+        { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "game_over", "score": "{player.score}", "level": "{level.id}" } } }
+      ]
+    },
+    {
+      "trigger": "onReachGoal",
+      "action": [
+        { "type": "showOverlay", "params": { "overlayId": "overlay_victory" } },
+        { "type": "grantAchievement", "params": { "id": "level_complete" } },
+        { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "level_complete", "level": "{level.id}", "score": "{player.score}" } } }
+      ]
+    },
+    {
+      "trigger": "onPauseToggled",
+      "action": { "type": "toggleOverlay", "params": { "overlayId": "overlay_pause" } }
+    },
+    {
+      "trigger": "onOpenSettings",
+      "action": { "type": "showOverlay", "params": { "overlayId": "settings_menu" } }
+    }
+  ],
+  "systems": {
+    "input": {
+      "bindings": {
+        "left": ["ArrowLeft", "A"],
+        "right": ["ArrowRight", "D"],
+        "jump": ["Space", "W", "ArrowUp"],
+        "attack": ["K", "button_x"],
+        "pause": ["P", "start"]
+      },
+      "controllerSupport": true,
+      "rebindUI": true
+    },
+    "physics": { "gravity": 1600, "frictionGround": 0.9 },
+    "camera": { "type": "follow", "target": "player1", "lerp": 0.1, "bounds": "tilemap" },
+    "progression": { "levels": ["level1", "level2", "level3"], "start": "level1" },
+    "save": { "slots": 3, "autoSave": true, "autoSaveIntervalSec": 120, "cloudSync": { "enabled": false, "endpoint": "/api/savecloud" } },
+    "analytics": { "enabled": false, "endpoint": "/api/analytics" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US", "es-ES", "hi-IN"] },
+    "performance": { "quality": "high", "presets": ["low", "medium", "high"] }
+  },
+  "localization": {
+    "strings": {
+      "en-US": {
+        "pause_title": "Paused",
+        "gameover_title": "Game Over",
+        "victory_title": "Level Complete!",
+        "settings_title": "Settings",
+        "controls_label": "Controls",
+        "accessibility_label": "Accessibility",
+        "subtitles_label": "Subtitles"
+      },
+      "es-ES": {
+        "pause_title": "Pausado",
+        "gameover_title": "Game Over",
+        "victory_title": "¡Nivel Completado!",
+        "settings_title": "Ajustes",
+        "controls_label": "Controles",
+        "accessibility_label": "Accesibilidad",
+        "subtitles_label": "Subtítulos"
+      }
+    }
+  },
+  "uiHints": {
+    "controls": "Arrow keys/A-D to move, Space to jump, K to attack, P to pause (controller supported)",
+    "tips": [
+      "Collect coins to increase score",
+      "Checkpoints save progress within a level",
+      "Use the Settings menu to rebind controls or enable accessibility options",
+      "Boss fights reward achievements and unlockables"
+    ]
+  },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "Patched v1.0.1: Added save slots/cloud stub, controller mappings + rebind UI, accessibility toggles, analytics hooks, boss fight (boss_1), localization-ready strings, level editor metadata and performance presets. Implement server endpoints /api/savecloud and /api/analytics to enable backend features."
+  }
+}

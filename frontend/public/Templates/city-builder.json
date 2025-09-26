@@ -1,0 +1,125 @@
+{
+  "id": "city-builder",
+  "name": "City Builder",
+  "version": "1.2.0",
+  "author": "GameForge",
+  "category": "Strategy / Simulation",
+  "tags": ["strategy","sim","city","management","3d"],
+  "thumbnail": "assets/city.jpeg",
+  "description": "AAA-level 3D city-building and management template with zoning, infrastructure, economy, agent-based population & traffic simulation, climate & disasters, supply-chains, diplomacy, procedural map generation, cinematic & replay tools, mod & scripting API, persistent multiplayer, live-ops and monetization hooks.",
+  "settings": {
+    "grid": { "enabled": true, "cellSize": 2.0, "snapToGrid": true },
+    "zones": ["residential","commercial","industrial","park"],
+    "economy": { "taxRates": { "residential": 8.0, "commercial": 10.0, "industrial": 12.0 }, "budgetUpdateIntervalMin": 5, "supplyChains": true, "tradeRoutes": true },
+    "population": { "simulateAge": true, "birthRate": 0.01, "migrationFactor": 0.002, "needsModel": true, "moraleSystem": true, "crimeRate": true },
+    "traffic": { "enabled": true, "trafficSimModel": "agent_based", "congestionImpact": true, "publicTransit": true, "autonomousVehicles": true },
+    "services": { "power": true, "water": true, "waste": true, "health": true, "education": true, "safety": true, "fireDept": true, "police": true },
+    "disasters": { "enabled": true, "types": ["fire","flood","earthquake","tornado","pandemic"], "responseUnits": true },
+    "climate": { "seasons": true, "weatherPatterns": true, "seaLevelRise": true, "pollution": true },
+    "aiCitizens": { "pathfinding": "navmesh", "jobAssignment": true, "dailySchedules": true, "beliefs": true },
+    "proceduralMap": { "enabled": true, "biomes": ["temperate","desert","tundra","tropical","coastal"], "seeded": true, "options": ["size","riverDensity","mountainRange","coastlineComplexity"] },
+    "historicalProgression": { "enabled": true, "eras": ["village","industrial","modern","futuristic"], "transitionTriggers": ["population","techLevel"] },
+    "diplomacy": { "enabled": true, "neighborCities": true, "tradeAgreements": true, "treatiesEndpoint": "/api/treaties" },
+    "multiplayer": { "sharingScenarios": true, "coOp": true, "persistentWorlds": true, "maxPlayersCoop": 16, "rankedLeaderboards": true, "netSyncEndpoint": "/api/match", "authoritativeServer": true, "crossplay": true },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "metrics": ["trafficHeatmap","populationGrowth","resourceUsage","happiness","crimeStats"], "liveTelemetry": "/api/telemetry" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN","zh-CN"] },
+    "accessibility": { "uiScaleRange": { "min": 0.7, "max": 1.8 }, "highContrast": true, "subtitles": true, "voiceGuidedBuild": true, "simplifiedControls": true },
+    "monetization": { "dlc": true, "scenarioPacks": true, "iap": { "enabled": true }, "storeEndpoint": "/api/store", "battlepass": true },
+    "mods": { "enabled": true, "importValidation": true, "workshopEndpoint": "/api/mods", "scriptingAPI": "/api/script" },
+    "liveOps": { "enabled": true, "weeklyChallengesEndpoint": "/api/weeklyChallenges", "globalEventsEndpoint": "/api/globalEvents", "rotatingMaps": true }
+  },
+  "assets": {
+    "models": [
+      { "id": "house_small", "src": "assets/city/models/house_small.glb" },
+      { "id": "apartment_block", "src": "assets/city/models/apartment_block.glb" },
+      { "id": "factory_small", "src": "assets/city/models/factory_small.glb" },
+      { "id": "park_tile", "src": "assets/city/models/park_tile.glb" },
+      { "id": "road_segment", "src": "assets/city/models/road_segment.glb" },
+      { "id": "train_station", "src": "assets/city/models/train_station.glb" }
+    ],
+    "audio": [
+      { "id": "sfx_construction", "src": "assets/audio/city/construction.wav" },
+      { "id": "sfx_traffic", "src": "assets/audio/city/traffic.wav" },
+      { "id": "bgm_loop", "src": "assets/audio/city/bgm_loop.mp3", "loop": true }
+    ],
+    "cinematics": [
+      { "id": "camera_director_presets", "presets": ["aerial","street_level","time_lapse"] }
+    ]
+  },
+  "layers": [
+    { "id": "world3d", "type": "3dScene" },
+    { "id": "infrastructure", "type": "entityLayer" },
+    { "id": "citizens", "type": "entityLayer" },
+    { "id": "traffic", "type": "simulationLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" },
+    { "id": "cinematic", "type": "cinematicLayer" }
+  ],
+  "objects": [
+    {
+      "id": "city_center",
+      "type": "landmark",
+      "layer": "world3d",
+      "x": 32,
+      "y": 0,
+      "z": 32,
+      "properties": { "model": "apartment_block", "populationCapacity": 200 }
+    },
+    {
+      "id": "main_road",
+      "type": "road",
+      "layer": "traffic",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "properties": { "segments": 120 }
+    },
+    {
+      "id": "ui_budget",
+      "type": "uiPanel",
+      "layer": "ui",
+      "x": 12,
+      "y": 12,
+      "properties": { "bindTo": "city.budget", "layout": "vertical" }
+    }
+  ],
+  "systems": {
+    "input": { "bindings": { "place": ["LeftClick"], "pan": ["MiddleMouse"], "zoom": ["MouseWheel"], "select": ["RightClick"] }, "controllerSupport": true, "remappable": true },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "scenarioEditor": { "enabled": true, "exportEndpoint": "/api/exportScenario", "undoRedo": true, "collaborativeEditing": true },
+    "proceduralMapEditor": { "enabled": true, "exportEndpoint": "/api/exportMap", "generatorOptions": ["biome","riverDensity","size"] },
+    "multiplayer": { "netSyncEndpoint": "/api/match", "authoritativeServer": true, "crossplay": true },
+    "monetization": { "storeEndpoint": "/api/store", "dlcEndpoint": "/api/dlc" },
+    "mods": { "enabled": true, "endpoint": "/api/mods", "scriptingAPI": "/api/script" },
+    "vr": { "enabled": true, "cockpitMode": true, "teleportation": true }
+  },
+  "ui": {
+    "hud": { "budgetPanel": true, "populationPanel": true, "trafficOverlayToggle": true, "policyPanel": true },
+    "overlays": { "trafficHeatmap": true, "pollutionMap": true, "crimeMap": true, "climateMap": true }
+  },
+  "simulation": {
+    "trafficSim": { "vehicleAgents": true, "publicTransitAgents": true, "signalTiming": true, "congestionAdaptive": true },
+    "economySim": { "jobAssignment": true, "supplyChains": true, "tradeRoutes": true },
+    "serviceSim": { "coverageRadius": true, "responseTimes": true },
+    "climateSim": { "seasonalCycles": true, "weatherEvents": true, "pollutionSpread": true }
+  },
+  "events": [
+    { "trigger": "onBuildingPlaced", "action": [{ "type": "playSound", "params": { "id": "sfx_construction" } }, { "type": "recordMetric", "params": { "metric": "buildingPlaced" } }] },
+    { "trigger": "onDisaster", "action": [{ "type": "applyDamage", "params": { "area": "{disaster.area}", "severity": "{disaster.severity}" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "disaster", "type": "{disaster.type}", "severity": "{disaster.severity}" } } }] },
+    { "trigger": "onBudgetDeficit", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_budget_deficit" } }, { "type": "recordMetric", "params": { "metric": "budgetDeficit" } }] },
+    { "trigger": "onSeasonChange", "action": [{ "type": "updateClimate", "params": { "season": "{climate.season}" } }, { "type": "playSound", "params": { "id": "sfx_traffic" } }] }
+  ],
+  "localization": {
+    "strings": {
+      "en-US": { "budget": "Budget", "population": "Population", "place_building": "Place Building", "disaster_warning": "Disaster Incoming!" },
+      "es-ES": { "budget": "Presupuesto", "population": "Población", "place_building": "Colocar Edificio", "disaster_warning": "¡Desastre Entrante!" }
+    }
+  },
+  "meta": {
+    "created_at": "2025-09-19T00:00:00Z",
+    "updated_at": "2025-09-20T00:00:00Z",
+    "notes": "City Builder v1.2.0 — Added procedural map generator and biomes, historical progression & era transitions, diplomacy & treaties endpoint, cinematic camera director & time-lapse export, scripting API & mods pipeline, VR cockpit mode, procedural map editor export, weekly challenges & live events endpoints, and expanded telemetry. For production: provide scalable server infra for persistent worlds, workshop moderation, regional presets and long-term climate tuning."
+  }
+}

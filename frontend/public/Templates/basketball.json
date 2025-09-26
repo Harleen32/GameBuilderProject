@@ -1,0 +1,398 @@
+{
+  "id": "basketball-v1",
+  "name": "Basketball Kit",
+  "type": "sports",
+  "version": "1.0.0",
+  "author": "GameForge Template",
+  "description": "Full-featured 2D basketball game template with court, teams, players, ball physics, scoring, UI, audio, rules, AI, networking hooks, and editor metadata — designed to be extended for arcade or sim styles.",
+  "createdAt": "2025-09-19T00:00:00Z",
+  "compat": {
+    "engine": "GameForge-Editor",
+    "minEditorVersion": "0.5.0"
+  },
+  "paths": {
+    "self": "/templates/basketball.json",
+    "cover": "/assets/templates/covers/basketball-cover.png",
+    "thumbnail": "/assets/templates/thumbs/basketball-thumb.png",
+    "spriteDir": "/assets/sprites/basketball",
+    "audioDir": "/assets/audio/basketball"
+  },
+  "tags": ["sports", "basketball", "2D", "multiplayer-ready", "arcade", "simulation"],
+  "uiCard": {
+    "title": "Basketball Kit",
+    "subtitle": "Play-by-play basketball with full rules, AI, and multiplayer hooks.",
+    "thumbnail": "/assets/templates/thumbs/basketball-thumb.png",
+    "cover": "/assets/templates/covers/basketball-cover.png",
+    "badges": ["Full-Game", "Multiplayer-Ready"],
+    "buttons": [
+      {
+        "id": "preview",
+        "label": "Preview",
+        "kind": "primary",
+        "action": { "type": "open-preview", "payload": { "templateSource": "/templates/basketball.json" } }
+      },
+      {
+        "id": "edit",
+        "label": "Edit",
+        "kind": "accent",
+        "action": { "type": "open-editor", "payload": { "templateSource": "/templates/basketball.json", "hash": "basketball-v1" } }
+      },
+      {
+        "id": "download",
+        "label": "Download",
+        "kind": "ghost",
+        "action": { "type": "download", "payload": { "href": "/templates/basketball.json", "filename": "basketball.json" } }
+      }
+    ]
+  },
+  "settings": {
+    "canvasWidth": 1280,
+    "canvasHeight": 720,
+    "backgroundColor": "#0b1220",
+    "pixelRatioPolicy": "device",
+    "performance": {
+      "targetFPS": 60,
+      "maxDeltaMs": 33,
+      "lowSpecMode": { "maxParticles": 0, "shadowQuality": "low" }
+    },
+    "grid": { "enabled": true, "size": 16, "snap": true },
+    "physics": {
+      "gravityY": 9.8,
+      "globalFriction": 0.98,
+      "collisionIterations": 6,
+      "ballBounceDamping": 0.72,
+      "playerBodyType": "dynamic",
+      "useContinuousCollision": true
+    },
+    "camera": { "mode": "free", "zoomMin": 0.6, "zoomMax": 1.6, "viewportMargin": 0.15 }
+  },
+  "editor": {
+    "tools": {
+      "select": true,
+      "move": true,
+      "scale": true,
+      "rotate": false,
+      "tilemap": false,
+      "physics": true,
+      "playtest": true,
+      "replay": true
+    },
+    "panels": { "hierarchy": true, "inspector": true, "assets": true, "timeline": true, "console": true },
+    "shortcuts": {
+      "playPause": ["Space"],
+      "stepFrame": ["Ctrl+."],
+      "snapToggle": ["G"],
+      "toggleGrid": ["Shift+G"]
+    },
+    "importRules": { "imageExt": [".png", ".jpg", ".webp"], "audioExt": [".mp3", ".wav", ".ogg"] }
+  },
+  "assets": {
+    "images": [
+      { "id": "court-full", "path": "/assets/backgrounds/basketball/court-full.png", "preload": true },
+      { "id": "hoop-left", "path": "/assets/sprites/basketball/hoop-left.png", "preload": true },
+      { "id": "hoop-right", "path": "/assets/sprites/basketball/hoop-right.png", "preload": true },
+      { "id": "ball", "path": "/assets/sprites/basketball/ball.png", "preload": true },
+      { "id": "player-1", "path": "/assets/sprites/basketball/player-1.png", "preload": false },
+      { "id": "player-2", "path": "/assets/sprites/basketball/player-2.png", "preload": false }
+    ],
+    "audio": [
+      { "id": "whistle", "path": "/assets/audio/basketball/whistle.wav", "preload": true },
+      { "id": "bounce", "path": "/assets/audio/basketball/bounce.wav", "preload": true },
+      { "id": "swish", "path": "/assets/audio/basketball/swish.wav", "preload": true },
+      { "id": "rim-hit", "path": "/assets/audio/basketball/rim-hit.wav", "preload": true },
+      { "id": "crowd-small", "path": "/assets/audio/basketball/crowd-small.mp3", "preload": false }
+    ],
+    "fonts": [{ "id": "score-font", "family": "Orbitron, sans-serif" }],
+    "icons": []
+  },
+  "input": {
+    "axes": [
+      { "id": "moveX", "negative": ["ArrowLeft", "a"], "positive": ["ArrowRight", "d"] },
+      { "id": "moveY", "negative": ["ArrowUp", "w"], "positive": ["ArrowDown", "s"] }
+    ],
+    "actions": [
+      { "id": "pass", "keys": ["KeyC", "x"], "mobile": ["tap_two_finger"] },
+      { "id": "shoot", "keys": ["Space", "KeyZ"], "mobile": ["tap"] },
+      { "id": "steal", "keys": ["KeyV"], "mobile": ["swipe_left"] },
+      { "id": "sprint", "keys": ["ShiftLeft", "ShiftRight"], "mobile": ["hold"] },
+      { "id": "callTimeout", "keys": ["KeyT"] }
+    ],
+    "touch": {
+      "joystick": { "enabled": true, "position": "bottom-left", "size": 120 },
+      "actionButtons": { "enabled": true, "position": "bottom-right", "buttons": ["shoot", "pass", "sprint"] }
+    }
+  },
+  "rules": {
+    "gameLength": { "quarterDurationSec": 600, "quarters": 4, "overtimeDurationSec": 300 },
+    "shotClockSec": 24,
+    "foulsPerPlayer": 6,
+    "timeoutsPerTeam": 3,
+    "scoring": { "2ptArea": "insideArc", "3ptArea": "beyondArc", "freeThrow": 1 },
+    "ballPossessionAfterScore": "opponentInbound",
+    "jumpBallAtStart": true,
+    "substitutionPolicy": "manual",
+    "timeoutBehavior": { "pauseClock": true, "allowSubstitutions": true },
+    "foulTypes": ["personal", "technical", "flagrant"]
+  },
+  "entities": {
+    "court": {
+      "id": "court",
+      "type": "court",
+      "transform": { "x": 0, "y": 0, "width": 1200, "height": 680 },
+      "render": { "image": "court-full", "scaleToFit": true },
+      "physical": { "static": true, "collision": "bounds" },
+      "tags": ["playfield"]
+    },
+    "hoops": [
+      {
+        "id": "hoop-left",
+        "side": "left",
+        "type": "hoop",
+        "transform": { "x": 80, "y": 220, "width": 64, "height": 32 },
+        "render": { "image": "hoop-left" },
+        "physics": { "static": true, "sensor": true },
+        "scoring": { "points2": 2, "points3": 3, "freeThrow": 1 },
+        "tags": ["hoop", "scorezone"]
+      },
+      {
+        "id": "hoop-right",
+        "side": "right",
+        "type": "hoop",
+        "transform": { "x": 1120, "y": 220, "width": 64, "height": 32 },
+        "render": { "image": "hoop-right" },
+        "physics": { "static": true, "sensor": true },
+        "scoring": { "points2": 2, "points3": 3, "freeThrow": 1 },
+        "tags": ["hoop", "scorezone"]
+      }
+    ],
+    "ball": {
+      "id": "ball-main",
+      "type": "ball",
+      "transform": { "x": 620, "y": 320, "width": 28, "height": 28 },
+      "render": { "image": "ball", "origin": [0.5, 0.5], "rotation": 0 },
+      "physics": {
+        "body": "circle",
+        "mass": 0.62,
+        "radius": 14,
+        "restitution": 0.72,
+        "friction": 0.2,
+        "drag": 0.01
+      },
+      "state": { "heldBy": null, "velocity": [0, 0], "spin": 0 },
+      "tags": ["ball", "dynamic"]
+    },
+    "teams": [
+      {
+        "id": "team-home",
+        "name": "Home",
+        "colorPrimary": "#114b8a",
+        "colorAccent": "#7fb3ff",
+        "players": [
+          {
+            "id": "h-pg",
+            "name": "Home PG",
+            "number": 3,
+            "pos": "PG",
+            "transform": { "x": 300, "y": 360, "width": 48, "height": 72 },
+            "render": { "image": "player-1" },
+            "physics": { "mass": 75, "speed": 4.8, "accel": 0.35 },
+            "stats": { "shooting": 70, "passing": 78, "dribbling": 80, "defense": 65, "stamina": 100 },
+            "ai": { "behavior": "playerControlled", "role": "point" },
+            "tags": ["player", "home"]
+          },
+          {
+            "id": "h-sf",
+            "name": "Home SF",
+            "number": 11,
+            "pos": "SF",
+            "transform": { "x": 380, "y": 360, "width": 48, "height": 72 },
+            "render": { "image": "player-1" },
+            "physics": { "mass": 82, "speed": 4.3, "accel": 0.32 },
+            "stats": { "shooting": 72, "passing": 65, "dribbling": 68, "defense": 70, "stamina": 100 },
+            "ai": { "behavior": "aiControlled", "role": "wing" },
+            "tags": ["player", "home"]
+          }
+        ],
+        "substitutes": []
+      },
+      {
+        "id": "team-away",
+        "name": "Away",
+        "colorPrimary": "#a51c30",
+        "colorAccent": "#ff8b94",
+        "players": [
+          {
+            "id": "a-pg",
+            "name": "Away PG",
+            "number": 4,
+            "pos": "PG",
+            "transform": { "x": 900, "y": 360, "width": 48, "height": 72 },
+            "render": { "image": "player-2" },
+            "physics": { "mass": 76, "speed": 4.7, "accel": 0.34 },
+            "stats": { "shooting": 68, "passing": 74, "dribbling": 78, "defense": 66, "stamina": 100 },
+            "ai": { "behavior": "aiControlled", "role": "point" },
+            "tags": ["player", "away"]
+          },
+          {
+            "id": "a-c",
+            "name": "Away C",
+            "number": 23,
+            "pos": "C",
+            "transform": { "x": 840, "y": 340, "width": 56, "height": 80 },
+            "render": { "image": "player-2" },
+            "physics": { "mass": 102, "speed": 3.6, "accel": 0.24 },
+            "stats": { "shooting": 60, "passing": 55, "dribbling": 50, "defense": 80, "stamina": 100 },
+            "ai": { "behavior": "aiControlled", "role": "center" },
+            "tags": ["player", "away"]
+          }
+        ],
+        "substitutes": []
+      }
+    ],
+    "referee": {
+      "id": "ref-1",
+      "type": "referee",
+      "transform": { "x": 620, "y": 200, "width": 32, "height": 48 },
+      "behavior": { "callFouls": true, "applyRules": true },
+      "tags": ["referee"]
+    }
+  },
+  "ui": {
+    "showScore": true,
+    "hudElements": [
+      { "id": "scoreboard", "type": "scoreboard", "x": 520, "y": 12, "width": 240, "height": 72 },
+      { "id": "shotClock", "type": "shotClock", "x": 1160, "y": 12, "width": 100, "height": 48 },
+      { "id": "gameClock", "type": "gameClock", "x": 580, "y": 82, "width": 120, "height": 36 },
+      { "id": "playerStamina", "type": "staminaBar", "x": 16, "y": 620, "width": 200, "height": 16 },
+      { "id": "minimap", "type": "minimap", "x": 1090, "y": 600, "width": 180, "height": 100 }
+    ],
+    "theme": { "font": "score-font", "primary": "#ffffff", "accent": "#ffb84d" }
+  },
+  "audio": {
+    "music": "/assets/audio/basketball/crowd-ambient.mp3",
+    "sfx": { "bounce": "bounce", "swish": "swish", "rimHit": "rim-hit", "whistle": "whistle" },
+    "volume": { "music": 0.5, "sfx": 1.0, "master": 1.0 }
+  },
+  "gameState": {
+    "score": { "team-home": 0, "team-away": 0 },
+    "possession": { "team": "team-home", "playerId": "h-pg" },
+    "quarter": 1,
+    "timeLeftSec": 600,
+    "shotClockLeftSec": 24,
+    "fouls": { "team-home": 0, "team-away": 0 },
+    "timeouts": { "team-home": 3, "team-away": 3 },
+    "replayBuffer": { "enabled": true, "lengthSec": 12 }
+  },
+  "ai": {
+    "enabled": true,
+    "difficultyLevels": {
+      "easy": { "reaction": 0.25, "accuracyMod": -12, "aggression": 0.3 },
+      "normal": { "reaction": 0.18, "accuracyMod": 0, "aggression": 0.5 },
+      "hard": { "reaction": 0.12, "accuracyMod": 10, "aggression": 0.7 }
+    },
+    "roles": {
+      "point": { "playmaking": 0.9, "shotPreference": 0.4 },
+      "wing": { "playmaking": 0.6, "shotPreference": 0.5 },
+      "center": { "playmaking": 0.3, "shotPreference": 0.2, "postPlay": true }
+    },
+    "pathfinding": { "navGridSize": 32, "avoidanceRadius": 28 }
+  },
+  "network": {
+    "multiplayer": {
+      "enabled": true,
+      "mode": ["local", "peer-to-peer", "client-server"],
+      "syncStrategy": { "authority": "server", "interpolationMs": 80, "predictionMs": 120 },
+      "matchmakingHooks": true
+    },
+    "placeholders": {
+      "serverEndpoint": "https://api.yourgame.example/match",
+      "authHook": "/auth",
+      "replayUpload": "/replay"
+    }
+  },
+  "persistence": {
+    "saveSlots": 5,
+    "autosaveIntervalSec": 30,
+    "storageKeyPrefix": "gf_basketball_v1_",
+    "cloudSync": { "enabled": false, "provider": null }
+  },
+  "analytics": {
+    "enabled": false,
+    "events": ["gameStart", "gameEnd", "scoreEvent", "foulEvent", "purchase"],
+    "tags": { "template": "basketball-v1" }
+  },
+  "achievements": [
+    { "id": "first_score", "title": "First Basket", "desc": "Score your first points.", "reward": { "xp": 50 } },
+    { "id": "no_fouls", "title": "Clean Game", "desc": "Finish a game with no personal fouls.", "reward": { "xp": 200 } },
+    { "id": "hat_trick", "title": "Hot Hand", "desc": "Score 3 consecutive baskets.", "reward": { "xp": 150 } }
+  ],
+  "localization": {
+    "defaultLang": "en",
+    "languages": ["en", "es", "pt", "fr"],
+    "strings": {
+      "en": {
+        "score_label": "Score",
+        "period_label": "Q",
+        "foul_label": "Fouls",
+        "timeout_label": "Timeouts",
+        "shot_clock": "Shot",
+        "game_clock": "Time"
+      }
+    }
+  },
+  "demoScene": {
+    "layers": [
+      { "id": "bg", "z": 0 },
+      { "id": "world", "z": 1 },
+      { "id": "ui", "z": 2 }
+    ],
+    "spawn": [
+      { "type": "entity-ref", "layer": "world", "ref": "court" },
+      { "type": "entity-ref", "layer": "world", "ref": "hoop-left" },
+      { "type": "entity-ref", "layer": "world", "ref": "hoop-right" },
+      { "type": "entity-ref", "layer": "world", "ref": "team-home.players[0]" },
+      { "type": "entity-ref", "layer": "world", "ref": "team-away.players[0]" },
+      { "type": "entity-ref", "layer": "world", "ref": "ball-main" }
+    ],
+    "camera": { "mode": "free", "follow": "possession", "zoom": 1.0 }
+  },
+  "systems": {
+    "initializers": [
+      "applySettings",
+      "mountAssets",
+      "createEntities",
+      "setupInput",
+      "spawnDemoScene",
+      "initAudio"
+    ],
+    "runtime": [
+      "inputProcessing",
+      "aiDecision",
+      "playerController",
+      "physicsStep",
+      "collisionResolution",
+      "gameRules",
+      "cameraUpdate",
+      "animationTick",
+      "audioTick",
+      "renderFrame",
+      "replayRecorder",
+      "networkSync"
+    ],
+    "shutdown": ["saveState", "unmountAssets"]
+  },
+  "tools": {
+    "debug": { "showCollision": true, "showNavGrid": false, "showFPS": true },
+    "tuning": { "exposeParams": ["ball.restitution", "player.speed", "shotClockSec"] },
+    "replay": { "enabled": true, "bufferSec": 12, "exportFormats": ["json"] }
+  },
+  "security": {
+    "cheatDetection": { "enabled": true, "thresholds": { "speedHack": 1.6, "scoreBurst": 5 } },
+    "antiTamper": { "enabled": false }
+  },
+  "notes": [
+    "To switch to arcade style: increase player.speed and shooting accuracy, reduce stamina drain.",
+    "To create a 3D-like camera: replace camera.mode with 'cinematic' and attach spline points.",
+    "Network mode requires implementing server-side authoritative logic for fairness."
+  ]
+}

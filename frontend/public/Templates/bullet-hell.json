@@ -1,0 +1,139 @@
+{
+  "id": "bullet-hell",
+  "name": "Bullet Hell",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Shooters",
+  "tags": ["2d","shooter","bullet-hell","arcade"],
+  "thumbnail": "assets/bullethell.jpeg",
+  "description": "High-density bullet-hell shooter template with configurable attack patterns, boss fights, pattern editor, scoring combos, hitboxes/tweakable collision, replay/ghost, accessibility (safe-mode), co-op hooks, analytics and monetization.",
+  "settings": {
+    "viewport": { "width": 1280, "height": 720 },
+    "player": { "speed": 280, "hitboxRadius": 6, "startHealth": 1, "lives": 3, "bombs": 3 },
+    "difficulty": { "baseIntensity": 1.0, "rampPerWave": 0.08 },
+    "score": { "comboDecaySec": 2.0, "scorePerEnemy": 100 },
+    "replay": { "enabled": true, "maxReplays": 50, "sampleReplays": ["replay_perfect_stage1.rpl"] },
+    "save": { "autoSave": true, "slots": 10, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "heatmapEndpoint": "/api/heatmap" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "safeMode": false, "bulletAssist": false, "uiScale": 1.0, "colorblindMode": "off", "slowMotionTutorial": true },
+    "monetization": { "ads": { "rewardedBomb": true }, "iap": { "enabled": true, "products": [{ "id": "bomb_pack_5", "priceUSD": 1.99, "grant": { "bombs": 5 } }] } },
+    "multiplayer": { "coOp": true, "maxPlayers": 2, "netSyncEndpoint": "/api/match" },
+    "leaderboards": { "enabled": true, "endpoints": { "uploadReplay": "/api/uploadReplay", "getTopScores": "/api/leaderboard/top" } }
+  },
+  "assets": {
+    "images": [
+      { "id": "player_ship", "src": "assets/bullethell/player_ship.png", "size": { "w": 48, "h": 48 } },
+      { "id": "bullet_small", "src": "assets/bullethell/bullet_small.png", "size": { "w": 8, "h": 8 } },
+      { "id": "bullet_orb", "src": "assets/bullethell/bullet_orb.png", "size": { "w": 12, "h": 12 } },
+      { "id": "enemy_shooter", "src": "assets/bullethell/enemy_shooter.png", "size": { "w": 64, "h": 64 } },
+      { "id": "boss_core", "src": "assets/bullethell/boss_core.png", "size": { "w": 220, "h": 220 } },
+      { "id": "bg_starfield", "src": "assets/bullethell/bg_starfield.png", "size": { "w": 1280, "h": 720 } }
+    ],
+    "audio": [
+      { "id": "sfx_shoot", "src": "assets/audio/bullethell/shoot.wav" },
+      { "id": "sfx_hit", "src": "assets/audio/bullethell/hit.wav" },
+      { "id": "sfx_bomb", "src": "assets/audio/bullethell/bomb.wav" },
+      { "id": "sfx_score", "src": "assets/audio/bullethell/score.wav" },
+      { "id": "bgm_stage", "src": "assets/audio/bullethell/bgm_stage.mp3", "loop": true }
+    ]
+  },
+  "particles": [
+    { "id": "particle_flash", "template": { "frames": 4, "lifeMs": 300, "size": 12 } },
+    { "id": "particle_explode", "template": { "frames": 8, "lifeMs": 600, "size": 32 } }
+  ],
+  "layers": [
+    { "id": "background", "type": "static" },
+    { "id": "entities", "type": "entityLayer" },
+    { "id": "bullets", "type": "entityLayer" },
+    { "id": "particles", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    { "id": "player", "type": "player", "layer": "entities", "x": 640, "y": 600, "properties": { "sprite": "player_ship", "speed": 280, "hitboxRadius": 6, "lives": 3, "bombs": 3 } },
+    { "id": "ui_score", "type": "uiText", "layer": "ui", "x": 16, "y": 16, "properties": { "textTemplate": "Score: {player.score}", "bindTo": "player.score" } },
+    { "id": "ui_lives", "type": "uiIcons", "layer": "ui", "x": 16, "y": 44, "properties": { "bindTo": "player.lives", "icon": "player_ship" } },
+    { "id": "overlay_pause", "type": "uiOverlay", "layer": "overlays", "properties": { "visible": false, "title": "Paused", "buttons": [{ "text": "Resume", "action": "togglePause" }, { "text": "Quit", "action": "toMainMenu" }] } },
+    { "id": "overlay_gameover", "type": "uiOverlay", "layer": "overlays", "properties": { "visible": false, "title": "Game Over", "buttons": [{ "text": "Retry", "action": "restart" }, { "text": "Menu", "action": "toMainMenu" }] } },
+    { "id": "overlay_victory", "type": "uiOverlay", "layer": "overlays", "properties": { "visible": false, "title": "Stage Clear", "buttons": [{ "text": "Next", "action": "loadNext" }, { "text": "Share Replay", "action": "shareReplay" }] } }
+  ],
+  "enemyPatterns": [
+    { "id": "spiral_1", "description": "Spiral outward bullets", "params": { "spawnRate": 0.02, "angleSpeed": 0.6, "bulletsPerWave": 36 } },
+    { "id": "waveburst", "description": "Burst waves with gaps", "params": { "burstCount": 6, "bulletsPerBurst": 20, "gapAngle": 18 } },
+    { "id": "aimed_rain", "description": "Aimed rain toward player with spread", "params": { "count": 12, "speed": 420 } }
+  ],
+  "enemies": [
+    { "id": "enemy_shooter", "sprite": "enemy_shooter", "health": 8, "ai": "pattern_shooter", "patternId": "spiral_1", "spawnScore": 150 },
+    { "id": "enemy_burst", "sprite": "enemy_shooter", "health": 12, "ai": "pattern_shooter", "patternId": "waveburst", "spawnScore": 220 }
+  ],
+  "bosses": [
+    {
+      "id": "boss_omega",
+      "sprite": "boss_core",
+      "health": 8000,
+      "phases": [
+        { "phase": 1, "patterns": ["spiral_1"], "durationSec": 18, "notes": "slow spirals, build intensity" },
+        { "phase": 2, "patterns": ["waveburst","aimed_rain"], "durationSec": 28, "notes": "mixed bursts + aimed rain" },
+        { "phase": 3, "patterns": ["waveburst","spiral_1","enraged_spinner"], "durationSec": null, "notes": "enraged final phase with density spikes" }
+      ],
+      "spawnScore": 8000,
+      "rewards": { "coins": 500, "unlock": "pattern_enraged_spinner" }
+    }
+  ],
+  "patternsLibrary": [
+    { "id": "enraged_spinner", "script": "rotate_and_emit(speed=2.2, density=64, accel=0.05)", "preview": { "duration": 3.0 } },
+    { "id": "bezier_spread", "script": "bezier_spread(control1=... , control2=... , density=32)", "preview": { "duration": 2.5 } }
+  ],
+  "patternEditor": {
+    "ui": { "enabled": true, "previewMode": true, "exportPreviewImageEndpoint": "/api/patternPreview" },
+    "exportEndpoint": "/api/exportPattern",
+    "importEndpoint": "/api/importPattern",
+    "samplePresets": ["spiral_1","waveburst","aimed_rain"]
+  },
+  "replaySamples": ["replay_perfect_stage1.rpl"],
+  "levels": [
+    {
+      "id": "stage_1",
+      "name": "Starfield Gauntlet",
+      "lengthSec": 110,
+      "waves": [
+        { "timeSec": 3, "spawns": [{ "enemyId": "enemy_shooter", "count": 6, "positions": [{"x":100,"y":-50},{"x":400,"y":-50},{"x":700,"y":-50}] }] },
+        { "timeSec": 50, "spawns": [{ "enemyId": "enemy_burst", "count": 12, "positions": [] }] },
+        { "timeSec": 95, "spawns": [{ "bossId": "boss_omega", "count": 1, "positions": [{"x":640,"y":-200}] }] }
+      ],
+      "ambient": { "music": "bgm_stage" }
+    }
+  ],
+  "achievements": [
+    { "id": "survivor_1", "name": "Survivor", "condition": "Finish stage 1 without using bombs" },
+    { "id": "bomb_master", "name": "Bomb Master", "condition": "Use 10 bombs total" },
+    { "id": "perfect_run", "name": "Perfect Run", "condition": "Clear a stage without losing a life" }
+  ],
+  "events": [
+    { "trigger": "onEnemyKilled", "action": [{ "type": "addScore", "params": { "amount": "enemy.spawnScore" } }, { "type": "playSound", "params": { "id": "sfx_score" } }, { "type": "recordMetric", "params": { "metric": "enemy_killed" } }] },
+    { "trigger": "onPlayerHit", "action": [{ "type": "playSound", "params": { "id": "sfx_hit" } }, { "type": "showOverlayIf", "params": { "overlayId": "overlay_gameover", "condition": "player.lives<=0" } }, { "type": "recordMetric", "params": { "metric": "player_death" } }] },
+    { "trigger": "onBombUsed", "action": [{ "type": "clearBullets", "params": { "radius": 240 } }, { "type": "playSound", "params": { "id": "sfx_bomb" } }, { "type": "recordMetric", "params": { "metric": "bomb_used" } }] },
+    { "trigger": "onBossDefeated", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_victory" } }, { "type": "grantAchievementCheck", "params": {} }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "boss_defeated", "bossId": "{boss.id}", "time": "{session.time}" } } }, { "type": "uploadReplay", "params": { "endpoint": "/api/uploadReplay", "replayId": "{replay.id}" } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "move": ["W","A","S","D","ArrowKeys"], "shoot": ["Pointer","Space"], "bomb": ["B"], "pause": ["P"] }, "controllerSupport": true, "autoFocusOnStart": true, "vibration": { "enabled": true, "intensity": 0.6 } },
+    "patternEditorSystem": { "enabled": true, "exportEndpoint": "/api/exportPattern", "previewEndpoint": "/api/patternPreview" },
+    "replay": { "enabled": true, "exportEndpoint": "/api/exportReplay", "uploadEndpoint": "/api/uploadReplay" },
+    "save": { "autoSave": true, "slots": 10, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "heatmapEndpoint": "/api/heatmap" },
+    "monetization": { "ads": { "enabled": true, "rewardedAdId": "bomb_ad" }, "iap": { "enabled": true } },
+    "leaderboards": { "enabled": true, "uploadEndpoint": "/api/uploadReplay", "fetchEndpoint": "/api/leaderboard/top" }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "pause_title": "Paused", "game_over": "Game Over", "victory": "Stage Clear", "score": "Score" },
+      "es-ES": { "pause_title": "Pausado", "game_over": "Juego Terminado", "victory": "Etapa Completada", "score": "Puntuación" },
+      "fr-FR": { "pause_title": "Pause", "game_over": "Jeu Terminé", "victory": "Étape Terminée", "score": "Score" },
+      "de-DE": { "pause_title": "Pausiert", "game_over": "Spiel Vorbei", "victory": "Stadium Beendet", "score": "Punktzahl" },
+      "hi-IN": { "pause_title": "रुका हुआ", "game_over": "गेम ओवर", "victory": "स्टेज क्लियर", "score": "स्कोर" }
+    }
+  },
+  "uiHints": { "controls": "Move with WASD/Arrow keys. Hold pointer to focus firing. Press B to use a bomb (clears bullets).", "tips": ["Bombs are scarce but lifesaving","Use safe-mode in accessibility settings to reduce bullet density","Pattern editor lets you design enemy barrages for testing"] },
+  "meta": { "created_at": "2025-09-18T00:00:00Z", "updated_at": "2025-09-18T00:00:00Z", "notes": "v1.1.0 — Added extended localization, expanded pattern library, pattern editor preview/export, additional boss phases, leaderboards & replay upload endpoints, controller vibration settings, slow-motion tutorial accessibility toggle, sample replays and replay upload on boss defeat. Implement backend pattern/replay/leaderboard endpoints and ad/IAP SDKs to enable full functionality." }
+}

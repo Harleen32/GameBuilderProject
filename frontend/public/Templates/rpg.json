@@ -1,0 +1,93 @@
+{
+  "id": "rpg",
+  "name": "2D RPG Adventure",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "RPG / Adventure",
+  "tags": ["2d","rpg","adventure","quests","combat"],
+  "thumbnail": "assets/rpg.jpeg",
+  "description": "A complete 2D RPG starter template with quests, inventory, turn-based & real-time hybrid combat, NPCs, dialogue trees, progression, procedural dungeons, save/restore, localization, analytics, mod support and live-ops hooks.",
+  "settings": {
+    "camera": { "fixedTimestepMs": 16, "followPlayer": true, "screenShake": true },
+    "player": { "maxHP": 100, "maxMP": 50, "inventorySize": 32, "equipSlots": ["head","body","legs","weapon","accessory"] },
+    "combat": { "mode": "hybrid", "turnBased": true, "realTime": true, "difficultyRamp": 0.05, "encounterRate": 0.12 },
+    "quests": { "main": true, "side": true, "dynamic": true, "questLogLimit": 50 },
+    "ai": { "npcSchedules": true, "enemyBehaviors": ["patrol","aggressive","ambush"], "pathfinding": "grid" },
+    "proceduralDungeons": { "enabled": true, "seeded": true, "maxDepth": 12, "roomTemplates": true },
+    "crafting": { "enabled": true, "recipes": true, "smithing": true },
+    "multiplayer": { "coOp": false, "ghostSharing": true, "netSyncEndpoint": "/api/match" },
+    "save": { "autoSave": true, "saveSlots": 8, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "metrics": ["questCompletion","encounterWinRate","itemUsage"] },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "textSize": "scalable", "colorblindModes": ["protanopia","deuteranopia"], "toggleCombatSpeed": true },
+    "monetization": { "dlc": true, "cosmetics": true, "iap": { "enabled": true }, "storeEndpoint": "/api/store" },
+    "mods": { "enabled": true, "workshopIntegration": true, "scriptingAPI": "/api/script" },
+    "liveOps": { "dailyQuests": true, "seasonalEvents": true, "eventsEndpoint": "/api/liveEvents" }
+  },
+  "assets": {
+    "sprites": [
+      { "id": "player_idle", "src": "assets/rpg/sprites/player_idle.png" },
+      { "id": "goblin", "src": "assets/rpg/sprites/goblin.png" },
+      { "id": "chest", "src": "assets/rpg/sprites/chest.png" }
+    ],
+    "audio": [
+      { "id": "sfx_attack", "src": "assets/audio/rpg/attack.wav" },
+      { "id": "sfx_levelup", "src": "assets/audio/rpg/levelup.wav" },
+      { "id": "bgm_town", "src": "assets/audio/rpg/bgm_town.mp3", "loop": true }
+    ],
+    "particles": [
+      { "id": "particle_hit", "template": { "frames": 6, "lifeMs": 300, "size": 16 } }
+    ]
+  },
+  "layers": [
+    { "id": "world2d", "type": "tilemap" },
+    { "id": "entities", "type": "entityLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    { "id": "player_1", "type": "player", "layer": "entities", "x": 10, "y": 5, "properties": { "sprite": "player_idle", "hp": 100, "mp": 50, "inventory": [] } },
+    { "id": "town_chest_1", "type": "interactive", "layer": "entities", "x": 6, "y": 8, "properties": { "sprite": "chest", "contains": ["gold", "potion"] } },
+    { "id": "ui_healthbar", "type": "uiBar", "layer": "ui", "x": 12, "y": 12, "properties": { "bindTo": "player.hp", "max": "player.maxHP" } }
+  ],
+  "npcs": [
+    { "id": "npc_blacksmith", "name": "Garr", "schedule": [{ "time": "08:00", "action": "open_shop" }, { "time": "18:00", "action": "go_home" }], "dialogueTree": "/assets/rpg/dialogues/blacksmith.json" }
+  ],
+  "items": [
+    { "id": "potion", "name": "Health Potion", "type": "consumable", "effect": { "heal": 50 }, "cost": 20 },
+    { "id": "iron_sword", "name": "Iron Sword", "type": "weapon", "damage": 12, "durability": 100 }
+  ],
+  "quests": [
+    { "id": "q_intro", "title": "Welcome to the Village", "type": "main", "objectives": [{ "type": "talk", "target": "npc_blacksmith" }], "rewards": { "xp": 100, "gold": 50 } }
+  ],
+  "combatSystems": {
+    "abilities": [
+      { "id": "slash", "name": "Slash", "cooldownMs": 800, "mpCost": 0, "effect": { "damage": 12 } },
+      { "id": "fireball", "name": "Fireball", "cooldownMs": 2000, "mpCost": 12, "effect": { "damage": 30, "area": 1.2 } }
+    ],
+    "statusEffects": ["poison","stun","burn"]
+  },
+  "systems": {
+    "input": { "bindings": { "moveUp": ["W"], "moveDown": ["S"], "moveLeft": ["A"], "moveRight": ["D"], "interact": ["E"], "attack": ["LeftClick"] }, "controllerSupport": true, "remappable": true },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "mods": { "enabled": true, "endpoint": "/api/mods" },
+    "liveOps": { "dailyQuestsEndpoint": "/api/dailyQuests", "eventsEndpoint": "/api/liveEvents" }
+  },
+  "events": [
+    { "trigger": "onLevelUp", "action": [{ "type": "playSound", "params": { "id": "sfx_levelup" } }, { "type": "grantStatPoint", "params": { "amount": 1 } }, { "type": "recordMetric", "params": { "metric": "levelUps" } }] },
+    { "trigger": "onQuestComplete", "action": [{ "type": "grantReward", "params": { "player": "{player.id}", "reward": "{quest.reward}" } }, { "type": "recordMetric", "params": { "metric": "questsCompleted" } }] }
+  ],
+  "localization": {
+    "strings": {
+      "en-US": { "hello_npc": "Hello, traveler!", "quest_log": "Quest Log", "inventory": "Inventory" },
+      "es-ES": { "hello_npc": "¡Hola, viajero!", "quest_log": "Registro de Misiones", "inventory": "Inventario" }
+    }
+  },
+  "uiHints": { "controls": "Use WASD to move, left-click to attack, E to interact. Open inventory to equip items.", "tips": ["Save often","Talk to NPCs for quests","Manage your MP during dungeon runs"] },
+  "meta": {
+    "created_at": "2025-09-20T00:00:00Z",
+    "updated_at": "2025-09-20T00:00:00Z",
+    "notes": "RPG v1.1.0 — Hybrid turn/real-time combat, procedural dungeons, NPC schedules & dialogue, quest system, crafting & smithing, save/analytics/mod hooks and live-ops endpoints. For production: add more content, dialogue localization, cinematic scenes, and balance combat/loot tables."
+  }
+}
