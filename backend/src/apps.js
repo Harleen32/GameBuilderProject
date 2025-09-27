@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 /* ---------------------------
-   CORS — allow localhost, prod Vercel, and Vercel preview URLs
+   CORS — localhost, prod Vercel, Vercel previews
 ---------------------------- */
 const PROD_VERCEL = 'https://game-builder-project-pvrn.vercel.app';
 
@@ -32,28 +32,27 @@ function isAllowedOrigin(origin) {
   if (!origin) return true; // curl/postman/health checks (no Origin header)
   if (origin === PROD_VERCEL) return true;
 
-  // Allow preview deployments like:
-  // https://game-builder-project-pvrn-abcdef1234-harleens-projects-a29d32a9.vercel.app
+  // Vercel preview deployments for this project, e.g.:
+  // https://game-builder-project-pvrn-somehash-harleens-projects-a29d32a9.vercel.app
   const previewRe = /^https:\/\/game-builder-project-pvrn-[a-z0-9-]+\.vercel\.app$/i;
   if (previewRe.test(origin)) return true;
 
-  // Local dev (any port)
+  // Any localhost port
   if (/^http:\/\/localhost:\d+$/i.test(origin)) return true;
 
   return false;
 }
 
-app.use(cors({
-  origin: (origin, cb) => {
-    if (isAllowedOrigin(origin)) return cb(null, true);
-    return cb(new Error(`Not allowed by CORS: ${origin}`));
-  },
-  credentials: true,
-  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization']
-}));
+app.use(
+  cors({
+    origin: (origin, cb) => (isAllowedOrigin(origin) ? cb(null, true) : cb(new Error(`Not allowed by CORS: ${origin}`))),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
-// Ensure OPTIONS preflights always succeed
+// Ensure OPTIONS preflights succeed
 app.options('*', cors());
 
 /* ---------------------------
