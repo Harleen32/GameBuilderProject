@@ -14,49 +14,71 @@ const rateLimiter     = require('./middlewares/rateLimiter');
 
 const app = express();
 
-// Security & performance
+/* ---------------------------
+   Security & performance
+---------------------------- */
 app.use(helmet());
 app.use(compression());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// ✅ Updated CORS with deployed frontend URL
-const allowed = [
-  'http://localhost:3000', 
-  'https://game-builder-project-pvrn.vercel.app' // your Vercel frontend URL
-];
+/* ---------------------------
+   CORS — allow localhost, prod Vercel, and Vercel preview URLs
+---------------------------- */
+const PROD_VERCEL = 'https://game-builder-project-pvrn.vercel.app';
 
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true); // allow curl/postman/no origin
-      if (allowed.includes(origin)) return cb(null, true);
-      cb(new Error('Not allowed by CORS'));
-    },
-    credentials: true
-  })
-);
+function isAllowedOrigin(origin) {
+  if (!origin) return true; // curl/postman/health checks (no Origin header)
+  if (origin === PROD_VERCEL) return true;
 
-// Static (optional)
+  // Allow preview deployments like:
+  // https://game-builder-project-pvrn-abcdef1234-harleens-projects-a29d32a9.vercel.app
+  const previewRe = /^https:\/\/game-builder-project-pvrn-[a-z0-9-]+\.vercel\.app$/i;
+  if (previewRe.test(origin)) return true;
+
+  // Local dev (any port)
+  if (/^http:\/\/localhost:\d+$/i.test(origin)) return true;
+
+  return false;
+}
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (isAllowedOrigin(origin)) return cb(null, true);
+    return cb(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
+
+// Ensure OPTIONS preflights always succeed
+app.options('*', cors());
+
+/* ---------------------------
+   Static & rate limit
+---------------------------- */
 app.use('/uploads', express.static('uploads'));
-
-// Rate limit whole API
 app.use('/api', rateLimiter);
 
-// API Routes
+/* ---------------------------
+   Routes
+---------------------------- */
 app.use('/api/templates', templatesRoutes);
-app.use('/api/projects', projectsRoutes);
-app.use('/api/ai', aiRoutes);
+app.use('/api/projects',  projectsRoutes);
+app.use('/api/ai',        aiRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
-// ✅ Root route for Render health check
+// Root (Render health/home)
 app.get('/', (_req, res) => {
   res.send('Backend is running 🚀');
 });
 
-// Error handling MUST stay last
+/* ---------------------------
+   Error handling (last)
+---------------------------- */
 app.use(errorHandler);
 
 module.exports = app;
