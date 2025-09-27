@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Game Templates — GameForge</title>
+
+  <!-- Font (matches site) -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="template.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="logo">GameForge</div>
+        <div class="subtitle">Choose a template to start building</div>
+      </div>
+
+      <div class="controls">
+        <div class="search-wrapper">
+          <input id="searchBar" type="search" placeholder="Search templates, e.g. platformer, shooter..." aria-label="Search templates">
+          <button id="clearSearch" title="Clear search" aria-label="Clear search">✕</button>
+        </div>
+
+        <div class="filter-group" role="group" aria-label="Template filters">
+          <select id="typeFilter" aria-label="Filter by type">
+            <option value="">All types</option>
+            <option value="2d">2D</option>
+            <option value="3d">3D</option>
+            <option value="puzzle">Puzzle</option>
+            <option value="racing">Racing</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="templateGrid" class="grid" aria-live="polite"></section>
+  </main>
+
+  <!-- Preview modal -->
+  <div id="previewModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-inner">
+      <button class="modal-close" aria-label="Close preview">✕</button>
+      <div class="modal-content">
+        <img id="previewImg" alt="Template preview" src="" />
+        <div class="modal-info">
+          <h3 id="previewTitle"></h3>
+          <p id="previewDescription"></p>
+          <div class="modal-actions">
+            <a id="openEditorBtn" class="btn primary" href="#">Open in Editor</a>
+            <button id="downloadBtn" class="btn ghost">Download</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="template.js" defer></script>
+</body>
+</html>

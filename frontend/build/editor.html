@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="editor.css" />
+</head>
+<body class="dark-theme">
+  <!-- 🔝 Top Navbar -->
+  <header class="navbar glass">
+    <h1 class="logo">🎮 Game Editor</h1>
+    <nav class="nav-buttons">
+      <button class="btn">🆕 New Project</button>
+      <button class="btn">💾 Save</button>
+      <button class="btn">📤 Export</button>
+      <button class="btn">▶️ Play Test</button>
+      <button class="btn">↩️ Undo</button>
+      <button class="btn">↪️ Redo</button>
+    </nav>
+    <div class="toolbar-center">
+      <h1 class="project-title">GameForge</h1>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn">➕ Zoom In</button>
+      <button class="btn">➖ Zoom Out</button>
+      <button class="btn">⚙️ Settings</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <div class="editor-layout">
+      <!-- 📂 Left Sidebar -->
+      <aside class="left-sidebar">
+        <div class="search-box">
+          <input 
+            type="text" 
+            id="searchBar" 
+            placeholder="🔍 Search objects..." 
+          />
+        </div>
+        <ul class="sidebar-menu">
+          <li><div class="menu-item active">🏠 Dashboard <span class="arrow">▾</span></div></li>
+
+          <!-- Categories (items loaded via JS) -->
+          <li>
+            <div class="menu-item" data-category="Players & Characters">👤 Players & Characters <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Terrain & Structures">🏗️ Terrain & Structures <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Hazards">⚠ Hazards <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Items & Collectibles">💎 Items & Collectibles <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Interactive Objects">🔧 Interactive Objects <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Environment">🌳 Environment <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Triggers & Logic">🧠 Triggers & Logic <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="UI/Gameplay Systems">🎮 UI/Gameplay Systems <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="RPG / Adventure Elements">🗺️ RPG / Adventure Elements <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Strategy / Base Building">🏰 Strategy / Base Building <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Puzzle Mechanics">🧩 Puzzle Mechanics <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Audio & Visual FX">✨ Audio & Visual FX <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Multiplayer / Online">🌐 Multiplayer / Online <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Sandbox / Creative">🎨 Sandbox / Creative <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Narrative / Story">📚 Narrative / Story <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Horror / Atmosphere">👻 Horror / Atmosphere <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Sports Games">⚽ Sports Games <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Sci-Fi / Cyberpunk">🤖 Sci-Fi / Cyberpunk <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Racing / Vehicles">🏎️ Racing / Vehicles <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+          <li>
+            <div class="menu-item" data-category="Educational / Learning Games">📖 Educational / Learning Games <span class="arrow">▸</span></div>
+            <ul class="submenu"></ul>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- 🖼️ Main Canvas Area -->
+      <main class="canvas-area">
+        <canvas id="editorCanvas"></canvas>
+        <div class="canvas-controls">
+          <button>🔍 Zoom</button>
+          <button>🧲 Snap</button>
+          <button>📐 Grid</button>
+          <button>🌓 2D/3D</button>
+          <button>🔄 Rotate</button>
+          <button>📏 Resize</button>
+        </div>
+      </main>
+
+      <!-- ⚙️ Right Sidebar -->
+      <aside class="right-sidebar">
+        <div class="tabs">
+          <button data-tab="assets" class="active">📦 Assets</button>
+          <button data-tab="inspector">⚙️ Inspector</button>
+          <button data-tab="layers">📑 Layers</button>
+          <button data-tab="logic">🧠 Logic</button>
+          <button data-tab="statemachine">🔄 State Machine</button>
+          <button data-tab="timeline">🎞️ Timeline</button>
+          <button data-tab="audio">🔉 Audio</button>
+          <button data-tab="settings">🔧 Settings</button>
+        </div>
+
+        <!-- Panels -->
+        <div class="panel tab-panel" id="assets-panel">
+          <h3>Game Assets</h3>
+          <h4>Environment 🌳</h4>
+          <div class="asset" draggable="true" data-type="platform">🟫 Platform</div>
+          <div class="asset" draggable="true" data-type="ground">🟩 Ground</div>
+          <div class="asset" draggable="true" data-type="wall">⬛ Wall</div>
+
+          <h4>Enemies</h4>
+          <div class="asset" draggable="true" data-type="enemy-basic">👾 Enemy</div>
+          <div class="asset" draggable="true" data-type="enemy-flyer">🦇 Flying Enemy</div>
+
+          <h4>Collectibles 💎</h4>
+          <div class="asset" draggable="true" data-type="coin">🪙 Coin</div>
+          <div class="asset" draggable="true" data-type="gem">💎 Gem</div>
+        </div>
+
+        <div class="panel tab-panel" id="inspector-panel" style="display: none;">
+          <h3>Inspector</h3>
+        </div>
+
+        <div class="panel tab-panel" id="layers-panel" style="display: none;">
+          <h3>Layers</h3>
+          <ul id="layer-list"></ul>
+        </div>
+
+        <div class="panel tab-panel" id="logic-panel" style="display: none;">
+          <h3>Logic</h3>
+        </div>
+
+        <div class="panel tab-panel" id="statemachine-panel" style="display: none;">
+          <h3>State Machine</h3>
+          <button onclick="addState()">➕ Add State</button>
+          <button onclick="exportStates()">📤 Export</button>
+          <div id="stateCanvas" style="width:100%; height:400px; background:#222; border:1px solid #444; margin-top:10px;"></div>
+        </div>
+
+        <div class="panel tab-panel" id="timeline-panel" style="display: none;">
+          <h3>Timeline</h3>
+        </div>
+
+        <div class="panel tab-panel" id="audio-panel" style="display: none;">
+          <h3>Audio</h3>
+        </div>
+
+        <div class="panel tab-panel" id="settings-panel" style="display: none;">
+          <h3>Game Settings</h3>
+          <label>Gravity: <input type="number" id="gravity" value="9.8"></label>
+          <label>Background Color: <input type="color" id="bgColor" value="#87ceeb"></label>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- 📌 Bottom Toolbar -->
+  <footer class="bottom-toolbar">
+    <span>🔍 Zoom: 100%</span>
+    <span>🧲 Snap: Enabled</span>
+    <span>🎮 FPS: 60</span>
+    <span>📋 Logs</span>
+    <span>🌐 Language: EN</span>
+  </footer>
+
+  <audio id="bg-music" controls style="display: none;"></audio>
+  <script src="editor.js"></script>
+</body>
+</html>

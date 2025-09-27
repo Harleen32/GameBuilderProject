@@ -1,0 +1,152 @@
+{
+  "id": "battle-royale",
+  "name": "3D Battle Royale",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Shooters",
+  "tags": ["3d","battle-royale","multiplayer","survival"],
+  "thumbnail": "assets/battle.jpeg",
+  "description": "Large-scale 3D Battle Royale template with map streaming, safe zone shrinking, parachute drop, loot tables, inventory, vehicles, squads, revive mechanics, spectator & replay systems, server-authoritative matchmaking, anti-cheat hooks, persistence (cosmetics & progression), monetization, analytics and accessibility.",
+  "settings": {
+    "maxPlayers": 100,
+    "modes": ["solo","duo","squad"],
+    "map": { "streaming": true, "sizeMeters": 8000 },
+    "circle": { "phases": [ { "radius": 2000, "durationSec": 300 }, { "radius": 1000, "durationSec": 240 }, { "radius": 400, "durationSec": 180 }, { "radius": 100, "durationSec": 120 } ], "damagePerSecOutside": 5 },
+    "drop": { "aircraftPath": [[-4000,2000],[4000,2000]], "dropDelaySec": 10 },
+    "inventory": { "maxSlots": 40, "weightEnabled": false },
+    "vehicles": { "enabled": true, "types": ["car","boat","motorbike"] },
+    "respawn": { "enabled": false, "dbno": true, "reviveWindowSec": 60 },
+    "antiCheat": { "enabled": true, "reportEndpoint": "/api/anticheat/report", "metricsEndpoint": "/api/anticheat/metrics" },
+    "matchmaking": { "ranked": true, "mmrEndpoint": "/api/matchmaking/mmr" },
+    "persistence": { "cosmetics": true, "battlePass": true, "storeEndpoint": "/api/store" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "heatmapEndpoint": "/api/heatmap" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "uiScale": 1.0, "colorblindMode": "on-request", "controllerRemap": true, "crosshairOptions": true, "audioCues": true }
+  },
+  "assets": {
+    "models": [
+      { "id": "player_male", "src": "assets/battle/models/player_male.glb" },
+      { "id": "player_female", "src": "assets/battle/models/player_female.glb" },
+      { "id": "vehicle_car", "src": "assets/battle/models/car.glb" },
+      { "id": "vehicle_bike", "src": "assets/battle/models/bike.glb" },
+      { "id": "map_island", "src": "assets/battle/maps/island.glb" }
+    ],
+    "audio": [
+      { "id": "sfx_parachute", "src": "assets/audio/battle/parachute.wav" },
+      { "id": "sfx_vehicle", "src": "assets/audio/battle/vehicle.wav" },
+      { "id": "sfx_loot", "src": "assets/audio/battle/loot.wav" },
+      { "id": "sfx_grenade", "src": "assets/audio/battle/grenade.wav" },
+      { "id": "bgm_lobby", "src": "assets/audio/battle/bgm_lobby.mp3", "loop": true }
+    ]
+  },
+  "layers": [
+    { "id": "world", "type": "3dScene" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "lobby_system",
+      "type": "lobby",
+      "layer": "ui",
+      "properties": { "maxQueueSize": 1000, "matchReadyCountdown": 10 }
+    },
+    {
+      "id": "drop_plane",
+      "type": "entity",
+      "layer": "world",
+      "properties": { "path": [[-4000,2000,0],[4000,2000,0]], "speed": 120 }
+    },
+    {
+      "id": "ui_minimap",
+      "type": "minimap",
+      "layer": "ui",
+      "x": 1100,
+      "y": 16,
+      "properties": { "size": 180, "anchor": "top-right" }
+    },
+    {
+      "id": "overlay_deploy",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Deploy", "subtitle": "Choose your drop point", "buttons": [{ "text": "Jump", "action": "deployNow" }, { "text": "Hold", "action": "hold" }] }
+    },
+    {
+      "id": "overlay_endgame",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Match Complete", "buttons": [{ "text": "Return to Lobby", "action": "toLobby" }, { "text": "Share", "action": "shareMatch" }] }
+    }
+  ],
+  "lootTables": {
+    "common": [{ "item": "bandage", "chance": 0.35 }, { "item": "9mm", "chance": 0.25 }, { "item": "ammo_box", "chance": 0.15 }],
+    "rare": [{ "item": "level2_vest", "chance": 0.05 }, { "item": "sniper", "chance": 0.02 }, { "item": "engine_parts", "chance": 0.01 }],
+    "airdrop": [{ "item": "level3_armor", "chance": 1.0 }, { "item": "rocket_launcher", "chance": 0.6 }, { "item": "loot_crate_cash", "chance": 1.0 }]
+  },
+  "weapons": [
+    { "id": "ak47", "name": "AK-47", "damage": 38, "fireRateRpm": 600, "magazine": 30, "reloadSec": 2.6, "range": 120 },
+    { "id": "sniper_mk", "name": "MK Sniper", "damage": 150, "fireRateRpm": 30, "magazine": 5, "reloadSec": 3.4, "range": 1000 },
+    { "id": "pistol_9mm", "name": "9mm Pistol", "damage": 18, "fireRateRpm": 420, "magazine": 15, "reloadSec": 1.6, "range": 60 },
+    { "id": "smg_vz", "name": "VZ SMG", "damage": 20, "fireRateRpm": 900, "magazine": 40, "reloadSec": 2.0, "range": 45 },
+    { "id": "shotgun_tac", "name": "Tactical Shotgun", "damage": 9, "pellets": 8, "fireRateRpm": 90, "magazine": 8, "reloadSec": 2.6, "range": 16 },
+    { "id": "rocket_launcher", "name": "Rocket Launcher", "damage": 250, "fireRateRpm": 30, "magazine": 1, "reloadSec": 3.6, "range": 300, "aoe": 6 }
+  ],
+  "attachments": [
+    { "id": "scope", "type": "optic", "options": ["2x","4x","6x","8x"] },
+    { "id": "muzzle", "type": "barrel", "options": ["compensator","suppressor"] },
+    { "id": "mag", "type": "magazine", "options": ["extended","fast"] }
+  ],
+  "armor": [
+    { "id": "vest_lv1", "type": "vest", "protection": 20, "durability": 100 },
+    { "id": "vest_lv2", "type": "vest", "protection": 45, "durability": 200 },
+    { "id": "vest_lv3", "type": "vest", "protection": 75, "durability": 350 },
+    { "id": "helmet_lv1", "type": "helmet", "protection": 15 },
+    { "id": "helmet_lv2", "type": "helmet", "protection": 35 }
+  ],
+  "throwables": [
+    { "id": "frag", "name": "Frag Grenade", "damage": 100, "throwArc": true, "cookable": true },
+    { "id": "smoke", "name": "Smoke Grenade", "effect": "screenObscure", "durationSec": 8 },
+    { "id": "molotov", "name": "Molotov", "effect": "areaIgnite", "durationSec": 6 }
+  ],
+  "vehicles": [
+    { "id": "car", "model": "vehicle_car", "maxSpeed": 40, "health": 500 },
+    { "id": "bike", "model": "vehicle_bike", "maxSpeed": 60, "health": 150 },
+    { "id": "boat", "model": "vehicle_car", "maxSpeed": 35, "health": 400 }
+  ],
+  "systems": {
+    "network": { "authoritativeServer": true, "matchServerEndpoint": "/api/match", "tickRate": 20, "streaming": true },
+    "matchmaking": { "mmrEndpoint": "/api/matchmaking/mmr", "regionFallback": true },
+    "antiCheat": { "enabled": true, "reportEndpoint": "/api/anticheat/report", "metricsEndpoint": "/api/anticheat/metrics" },
+    "persistence": { "enabled": true, "storeEndpoint": "/api/store", "cloudSave": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "heatmapEndpoint": "/api/heatmap", "metrics": ["killZones","weaponAccuracy","vehicleUsage","reviveStats"] },
+    "replay": { "enabled": true, "uploadEndpoint": "/api/uploadReplay", "spectatorEndpoint": "/api/spectate" }
+  },
+  "events": [
+    { "trigger": "onPlayerDropped", "action": [{ "type": "spawnPlayer", "params": { "x": "{drop.x}", "y": "{drop.y}", "z": "{drop.z}" } }, { "type": "playSound", "params": { "id": "sfx_parachute" } }] },
+    { "trigger": "onAirdropLanded", "action": [{ "type": "spawnLootCrate", "params": { "table": "airdrop" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "airdrop_landed", "location": "{pos}" } } }] },
+    { "trigger": "onPlayerKilled", "action": [{ "type": "recordMetric", "params": { "metric": "player_killed" } }, { "type": "maybeDropLoot", "params": {} }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "player_killed", "killer": "{killer.id}", "victim": "{victim.id}" } } }] },
+    { "trigger": "onPlayerDowned", "action": [{ "type": "notifyTeammates", "params": { "playerId": "{victim.id}", "location": "{pos}" } }, { "type": "startDBNOTimer", "params": { "seconds": 60 } }] },
+    { "trigger": "onPlayerRevived", "action": [{ "type": "applyHealth", "params": { "playerId": "{revived.id}", "amount": 40 } }, { "type": "recordMetric", "params": { "metric": "player_revived" } }] },
+    { "trigger": "onMatchEnd", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_endgame" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "match_end", "winner": "{winner.id}", "duration": "{match.duration}" } } }] }
+  ],
+  "achievements": [
+    { "id": "first_blood", "name": "First Blood", "condition": "First kill in a match" },
+    { "id": "survivor_10", "name": "Top 10", "condition": "Finish top 10 ten times" },
+    { "id": "airdrop_hoarder", "name": "Airdrop Hoarder", "condition": "Open 50 airdrops" }
+  ],
+  "uiHints": { "controls": "WASD to move, mouse to aim, left click to fire. Press G to throw a grenade, F to interact, Tab to open inventory.", "tips": ["Drop into less-crowded zones early if you want loot","Watch the safe-zone timer and vehicle fuel levels","Use audio to detect nearby footsteps"] },
+  "localization": {
+    "strings": {
+      "en-US": { "searching": "Searching for Match", "deploy": "Deploy", "match_complete": "Match Complete", "inventory_full": "Inventory Full", "downed": "Downed - Wait for revive" },
+      "es-ES": { "searching": "Buscando Partida", "deploy": "Desplegar", "match_complete": "Partida Completa", "inventory_full": "Inventario Lleno", "downed": "Herido - Espera revivir" },
+      "fr-FR": { "searching": "Recherche de partie", "deploy": "Déployer", "match_complete": "Match Terminé", "inventory_full": "Inventaire Plein", "downed": "À terre - Attendez la réanimation" },
+      "de-DE": { "searching": "Suche nach Spiel", "deploy": "Absetzen", "match_complete": "Match Beendet", "inventory_full": "Inventar Voll", "downed": "Niedergeschlagen - Warte auf Wiederbelebung" },
+      "hi-IN": { "searching": "मैच खोज रहा है", "deploy": "छपना", "match_complete": "मैच पूरा हुआ", "inventory_full": "इन्वेंटरी पूरी", "downed": "जमीन पर - पुनर्जीवित होने की प्रतीक्षा करें" }
+    }
+  },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "v1.1.0 — Added weapons (SMG, shotgun, rocket), attachments system, armor tiers, throwables (frag/smoke/molotov), DBNO revive mechanic, squad modes (solo/duo/squad), spectator/replay endpoints, revive/heatmap analytics, cosmetic persistence and store endpoints. Production requires scalable match servers, authoritative hit registration, anti-cheat rules, and persistent store/backends for cosmetics and battlepass."
+  }
+}

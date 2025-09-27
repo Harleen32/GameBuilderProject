@@ -1,0 +1,177 @@
+{
+  "id": "stealth-action",
+  "name": "3D Stealth Action",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Action / Stealth",
+  "tags": ["3d","stealth","action","ai","simulation"],
+  "thumbnail": "assets/stealth.jpeg",
+  "description": "A full-featured 3D stealth action template with advanced AI, navmesh/pathfinding, cover and visibility systems, noise propagation, animation (IK/root motion), cinematic tools, level streaming, multiplayer/co-op hooks, VR/console support, performance & graphics settings, accessibility, analytics and monetization stubs.",
+  "settings": {
+    "targetPlatforms": ["desktop","console","mobile"],
+    "render": { "hdr": true, "pbr": true, "shadowQuality": "high", "lodDistances": [20,60,120], "occlusionCulling": true },
+    "physics": { "enabled": true, "fixedTimestepMs": 16, "ragdollOnDeath": true },
+    "ai": { "navmeshBake": true, "sightConeDegrees": 90, "hearingRadius": 6.0, "searchTimeoutSec": 12, "stealthDifficultyRamp": 0.04 },
+    "player": { "health": 100, "staminaMax": 100, "sneakSpeed": 2.0, "walkSpeed": 3.6, "sprintSpeed": 6.2, "crouchToggle": true, "coverSnapDistance": 1.25 },
+    "save": { "autoSave": true, "checkpoints": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "metrics": ["detectionEvents","playerNoise","stealthSuccessRate","timeToDetect"] },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "subtitles": true, "highContrast": false, "uiScaleRange": { "min": 0.8, "max": 1.6 }, "assistMode": { "enabled": false, "options": ["alwaysHighlightTargets","reducedEnemyFOV"] } },
+    "input": { "controllerSupport": true, "gamepadRemap": true, "keyboardRemap": true, "vrSupport": false },
+    "multiplayer": { "coOp": true, "stealthSyncMode": "authoritative", "maxPlayers": 4, "netSyncEndpoint": "/api/match", "rollbackNetworking": { "enabled": false, "bufferMs": 120 } },
+    "monetization": { "store": { "enabled": true, "endpoint": "/api/store" }, "dlc": [] }
+  },
+  "assets": {
+    "models": [
+      { "id": "player_hero", "src": "assets/stealth/models/player_hero.glb" },
+      { "id": "guard_male", "src": "assets/stealth/models/guard_male.glb" },
+      { "id": "prop_crate", "src": "assets/stealth/models/crate.glb" },
+      { "id": "map_factory", "src": "assets/stealth/maps/factory.glb" }
+    ],
+    "animations": [
+      { "id": "anim_walk", "src": "assets/stealth/anims/walk.fbx" },
+      { "id": "anim_run", "src": "assets/stealth/anims/run.fbx" },
+      { "id": "anim_crouch_walk", "src": "assets/stealth/anims/crouch_walk.fbx" },
+      { "id": "anim_aim", "src": "assets/stealth/anims/aim.fbx" }
+    ],
+    "audio": [
+      { "id": "sfx_footstep_soft", "src": "assets/audio/stealth/footstep_soft.wav" },
+      { "id": "sfx_footstep_hard", "src": "assets/audio/stealth/footstep_hard.wav" },
+      { "id": "sfx_guard_alert", "src": "assets/audio/stealth/guard_alert.wav" },
+      { "id": "bgm_tension", "src": "assets/audio/stealth/bgm_tension.mp3", "loop": true }
+    ],
+    "particles": [
+      { "id": "particle_smoke", "template": { "frames": 8, "lifeMs": 1200, "size": 64 } },
+      { "id": "particle_spark", "template": { "frames": 6, "lifeMs": 400, "size": 24 } }
+    ]
+  },
+  "layers": [
+    { "id": "world3d", "type": "3dScene" },
+    { "id": "physics", "type": "physicsLayer" },
+    { "id": "aiNav", "type": "navmeshLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" },
+    { "id": "cinematic", "type": "cinematicLayer" }
+  ],
+  "objects": [
+    {
+      "id": "player",
+      "type": "player",
+      "layer": "world3d",
+      "x": 12,
+      "y": 0,
+      "z": 8,
+      "properties": {
+        "model": "player_hero",
+        "health": 100,
+        "stamina": 100,
+        "inventory": { "slots": 12 },
+        "abilities": { "silentTakedown": true, "distractionDevice": true, "throwableNoise": true },
+        "animationRig": { "rootMotion": true, "ik": true }
+      }
+    },
+    {
+      "id": "ui_stamina",
+      "type": "uiBar",
+      "layer": "ui",
+      "x": 16,
+      "y": 72,
+      "properties": { "bindTo": "player.stamina", "max": "player.staminaMax", "label": "Stamina" }
+    },
+    {
+      "id": "overlay_gameover",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Mission Failed", "buttons": [{ "text": "Retry", "action": "restartCheckpoint" }, { "text": "Exit", "action": "toMenu" }] }
+    },
+    {
+      "id": "overlay_mission_complete",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Mission Complete", "buttons": [{ "text": "Next", "action": "loadNextMission" }, { "text": "Replay", "action": "replayMission" }] }
+    }
+  ],
+  "ai": {
+    "guardTypes": [
+      { "id": "guard_patrol", "model": "guard_male", "sightFOV": 80, "sightRange": 18, "hearingRange": 6, "alertDuration": 8, "patrolSpeed": 2.6 },
+      { "id": "guard_stationary", "model": "guard_male", "sightFOV": 100, "sightRange": 24, "hearingRange": 4, "alertDuration": 10, "patrolSpeed": 0 }
+    ],
+    "behaviors": {
+      "patrol": { "editor": true, "waypointTolerance": 0.5, "loop": true },
+      "investigate": { "searchRadius": 8, "investigateTimeSec": 6 },
+      "chase": { "maxChaseTimeSec": 20, "giveUpDistance": 45 },
+      "coordinatedAlert": { "enabled": true, "radius": 18 }
+    },
+    "navmesh": { "bakeOnStart": false, "dynamicObstacleSupport": true }
+  },
+  "stealthSystems": {
+    "visibility": { "lineOfSight": true, "coverModifier": 0.6, "shadowModifier": 0.8 },
+    "noise": { "propagationSpeed": 340, "footstepVolumeMap": { "sneak": 0.2, "walk": 0.6, "run": 1.0 }, "noiseDecay": 3.0 },
+    "cover": { "snapDistance": 1.25, "peekAngles": [15,45], "coverTypes": ["low","high"] },
+    "takedown": { "silent": true, "staminaCost": 20 }
+  },
+  "cinematic": {
+    "cutsceneEditor": { "enabled": true, "exportEndpoint": "/api/exportCutscene" },
+    "cameraDirector": { "blendTimeMs": 600, "cinematicFOV": 40, "advancedCameraTracks": true }
+  },
+  "tools": {
+    "aiPatrolEditor": { "enabled": true, "exportEndpoint": "/api/exportPatrol" },
+    "navmeshBaker": { "enabled": true, "bakeEndpoint": "/api/bakeNavmesh" },
+    "levelStreamer": { "enabled": true, "regions": [] },
+    "lightingBaker": { "enabled": true },
+    "proceduralGuardPlacement": { "enabled": true, "seeded": true, "rulesEndpoint": "/api/guardRules" }
+  },
+  "physicsInteractions": {
+    "destructibleObjects": true,
+    "pushableProps": true,
+    "ragdollOnTakedown": true
+  },
+  "multiplayer": {
+    "coOp": { "enabled": true, "syncStrategy": "authoritative", "phaseSync": true },
+    "pvp": { "enabled": false },
+    "replay": { "enabled": true, "uploadEndpoint": "/api/uploadReplay", "spectatorMode": true }
+  },
+  "vr": { "supported": true, "configEndpoint": "/api/vr-config", "locomotionModes": ["teleport","smooth"], "comfortOptions": { "vignette": true, "snapTurn": true } },
+  "performance": {
+    "graphicsPresets": ["low","medium","high","ultra"],
+    "dynamicResolution": true,
+    "profilingHooks": { "enabled": true, "endpoint": "/api/profiling" },
+    "autotune": { "enabled": true, "metricsEndpoint": "/api/perf-autotune" }
+  },
+  "analytics": {
+    "events": ["detectionEvent","takedown","alertSpread","missionComplete","missionFail","timeToDetect","heatmap"],
+    "endpoint": "/api/analytics",
+    "heatmapEndpoint": "/api/heatmap"
+  },
+  "achievements": [
+    { "id": "ghost", "name": "Ghost", "condition": "Complete a level without being detected" },
+    { "id": "silent_killer", "name": "Silent Killer", "condition": "Perform 50 silent takedowns" },
+    { "id": "collector", "name": "Collector", "condition": "Collect 100 loot items across missions" }
+  ],
+  "events": [
+    { "trigger": "onPlayerDetected", "action": [{ "type": "raiseAlertLevel", "params": { "amount": 1 } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "detectionEvent", "position": "{pos}", "guardId": "{guard.id}" } } }] },
+    { "trigger": "onTakedown", "action": [{ "type": "playSound", "params": { "id": "sfx_guard_alert" } }, { "type": "recordMetric", "params": { "metric": "takedown" } }] },
+    { "trigger": "onMissionComplete", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_mission_complete" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "missionComplete", "time": "{session.time}", "detectionCount": "{session.detections}" } } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "move": ["W","A","S","D"], "crouch": ["C"], "sprint": ["LeftShift"], "interact": ["E"], "pause": ["P"] }, "controllerSupport": true, "remappable": true },
+    "save": { "autoSave": true, "checkpoints": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "heatmapEndpoint": "/api/heatmap" },
+    "navmesh": { "bakeEndpoint": "/api/bakeNavmesh", "dynamicObstacles": true },
+    "cinematic": { "exportEndpoint": "/api/exportCutscene" },
+    "procedural": { "guardRulesEndpoint": "/api/guardRules", "placementSeed": 42 },
+    "monetization": { "storeEndpoint": "/api/store", "dlcEndpoint": "/api/dlc" }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "mission_failed": "Mission Failed", "mission_complete": "Mission Complete", "detected": "Detected!", "stealth_tips": "Use shadows and cover to stay hidden" },
+      "es-ES": { "mission_failed": "Misión Fallida", "mission_complete": "Misión Completada", "detected": "¡Detectado!", "stealth_tips": "Usa sombras y cobertura para permanecer oculto" }
+    }
+  },
+  "uiHints": { "controls": "Crouch to reduce noise, use objects to distract guards, perform silent takedowns from behind.", "tips": ["Watch guard FOV cones","Move slowly across noisy surfaces","Use lighting to your advantage"] },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "Stealth Action v1.1.0 — Added VR support and configuration endpoint, advanced cinematic camera tracks, procedural guard placement, coordinated alert behavior, replay/spectator endpoints, performance autotune & profiling hooks, procedural guard rules endpoint, rollback networking toggle, expanded analytics/heatmap events, and production notes for platform optimization."
+  }
+}

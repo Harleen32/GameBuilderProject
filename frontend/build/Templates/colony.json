@@ -1,0 +1,116 @@
+{
+  "id": "colony",
+  "name": "Colony Survival",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Strategy / Survival",
+  "tags": ["strategy","survival","base","management","3d"],
+  "thumbnail": "assets/colony.jpeg",
+  "description": "Expanded AAA Colony Survival template: procedural planets & biomes, deep colonist relationships & morale, factions & diplomacy, historical progression, cinematic & VR modes, expanded mod pipeline, dedicated server hooks, live-ops/events, and production analytics.",
+  "settings": {
+    "world": { "planetType": "procedural","dayNightCycle": true, "gravity": 9.81, "radiation": true, "proceduralBiomes": true, "biomeTypes": ["rocky","volcanic","frozen","alien_jungle","arid"] },
+    "colonists": { "attributes": ["health","hunger","morale","skill","relationships","mentalHealth"], "assignmentSlots": true, "AIbehavior": "task_based_with_social", "permanentTraits": true, "relationshipsModel": true, "familyTrees": true },
+    "base": { "grid": true, "powerNetwork": true, "oxygenSystems": true, "temperatureSystems": true, "pressurization": true, "buildRadius": 128, "baseExpansionCostScale": 1.25 },
+    "resources": ["metal","food","water","chemicals","powerCells","exoticMatter"],
+    "crafting": { "workbenches": true, "blueprintSystem": true, "modularComponents": true, "assemblyLines": true },
+    "research": { "techTree": true, "researchStations": true, "researchCostScale": 1.4, "branchingProjects": true },
+    "threats": { "wildlife": true, "raidWaves": true, "environmentalHazards": true, "alienBosses": true, "factionRaids": true },
+    "environment": { "atmosphere": true, "storms": true, "temperatureRange": true, "toxicZones": true, "longTermClimate": true },
+    "factions": { "enabled": true, "neighborColonies": true, "alienFactions": true, "diplomacy": true, "tradeRoutes": true, "treatiesEndpoint": "/api/treaties" },
+    "historicalProgression": { "enabled": true, "eras": ["outpost","colony","advanced","spacefaring"], "transitionTriggers": ["population","techLevel","infrastructure"] },
+    "multiplayer": { "coOp": true, "persistentWorlds": true, "maxPlayers": 8, "netSyncEndpoint": "/api/match", "authoritativeServer": true, "dedicatedServerHooks": { "waveSpawnerEndpoint": "/api/waveSpawner", "moderationEndpoint": "/api/moderate" } },
+    "permaloss": { "enabled": false, "toggleable": true },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "metrics": ["colonistDeaths","resourceFlow","baseExpansions","moraleTrends","factionRelations"] },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "uiScaleRange": { "min": 0.8, "max": 1.6 }, "colorblindModes": ["protanopia","deuteranopia"], "simplifiedMode": true, "voiceGuidedBuild": true },
+    "monetization": { "dlc": true, "cosmetics": true, "iap": { "enabled": true }, "storeEndpoint": "/api/store" },
+    "mods": { "enabled": true, "workshopIntegration": true, "scriptingAPI": "/api/script", "ugcValidation": true },
+    "liveOps": { "dailyMissions": true, "seasonPass": true, "globalEvents": true, "eventsEndpoint": "/api/liveEvents", "leaderboards": true },
+    "vr": { "enabled": true, "cockpitMode": true, "teleportation": true }
+  },
+  "assets": {
+    "models": [
+      { "id": "hab_module", "src": "assets/colony/models/hab_module.glb" },
+      { "id": "solar_panel", "src": "assets/colony/models/solar_panel.glb" },
+      { "id": "rover_basic", "src": "assets/colony/models/rover_basic.glb" },
+      { "id": "alien_creature", "src": "assets/colony/models/alien_creature.glb" },
+      { "id": "biome_rocky", "src": "assets/colony/biomes/rocky.glb" }
+    ],
+    "audio": [
+      { "id": "sfx_build", "src": "assets/audio/colony/build.wav" },
+      { "id": "sfx_alarm", "src": "assets/audio/colony/alarm.wav" },
+      { "id": "bgm_loop", "src": "assets/audio/colony/bgm_loop.mp3", "loop": true }
+    ],
+    "particles": [
+      { "id": "particle_smoke", "template": { "frames": 8, "lifeMs": 800, "size": 36 } }
+    ],
+    "cinematics": [
+      { "id": "camera_time_lapse", "presets": ["overview","base_walk","rover_follow"] }
+    ]
+  },
+  "layers": [
+    { "id": "world3d", "type": "3dScene" },
+    { "id": "structures", "type": "entityLayer" },
+    { "id": "colonists", "type": "entityLayer" },
+    { "id": "vehicles", "type": "entityLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" },
+    { "id": "cinematic", "type": "cinematicLayer" }
+  ],
+  "objects": [
+    { "id": "starter_hab", "type": "structure", "layer": "structures", "x": 0, "y": 0, "z": 0, "properties": { "model": "hab_module", "health": 800, "capacity": 6 } },
+    { "id": "solar_1", "type": "power", "layer": "structures", "x": 4, "y": 0, "z": 2, "properties": { "model": "solar_panel", "outputKw": 5 } },
+    { "id": "rover_1", "type": "vehicle", "layer": "vehicles", "x": 2, "y": 0, "z": 4, "properties": { "model": "rover_basic", "fuel": 100 } },
+    { "id": "ui_colonists", "type": "uiPanel", "layer": "ui", "x": 12, "y": 12, "properties": { "bindTo": "colony.colonists", "layout": "vertical" } }
+  ],
+  "systems": {
+    "input": { "bindings": { "place": ["LeftClick"], "assign": ["Key_Q"], "radialMenu": ["Tab"], "pan": ["MiddleMouse"] }, "controllerSupport": true, "remappable": true },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "multiplayer": { "netSyncEndpoint": "/api/match", "matchmaking": "/api/matchmaking" },
+    "ai": { "behaviorTree": true, "taskScheduler": true, "socialSimulation": true },
+    "crafting": { "blueprintEndpoint": "/api/blueprints" },
+    "research": { "endpoint": "/api/research" },
+    "proceduralPlanetGen": { "exportEndpoint": "/api/exportPlanet", "seeded": true },
+    "moderation": { "workshopModerationEndpoint": "/api/moderate" },
+    "vr": { "enabled": true, "cockpitMode": true }
+  },
+  "colonistPresets": [
+    { "id": "engineer", "skills": { "construction": 4, "research": 2, "repair": 3 } },
+    { "id": "biologist", "skills": { "research": 4, "medicine": 3, "farming": 2 } },
+    { "id": "miner", "skills": { "mining": 5, "repair": 2 } }
+  ],
+  "researchTree": {
+    "nodes": [
+      { "id": "r_power_storage", "name": "Power Storage", "cost": 150, "effects": { "base.powerStorage": 100 } },
+      { "id": "r_o2_recycler", "name": "Oxygen Recycler", "cost": 200, "effects": { "base.oxygenEfficiency": 0.2 } }
+    ]
+  },
+  "events": [
+    { "trigger": "onColonistDeath", "action": [{ "type": "playSound", "params": { "id": "sfx_alarm" } }, { "type": "recordMetric", "params": { "metric": "colonistDeaths" } }] },
+    { "trigger": "onRaid", "action": [{ "type": "spawnEnemies", "params": { "waveId": "{wave.id}" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "raid_start", "wave": "{wave.number}" } } }] },
+    { "trigger": "onResearchComplete", "action": [{ "type": "unlockBlueprint", "params": { "blueprintId": "{research.unlocked}" } }, { "type": "recordMetric", "params": { "metric": "researchCompleted" } }] },
+    { "trigger": "onFactionDiplomacyChange", "action": [{ "type": "notifyUI", "params": { "message": "{faction.name} changed stance to {faction.stance}" } }, { "type": "recordMetric", "params": { "metric": "factionRelations" } }] }
+  ],
+  "ui": {
+    "hud": { "colonistPanel": true, "resourcePanel": true, "powerNetworkView": true, "oxygenOverlay": true },
+    "overlays": { "pressureMap": true, "temperatureMap": true, "radiationMap": true }
+  },
+  "eventsSchedule": {
+    "raids": { "intervalMin": 30, "difficultyRamp": 0.05 },
+    "environmentalStorms": { "intervalMin": 45, "severityScale": 0.06 },
+    "globalEvents": { "enabled": true, "rotationIntervalDays": 7 }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "colonist": "Colonist", "build": "Build", "assign": "Assign", "raid_incoming": "Raid Incoming!" },
+      "es-ES": { "colonist": "Colono", "build": "Construir", "assign": "Asignar", "raid_incoming": "¡Incursión Entrante!" }
+    }
+  },
+  "meta": {
+    "created_at": "2025-09-20T00:00:00Z",
+    "updated_at": "2025-09-20T00:00:00Z",
+    "notes": "Colony v1.1.0 — Added procedural planet generation & biomes, deep social simulation (relationships, family trees, morale contagion), factions & diplomacy, historical progression, cinematic/VR camera & time-lapse, expanded mod scripting/api & moderation hooks, procedural planet export, global events & leaderboards, and dedicated server moderation/wave-spawner endpoints. For production: extend faction content, tune social AI, implement scalable moderation & wave spawner services, and populate procedural biome assets."
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "id": "roguelike",
+  "name": "Roguelike Dungeon",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Roguelike / Dungeon Crawler",
+  "tags": ["2d","roguelike","procedural","permadeath","dungeon"],
+  "thumbnail": "assets/roguelike.jpeg",
+  "description": "Procedural roguelike dungeon template with seeded runs, permadeath, procedural rooms, varied enemy factions, item/loot generation, meta progression, daily challenges, leaderboards and mod/live-ops support.",
+  "settings": {
+    "seededRuns": true,
+    "permadeath": true,
+    "procedural": { "roomTemplates": true, "connectivity": "guaranteed", "maxDepth": 50, "branchingFactor": 1.6 },
+    "difficultyRamp": { "perFloor": 0.08, "bossEveryN": 10 },
+    "encounters": { "trapDensity": 0.12, "puzzleRooms": true, "eliteChance": 0.07 },
+    "items": { "rarities": ["common","uncommon","rare","epic","legendary"], "affixes": true, "itemLevelScale": true, "identifiedByDefault": false },
+    "metaProgression": { "unlockSystem": true, "persistentCurrency": "shards", "roguePass": true },
+    "dailyRuns": { "enabled": true, "dailySeedEndpoint": "/api/dailySeed" },
+    "leaderboards": { "enabled": true, "endpoint": "/api/leaderboard", "boards": ["deepest_floor","fastest_clear"] },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "metrics": ["runLength","deathReasons","lootValue"] },
+    "save": { "cloudSync": false, "replayShare": true, "replayEndpoint": "/api/uploadReplay" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","pt-BR"] },
+    "accessibility": { "textSize": "scalable", "colorblindModes": ["protanopia","deuteranopia"], "reducedFlash": true },
+    "mods": { "enabled": true, "workshopIntegration": true, "scriptingAPI": "/api/script" },
+    "liveOps": { "dailyChallenges": true, "seasonalEvents": true, "eventsEndpoint": "/api/liveEvents" }
+  },
+  "assets": {
+    "sprites": [
+      { "id": "player", "src": "assets/roguelike/sprites/player.png" },
+      { "id": "goblin", "src": "assets/roguelike/sprites/goblin.png" },
+      { "id": "skeleton", "src": "assets/roguelike/sprites/skeleton.png" }
+    ],
+    "audio": [
+      { "id": "sfx_hit", "src": "assets/audio/roguelike/hit.wav" },
+      { "id": "sfx_death", "src": "assets/audio/roguelike/death.wav" },
+      { "id": "bgm_dungeon", "src": "assets/audio/roguelike/bgm_dungeon.mp3", "loop": true }
+    ],
+    "particles": [
+      { "id": "particle_blood", "template": { "frames": 6, "lifeMs": 300, "size": 12 } }
+    ]
+  },
+  "layers": [
+    { "id": "tilemap", "type": "tilemap" },
+    { "id": "entities", "type": "entityLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    { "id": "player_rogue", "type": "player", "layer": "entities", "x": 5, "y": 5, "properties": { "sprite": "player", "hp": 100, "inventory": [], "gold": 0 } },
+    { "id": "entrance", "type": "door", "layer": "tilemap", "x": 2, "y": 2, "properties": { "leadsTo": "floor_1" } },
+    { "id": "ui_health", "type": "uiBar", "layer": "ui", "x": 12, "y": 12, "properties": { "bindTo": "player.hp", "max": "player.maxHP" } }
+  ],
+  "enemies": [
+    { "id": "goblin", "hp": 20, "damage": 4, "xp": 6, "behavior": "melee" },
+    { "id": "skeleton", "hp": 28, "damage": 6, "xp": 10, "behavior": "patrol" },
+    { "id": "champion_orc", "hp": 120, "damage": 18, "xp": 120, "behavior": "boss", "abilities": ["slam","charge"] }
+  ],
+  "items": [
+    { "id": "short_sword", "type": "weapon", "damage": 6, "rarity": "common" },
+    { "id": "healing_potion", "type": "consumable", "heal": 40, "rarity": "uncommon" },
+    { "id": "ring_of_fortitude", "type": "accessory", "effects": { "maxHP": 15 }, "rarity": "rare" }
+  ],
+  "systems": {
+    "input": { "bindings": { "moveUp": ["W"], "moveDown": ["S"], "moveLeft": ["A"], "moveRight": ["D"], "attack": ["LeftClick"], "use": ["E"] }, "controllerSupport": true, "remappable": true },
+    "save": { "cloudSync": false, "replayEndpoint": "/api/uploadReplay" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "leaderboards": { "enabled": true, "endpoint": "/api/leaderboard" }
+  },
+  "events": [
+    { "trigger": "onDeath", "action": [{ "type": "recordMetric", "params": { "metric": "deathReasons" } }, { "type": "showOverlay", "params": { "overlayId": "overlay_gameover" } }] },
+    { "trigger": "onFloorComplete", "action": [{ "type": "grantLoot", "params": { "player": "{player.id}", "floor": "{floor.number}" } }, { "type": "recordMetric", "params": { "metric": "floorClearTime" } }] },
+    { "trigger": "onItemIdentified", "action": [{ "type": "applyAffixes", "params": { "itemId": "{item.id}" } }, { "type": "recordMetric", "params": { "metric": "itemsIdentified" } }] }
+  ],
+  "meta": {
+    "created_at": "2025-09-20T00:00:00Z",
+    "updated_at": "2025-09-20T00:00:00Z",
+    "notes": "Roguelike v1.1.0 — Seeded procedural runs, permadeath, daily runs & leaderboards, item affix generation, meta progression and replay sharing endpoints. For production: tune procedural templates, extend affix pool, implement anti-cheat/leaderboard validation, and populate art/audio assets."
+  }
+}

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="GameForge — create games with AI, templates or start from blank. Drag & drop editor, templates, AI tools and community." />
+  <title>GameForge - Create Games with AI</title>
+
+  <!-- Fonts & AOS -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="Home.css" />
+</head>
+<body>
+  <header class="navbar" role="banner">
+    <div class="logo" aria-hidden="false">
+      <img src="assets/logo.png" alt="GameForge logo" />
+      <span>GameForge</span>
+    </div>
+
+    <button id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">☰</button>
+
+    <nav class="nav-links" id="nav-links" role="navigation" aria-label="Primary">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#features">Features</a>
+      <a href="#ai-tools">AI Tools</a>
+      <a href="#community">Community</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#pricing">Pricing</a>
+      <a href="my-projects.html">My Projects</a>
+      <button id="loginBtn" class="btn" aria-haspopup="dialog">Login</button>
+      <button id="signupBtn" class="btn secondary" aria-haspopup="dialog">Sign Up</button>
+    </nav>
+  </header>
+
+  <!-- LOGIN MODAL (single consolidated modal: glass + social) -->
+  <div id="loginModal" class="modal glass-modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle" aria-hidden="true" hidden>
+    <div class="modal-inner" role="document">
+      <button class="close-btn" aria-label="Close login modal" title="Close">&times;</button>
+
+      <div class="glass-card">
+        <div class="glass-left">
+          <img src="assets/login-art.png" alt="Person using the GameForge editor" class="glass-art">
+        </div>
+
+        <div class="glass-right">
+          <h2 id="loginTitle">Welcome back</h2>
+
+          <form id="loginForm" class="auth-form" autocomplete="username">
+            <label for="loginUsername" class="sr-only">Email or username</label>
+            <input id="loginUsername" name="username" type="text" placeholder="Email or username" required>
+
+            <label for="loginPassword" class="sr-only">Password</label>
+            <input id="loginPassword" name="password" type="password" placeholder="Password" required autocomplete="current-password">
+
+            <button type="submit" class="btn primary">Sign in</button>
+          </form>
+
+          <div class="social-login" aria-hidden="false">
+            <button class="social-btn google" type="button"><img src="assets/google.png" alt="" class="social-icon"> Sign in with Google</button>
+            <button class="social-btn github" type="button"><img src="assets/github.png" alt="" class="social-icon"> Sign in with GitHub</button>
+          </div>
+
+          <div class="auth-meta">
+            <a href="#" id="openSignup">Create account</a>
+            <a href="#" id="forgotPassword">Forgot?</a>
+          </div>
+
+          <div id="loginStatus" class="auth-status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNUP MODAL -->
+  <div id="signupModal" class="modal glass-modal" role="dialog" aria-modal="true" aria-labelledby="signupTitle" aria-hidden="true" hidden>
+    <div class="modal-inner" role="document">
+      <button class="close-btn" aria-label="Close signup modal" title="Close">&times;</button>
+
+      <div class="glass-card">
+        <div class="glass-left">
+          <img src="assets/signup-art.png" alt="Sign up illustration" class="glass-art">
+        </div>
+
+        <div class="glass-right">
+          <h2 id="signupTitle">Create account</h2>
+
+          <form id="signupForm" class="auth-form" autocomplete="username">
+            <label for="signupUsername" class="sr-only">Pick a username</label>
+            <input id="signupUsername" name="username" type="text" placeholder="Pick a username" required>
+
+            <label for="signupPassword" class="sr-only">Create a password</label>
+            <input id="signupPassword" name="password" type="password" placeholder="Create a password" required autocomplete="new-password">
+
+            <button type="submit" class="btn primary">Create account</button>
+          </form>
+
+          <div class="social-login">
+            <button class="social-btn google" type="button"><img src="assets/google.png" alt="" class="social-icon"> Sign up with Google</button>
+            <button class="social-btn github" type="button"><img src="assets/github.png" alt="" class="social-icon"> Sign up with GitHub</button>
+          </div>
+
+          <div class="auth-meta">
+            <a href="#" id="openLogin">Already have an account? Sign in</a>
+          </div>
+
+          <div id="signupStatus" class="auth-status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Modal -->
+  <div id="aiModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle" aria-hidden="true" hidden>
+    <div class="modal-content">
+      <button class="close-btn" id="aiClose" aria-label="Close AI modal" title="Close">&times;</button>
+      <h2 id="aiModalTitle">Create Your Game with AI</h2>
+
+      <form id="aiForm">
+        <label for="genre">Genre</label>
+        <select id="genre" name="genre" required>
+          <option value="" disabled selected>Choose Genre</option>
+          <option value="platformer">Platformer</option>
+          <option value="fps">FPS</option>
+          <option value="rpg">RPG</option>
+          <option value="puzzle">Puzzle</option>
+        </select>
+
+        <label for="platform">Platform</label>
+        <select id="platform" name="platform" required>
+          <option value="" disabled selected>Choose Platform</option>
+          <option value="web">Web</option>
+          <option value="mobile">Mobile</option>
+          <option value="pc">PC</option>
+          <option value="console">Console</option>
+        </select>
+
+        <label for="visual">Visual Style</label>
+        <select id="visual" name="visual" required>
+          <option value="" disabled selected>Visual Style</option>
+          <option value="pixel">Pixel Art</option>
+          <option value="3d">3D</option>
+          <option value="cartoon">Cartoon</option>
+          <option value="minimal">Minimal</option>
+        </select>
+
+        <div class="form-actions">
+          <button id="buildAiBtn" type="submit" class="btn secondary">Build with AI</button>
+        </div>
+      </form>
+
+      <div id="aiResult" style="display:none; margin-top: 1.5rem; color:#00ffcc;" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- Hero / Zigzag options -->
+  <main id="home">
+    <section class="zigzag-row right" data-aos="fade-left">
+      <div class="hero-image">
+        <img src="assets/female2.png" alt="Game creator illustration" class="floating-image" data-aos="fade-up" data-aos-delay="300" />
+      </div>
+      <div class="option-card">
+        <h3>🤖 Use AI</h3>
+        <p>Let AI generate your game idea and logic based on your input.</p>
+        <a href="use-ai.html" id="browseTemplatesBtn" class="btn primary">Start with AI</a>
+      </div>
+    </section>
+
+    <section class="zigzag-row left" data-aos="fade-right">
+      <div class="hero-image">
+        <img src="assets/game.png" alt="Templates preview" data-aos="fade-up" data-aos-delay="300" />
+      </div>
+      <div class="option-card" data-aos="fade-right">
+        <h3 class="card-title">🎮 Use Game Templates</h3>
+        <p>Pick from templates to get started fast.</p>
+        <a href="template.html" id="browseTemplatesBtn" class="btn primary" target="_blank" rel="noopener noreferrer">Browse Templates</a>
+      </div>
+    </section>
+
+    <section class="zigzag-row right">
+      <div class="hero-image">
+        <img src="assets/blank.png" alt="Start from blank preview">
+      </div>
+      <div class="option-card">
+        <h3>Start From Blank</h3>
+        <p>Begin from scratch with your own assets.</p>
+        <a href="#" class="btn primary">Start from Blank</a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+      <div class="section-content">
+        <h1>Why Choose GameForge?</h1>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>Drag & Drop Editor</h3>
+            <p>Intuitive design tools for quick game development.</p>
+          </div>
+          <div class="feature-card">
+            <h3>AI Game Builder</h3>
+            <p>Let AI generate characters, storylines, and environments.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Template Gallery</h3>
+            <p>Access dozens of game templates to start quickly.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI Tools -->
+    <section class="features" id="ai-tools">
+      <h2>AI Tools</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon pulse" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ffd5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M4 4.5A2.5 2.5 0 0 1 6.5 7H20"></path>
+              <line x1="6.5" y1="17" x2="6.5" y2="7"></line>
+            </svg>
+          </div>
+          <h3>Story Generator</h3>
+          <p>Create rich narratives with a single click.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon pulse" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ffd5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3c-4.97 0-9 3.58-9 8 0 4.42 4.03 8 9 8 1.5 0 2.91-.29 4.14-.82a2 2 0 1 1 2.68-2.68A8 8 0 0 0 21 11c0-4.42-4.03-8-9-8z"></path>
+              <circle cx="6.5" cy="11.5" r="1.5"></circle>
+              <circle cx="9.5" cy="7.5" r="1.5"></circle>
+              <circle cx="14.5" cy="7.5" r="1.5"></circle>
+              <circle cx="17.5" cy="11.5" r="1.5"></circle>
+            </svg>
+          </div>
+          <h3>Character Designer</h3>
+          <p>Generate characters visually or with AI prompts.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ffd5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+          </div>
+          <h3>Map & World Creator</h3>
+          <p>Design entire worlds using smart algorithms.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials-section" id="testimonials">
+      <h2 class="section-title">What People Say About GameForge</h2>
+      <div class="testimonial-carousel">
+        <div class="testimonial active">
+          <p>"GameForge helped me publish my first platformer — no coding required!"</p>
+          <h4>— Alex, Indie Developer</h4>
+        </div>
+        <div class="testimonial">
+          <p>"The AI Game Builder is pure magic. It made my idea real in minutes!"</p>
+          <h4>— Priya, Game Designer</h4>
+        </div>
+        <div class="testimonial">
+          <p>"Amazing UI, powerful tools, and an awesome community. Highly recommended."</p>
+          <h4>— Liam, Studio Owner</h4>
+        </div>
+      </div>
+    </section>
+
+    <!-- Templates -->
+    <section class="features" id="templates">
+      <h2>Templates</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Platformer Starter</h3>
+          <p>Classic 2D jump-and-run template to begin instantly.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Top-down RPG</h3>
+          <p>Set up quests, levels, and enemies effortlessly.</p>
+        </div>
+        <div class="feature-card">
+          <h3>3D Sandbox</h3>
+          <p>Customize terrain, objects, and physics with ease.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Community -->
+    <section class="features" id="community">
+      <h2>Community Games</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Zombie Rush</h3>
+          <p>Survive waves of undead in this user-built game.</p>
+        </div>
+        <div class="feature-card">
+          <h3>PixelCraft</h3>
+          <p>Explore and build in a pixelated open world.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Sky Battle</h3>
+          <p>Multiplayer aerial dogfights made in GameForge.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery (single id) -->
+    <section id="gallery" class="gallery">
+      <h2>Gallery</h2>
+      <div class="gallery-grid">
+        <img class="gallery-img" src="assets/game1.png" alt="Screenshot of Game 1" loading="lazy" />
+        <img class="gallery-img" src="assets/game2.png" alt="Screenshot of Game 2" loading="lazy" />
+        <img class="gallery-img" src="assets/game3.png" alt="Screenshot of Game 3" loading="lazy" />
+        <img class="gallery-img gallery-img-large" src="assets/game4.png" alt="Screenshot of Game 4" loading="lazy" />
+        <img class="gallery-img" src="assets/game5.png" alt="Screenshot of Game 5" loading="lazy" />
+        <img class="gallery-img" src="assets/game6.png" alt="Screenshot of Game 6" loading="lazy" />
+      </div>
+    </section>
+
+    <!-- About -->
+    <section class="features" id="about">
+      <h2>About GameForge</h2>
+      <p>We’re a passionate team helping game creators turn dreams into playable realities — without needing to code. GameForge combines AI and intuitive design so anyone can build games!</p>
+    </section>
+
+    <!-- Pricing overview -->
+    <section class="features" id="pricing-overview">
+      <h2>Pricing</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Free</h3>
+          <p>Basic features, community support, up to 2 games.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Pro</h3>
+          <p>All features, export options, priority support. ₹499/mo.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Studio</h3>
+          <p>Team collaboration, unlimited templates. ₹1299/mo.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing section -->
+    <section class="pricing-section" id="pricing">
+      <h2 class="section-title">Choose Your Plan</h2>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>Free</h3>
+          <p class="price">$0/mo</p>
+          <ul>
+            <li>2D Game Builder</li>
+            <li>Basic Templates</li>
+            <li>Community Access</li>
+            <li>Email Support</li>
+          </ul>
+          <button class="btn primary">Start Free</button>
+        </div>
+
+        <div class="pricing-card featured">
+          <h3>Pro</h3>
+          <p class="price">$15/mo</p>
+          <ul>
+            <li>2D & 3D Game Builder</li>
+            <li>Premium Templates</li>
+            <li>AI Assistant Access</li>
+            <li>Priority Support</li>
+          </ul>
+          <button class="btn primary">Go Pro</button>
+        </div>
+
+        <div class="pricing-card">
+          <h3>Studio</h3>
+          <p class="price">$29/mo</p>
+          <ul>
+            <li>Team Collaboration</li>
+            <li>Unlimited Projects</li>
+            <li>Custom AI Models</li>
+            <li>Dedicated Manager</li>
+          </ul>
+          <button class="btn primary">Get Studio</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact / Newsletter -->
+    <section class="contact-section" id="contact">
+      <h2 class="section-title">Stay in the Loop</h2>
+      <p class="section-subtext">Subscribe to get updates, new features, and game dev tips.</p>
+      <form class="contact-form" id="newsletterForm">
+        <label for="emailInput" class="sr-only">Email</label>
+        <input type="email" id="emailInput" name="email" placeholder="Enter your email" required>
+        <button type="submit" class="btn primary">Subscribe</button>
+      </form>
+      <div id="formResponse" class="response-message" role="status" aria-live="polite"></div>
+    </section>
+
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" aria-hidden="true" hidden>
+    <button class="close-lightbox" id="closeLightbox" aria-label="Close lightbox" title="Close">&times;</button>
+    <img src="" alt="Expanded preview" id="lightboxImg" />
+    <button class="nav prev" id="prevBtn" aria-label="Previous image">&#10094;</button>
+    <button class="nav next" id="nextBtn" aria-label="Next image">&#10095;</button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-content">
+      <div class="footer-left">
+        <img src="assets/logo.png" alt="GameForge Logo" class="footer-logo">
+        <p>© 2025 GameForge. All rights reserved.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#home">Home</a>
+        <a href="#features">Features</a>
+        <a href="#ai-tools">AI Tools</a>
+        <a href="#templates">Templates</a>
+        <a href="#community">Community</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#about">About</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="footer-social">
+        <a href="#" aria-label="Facebook"><img src="assets/facebook.png" alt=""></a>
+        <a href="#" aria-label="Twitter"><img src="assets/twitter.png" alt=""></a>
+        <a href="#" aria-label="YouTube"><img src="assets/youtube.png" alt=""></a>
+        <a href="#" aria-label="Instagram"><img src="assets/instagram.png" alt=""></a>
+      </div>
+    </div>
+
+    <section class="faq-section" id="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq">
+        <div class="faq-item">
+          <h4 class="faq-question" tabindex="0">Do I need coding experience to use GameForge?</h4>
+          <p class="faq-answer">No, GameForge is designed for beginners and professionals alike.</p>
+        </div>
+        <div class="faq-item">
+          <h4 class="faq-question" tabindex="0">Can I export my games?</h4>
+          <p class="faq-answer">Yes, Pro and Studio users can export games to Web, PC, and Mobile.</p>
+        </div>
+        <div class="faq-item">
+          <h4 class="faq-question" tabindex="0">How does the AI Builder work?</h4>
+          <p class="faq-answer">You select genre, platform, and style — AI does the rest.</p>
+        </div>
+      </div>
+    </section>
+  </footer>
+
+  <!-- Utility buttons -->
+  <button id="themeToggle" aria-pressed="false" title="Toggle theme">🌓</button>
+  <button id="backToTop" title="Go to top" aria-label="Back to top">↑</button>
+
+  <!-- Scripts: AOS then init, then Home.js (deferred) -->
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js" defer></script>
+  <script>
+    window.addEventListener('load', function () {
+      if (window.AOS) AOS.init();
+    });
+  </script>
+
+  <script src="Home.js" defer></script>
+</body>
+</html>

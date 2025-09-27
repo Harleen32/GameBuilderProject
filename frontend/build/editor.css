@@ -1,0 +1,373 @@
+/* ========== Global Styles ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body.dark-theme {
+  font-family: 'Poppins', sans-serif;
+  background: #1e1e1e;
+  color: #f5f5f5;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ========== Navbar ========== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2c;
+  padding: 10px 20px;
+  border-bottom: 1px solid #444;
+}
+
+.navbar .logo {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff9800;
+}
+
+.nav-buttons .btn,
+.toolbar-right .btn {
+  background: #333;
+  color: #f5f5f5;
+  border: none;
+  padding: 6px 12px;
+  margin: 0 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.nav-buttons .btn:hover,
+.toolbar-right .btn:hover {
+  background: #444;
+}
+/* 🔍 Search Box Styling */
+.search-box {
+  padding: 10px;
+  background: rgba(30, 30, 30, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-box input {
+  width: 90%;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.search-box input:focus {
+  border-color: #00bcd4;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 6px #00bcd4;
+}
+.highlight {
+  background: yellow;
+  color: black;
+  font-weight: bold;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+#noResultsMsg {
+  background: rgba(255, 50, 50, 0.1);
+  border: 1px solid rgba(255, 50, 50, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  margin: 10px;
+}
+
+/* Center project title */
+.toolbar-center h1 {
+  font-size: 18px;
+  color: #fff;
+}
+
+/* ========== Layout ========== */
+.main-layout {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.editor-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 250px 1fr 300px; /* left | canvas | right */
+  height: 100%;
+}
+
+/* ========== Left Sidebar ========== */
+.left-sidebar {
+  background: #252525;
+  border-right: 1px solid #444;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.sidebar-menu {
+  list-style: none;
+}
+
+.sidebar-menu li {
+  margin-bottom: 5px;
+}
+
+.menu-item {
+  padding: 8px 10px;
+  background: #333;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu-item:hover {
+  background: #444;
+}
+
+.menu-item.active {
+  background: #ff9800;
+  color: #fff;
+}
+
+.submenu {
+  list-style: none;
+  margin-top: 5px;
+  margin-left: 15px;
+  display: none;
+}
+
+.submenu li {
+  padding: 5px 10px;
+  font-size: 14px;
+  background: #2e2e2e;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.submenu li:hover {
+  background: #3a3a3a;
+}
+
+/* ========== Canvas Area ========== */
+.canvas-area {
+  position: relative;
+  background: #1b1b1b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.canvas-area canvas {
+  background: #222;
+  border: 1px solid #555;
+  width: 90%;
+  height: 90%;
+  border-radius: 6px;
+}
+
+.canvas-controls {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(40, 40, 40, 0.9);
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: flex;
+  gap: 10px;
+}
+
+.canvas-controls button {
+  background: #333;
+  color: #f5f5f5;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.canvas-controls button:hover {
+  background: #444;
+}
+
+/* ========== Right Sidebar ========== */
+.right-sidebar {
+  background: #252525;
+  border-left: 1px solid #444;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  background: #2e2e2e;
+  border-bottom: 1px solid #444;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background: #333;
+  color: #f5f5f5;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tabs button.active {
+  background: #ff9800;
+  color: #fff;
+}
+
+.tab-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.asset {
+  background: #2e2e2e;
+  padding: 6px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  cursor: grab;
+}
+
+.asset:hover {
+  background: #3a3a3a;
+}
+
+/* ========== Bottom Toolbar ========== */
+.bottom-toolbar {
+  background: #2c2c2c;
+  color: #ccc;
+  padding: 6px 12px;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #444;
+  font-size: 14px;
+}
+/* ======================
+   Sidebar Scroll
+====================== */
+.left-sidebar {
+  overflow-y: auto;
+  max-height: calc(100vh - 60px); /* fits below header */
+  scrollbar-width: thin;
+  scrollbar-color: #444 #222;
+}
+
+.left-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.left-sidebar::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+}
+.left-sidebar::-webkit-scrollbar-track {
+  background: #222;
+}
+
+/* ======================
+   Sidebar Items
+====================== */
+.menu-item {
+  padding: 10px;
+  margin: 4px 0;
+  background: #222;
+  color: #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.menu-item:hover {
+  background: #333;
+}
+
+.menu-item.active {
+  background: #0073aa;
+  color: #fff;
+}
+
+/* ======================
+   Submenu
+====================== */
+.submenu {
+  display: none;
+  margin: 4px 0 8px 15px;
+  padding-left: 8px;
+  border-left: 2px solid #333;
+}
+
+.submenu li {
+  padding: 6px 8px;
+  margin: 2px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #bbb;
+  transition: background 0.2s ease;
+}
+
+.submenu li:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+/* ======================
+   Collapsible Right Sidebar
+====================== */
+.right-sidebar {
+  width: 280px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+}
+
+.right-sidebar.collapsed {
+  width: 0;
+}
+
+.right-sidebar .toggle-btn {
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  background: #444;
+  color: #fff;
+  padding: 5px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.left-sidebar .submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding-left: 20px;
+}
+
+.left-sidebar .submenu.open {
+  max-height: 1000px; /* big enough to fit all items */
+}

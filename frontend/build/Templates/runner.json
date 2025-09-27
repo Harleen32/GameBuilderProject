@@ -1,0 +1,329 @@
+{
+  "id": "runner",
+  "name": "Endless Runner",
+  "version": "1.0.2",
+  "author": "GameForge",
+  "category": "2D",
+  "tags": ["2d", "runner", "endless"],
+  "thumbnail": "assets/runner.jpeg",
+  "description": "Procedural endless runner with difficulty scaling, power-ups, unlockable characters, polished UI/leaderboard hooks and a distance-based victory mode.",
+  "settings": {
+    "screenWidth": 1280,
+    "screenHeight": 720,
+    "initialSpeed": 320,
+    "speedIncrement": 0.015,
+    "spawnGapMin": 0.9,
+    "spawnGapMax": 2.2,
+    "gravity": 1600,
+    "maxLives": 3,
+    "distanceToWin": 5000,
+    "reproducibleSeed": null,
+    "leaderboardEnabled": true,
+    "adsCheckpointIntervalSec": 90
+  },
+  "assets": {
+    "images": [
+      { "id": "runner_player", "src": "assets/runner/player_sheet.png", "frames": 8, "size": { "w": 64, "h": 64 } },
+      { "id": "runner_ninja", "src": "assets/runner/player_ninja.png", "frames": 8, "size": { "w": 64, "h": 64 } },
+      { "id": "runner_robot", "src": "assets/runner/player_robot.png", "frames": 8, "size": { "w": 64, "h": 64 } },
+      { "id": "obstacle_rock", "src": "assets/runner/obstacle_rock.png", "size": { "w": 64, "h": 64 } },
+      { "id": "obstacle_spike", "src": "assets/runner/obstacle_spike.png", "size": { "w": 48, "h": 48 } },
+      { "id": "obstacle_pit", "src": "assets/runner/obstacle_pit.png", "size": { "w": 192, "h": 32 } },
+      { "id": "enemy_fly", "src": "assets/runner/enemy_fly.png", "frames": 4, "size": { "w": 48, "h": 32 } },
+      { "id": "coin", "src": "assets/runner/coin.png", "size": { "w": 24, "h": 24 } },
+      { "id": "bg_far", "src": "assets/runner/bg_far.png", "size": { "w": 2048, "h": 720 } },
+      { "id": "bg_near", "src": "assets/runner/bg_near.png", "size": { "w": 2048, "h": 720 } },
+      { "id": "power_shield", "src": "assets/runner/power_shield.png", "size": { "w": 32, "h": 32 } },
+      { "id": "power_magnet", "src": "assets/runner/power_magnet.png", "size": { "w": 32, "h": 32 } },
+      { "id": "dust", "src": "assets/runner/particles/dust.png", "frames": 6, "size": { "w": 16, "h": 16 } },
+      { "id": "coin_sparkle", "src": "assets/runner/particles/coin_sparkle.png", "frames": 8, "size": { "w": 32, "h": 32 } }
+    ],
+    "audio": [
+      { "id": "sfx_jump", "src": "assets/audio/runner/jump.wav" },
+      { "id": "sfx_hit", "src": "assets/audio/runner/hit.wav" },
+      { "id": "sfx_coin", "src": "assets/audio/runner/coin.wav" },
+      { "id": "sfx_powerup", "src": "assets/audio/runner/powerup.wav" },
+      { "id": "bgm_loop", "src": "assets/audio/runner/bgm_loop.mp3", "loop": true }
+    ]
+  },
+  "layers": [
+    { "id": "bg_far", "type": "parallax", "properties": { "image": "bg_far", "speed": 0.12 } },
+    { "id": "bg_near", "type": "parallax", "properties": { "image": "bg_near", "speed": 0.45 } },
+    { "id": "game", "type": "entityLayer" },
+    { "id": "particles", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "player",
+      "type": "player",
+      "x": 140,
+      "y": 480,
+      "width": 64,
+      "height": 64,
+      "sprite": "runner_player",
+      "layer": "game",
+      "properties": {
+        "lives": 3,
+        "speed": 320,
+        "verticalSpeed": 0,
+        "jumpForce": 520,
+        "doubleJump": true,
+        "doubleJumpEnabled": true,
+        "dash": { "enabled": true, "distance": 180, "cooldown": 1.0 },
+        "gravity": 1600,
+        "invulnerableAfterHit": 1.2,
+        "animations": { "run": { "frames": [0, 1, 2, 3], "fps": 16 }, "jump": { "frames": [4], "fps": 1 } },
+        "bind": { "distance": "ui_distance", "score": "ui_score", "lives": "ui_lives", "skin": "player.skin" },
+        "distance": 0,
+        "score": 0,
+        "skin": "default"
+      }
+    },
+    {
+      "id": "skins",
+      "type": "skinsCatalog",
+      "layer": "game",
+      "properties": {
+        "available": [
+          { "id": "default", "name": "Runner", "sprite": "runner_player", "unlock": { "type": "default" } },
+          { "id": "ninja", "name": "Ninja", "sprite": "runner_ninja", "unlock": { "type": "milestone", "distance": 2000 } },
+          { "id": "robot", "name": "Robot", "sprite": "runner_robot", "unlock": { "type": "milestone", "distance": 4000 } }
+        ]
+      }
+    },
+    {
+      "id": "obstacle_spawner",
+      "type": "spawnSystem",
+      "x": 0,
+      "y": 0,
+      "layer": "game",
+      "properties": {
+        "spawnGapMin": 0.9,
+        "spawnGapMax": 2.2,
+        "patterns": ["single", "double", "staggered", "pit", "flying"],
+        "weights": [0.48, 0.22, 0.15, 0.1, 0.05],
+        "pools": {
+          "obstacles": ["obstacle_rock", "obstacle_spike", "obstacle_pit"],
+          "fliers": ["enemy_fly"],
+          "collectibles": ["coin", "power_shield", "power_magnet"]
+        },
+        "powerupChance": 0.1,
+        "pitChance": 0.08,
+        "flyingChance": 0.06
+      }
+    },
+    {
+      "id": "coin_template",
+      "type": "pickupTemplate",
+      "sprite": "coin",
+      "layer": "game",
+      "properties": { "score": 5, "collectSound": "sfx_coin", "particle": "coin_sparkle_template" }
+    },
+    {
+      "id": "dust_template",
+      "type": "particleTemplate",
+      "sprite": "dust",
+      "layer": "particles",
+      "properties": { "frames": 6, "fps": 30, "autoDestroy": true, "emitOn": "playerLand" }
+    },
+    {
+      "id": "coin_sparkle_template",
+      "type": "particleTemplate",
+      "sprite": "coin_sparkle",
+      "layer": "particles",
+      "properties": { "frames": 8, "fps": 20, "autoDestroy": true }
+    },
+    {
+      "id": "ui_score",
+      "type": "uiText",
+      "x": 16,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Score: {player.score}", "bindTo": "player.score", "fontSize": 20 }
+    },
+    {
+      "id": "ui_distance",
+      "type": "uiText",
+      "x": 16,
+      "y": 44,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Distance: {player.distance}m", "bindTo": "player.distance", "fontSize": 16 }
+    },
+    {
+      "id": "ui_lives",
+      "type": "uiLives",
+      "x": 1200,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-right", "bindTo": "player.lives" }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredSmall", "title": "Paused", "buttons": [ { "text": "Resume", "action": "togglePause" }, { "text": "Main Menu", "action": "toMainMenu" } ] }
+    },
+    {
+      "id": "overlay_gameover",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Game Over",
+        "subtitle": "You fell! Try again.",
+        "buttons": [
+          { "text": "Retry", "action": "restartRun" },
+          { "text": "Leaderboard", "action": "showLeaderboard" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    },
+    {
+      "id": "overlay_victory",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Victory!",
+        "subtitle": "You reached the finish distance!",
+        "buttons": [
+          { "text": "Claim Reward", "action": "claimVictoryReward" },
+          { "text": "Main Menu", "action": "toMainMenu" }
+        ]
+      }
+    },
+    {
+      "id": "overlay_leaderboard",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": {
+        "visible": false,
+        "style": "centeredModal",
+        "title": "Leaderboard",
+        "contentSource": "leaderboardService",
+        "buttons": [ { "text": "Close", "action": "closeOverlay" } ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "trigger": "onCollect",
+      "target": "coin",
+      "action": {
+        "type": "addScore",
+        "params": { "amount": 5 },
+        "sideEffects": [
+          { "type": "playSound", "params": { "id": "sfx_coin" } },
+          { "type": "spawnParticle", "params": { "template": "coin_sparkle_template", "at": "coin" } }
+        ]
+      }
+    },
+    {
+      "trigger": "onCollect",
+      "target": "power_shield",
+      "action": {
+        "type": "grantPower",
+        "params": { "power": "shield", "duration": 8 },
+        "sideEffects": [ { "type": "playSound", "params": { "id": "sfx_powerup" } } ]
+      }
+    },
+    {
+      "trigger": "onCollect",
+      "target": "power_magnet",
+      "action": {
+        "type": "grantPower",
+        "params": { "power": "magnet", "duration": 10 },
+        "sideEffects": [ { "type": "playSound", "params": { "id": "sfx_powerup" } } ]
+      }
+    },
+    {
+      "trigger": "onHitObstacle",
+      "target": "player",
+      "action": {
+        "type": "playerDamage",
+        "params": { "damage": 1 },
+        "sideEffects": [
+          { "type": "playSound", "params": { "id": "sfx_hit" } },
+          { "type": "spawnParticle", "params": { "template": "dust_template", "at": "player" } }
+        ]
+      }
+    },
+    {
+      "trigger": "onPlayerDeath",
+      "conditions": { "playerLives": 0 },
+      "action": [
+        { "type": "showOverlay", "params": { "overlayId": "overlay_gameover" } },
+        {
+          "type": "callAPI",
+          "params": {
+            "endpoint": "/api/leaderboard",
+            "method": "POST",
+            "body": { "score": "{player.score}", "distance": "{player.distance}", "playerSkin": "{player.skin}" }
+          }
+        }
+      ]
+    },
+    {
+      "trigger": "onPlayerLand",
+      "action": { "type": "spawnParticle", "params": { "template": "dust_template", "at": "player" } }
+    },
+    {
+      "trigger": "onDistanceUpdate",
+      "conditions": { "distanceMod": 1 },
+      "action": [
+        { "type": "incrementPlayerStat", "params": { "stat": "distance", "amount": "{delta}" } },
+        {
+          "type": "checkMilestones",
+          "params": {
+            "milestones": [
+              { "distance": 1000, "actions": [ { "type": "grantPower", "params": { "power": "power_magnet", "duration": 8 } }, { "type": "unlockSkin", "params": { "skinId": "ninja" } } ] },
+              { "distance": 2000, "actions": [ { "type": "unlockSkin", "params": { "skinId": "robot" } } ] }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "trigger": "onDistanceReached",
+      "conditions": { "distance": { "gte": 5000 } },
+      "action": [ { "type": "showOverlay", "params": { "overlayId": "overlay_victory" } }, { "type": "grantReward", "params": { "coins": 500 } } ]
+    },
+    {
+      "trigger": "onPauseToggled",
+      "action": { "type": "toggleOverlay", "params": { "overlayId": "overlay_pause" } }
+    }
+  ],
+  "systems": {
+    "input": {
+      "bindings": {
+        "jump": ["Space", "W", "ArrowUp"],
+        "dash": ["Shift"],
+        "pause": ["P"]
+      },
+      "onKey": [{ "key": "P", "action": "togglePause" }]
+    },
+    "spawn": {
+      "autoScaler": { "enabled": true, "speedIncrement": 0.015, "maxSpeed": 1200 }
+    },
+    "physics": { "gravity": 1600, "frictionGround": 0.9 },
+    "leaderboard": { "enabled": true, "api": { "endpoint": "/api/leaderboard", "auth": null, "onGameOverAutoPost": true } },
+    "skins": { "enabled": true, "default": "default" }
+  },
+  "uiHints": {
+    "controls": "Space/W/ArrowUp to jump, Shift to dash, P to pause",
+    "tips": [
+      "Collect coins to increase score and unlock characters",
+      "Shield protects you from one hit, Magnet attracts nearby coins",
+      "Reach the finish distance (5,000m) to trigger Victory mode (optional)"
+    ]
+  },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "Patched: added victory overlay/distanceToWin (5000), skins/unlockables, additional obstacles (pits + flying enemies), power-up collection handling, leaderboard save on game over. Version 1.0.2."
+  }
+}

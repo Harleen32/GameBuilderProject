@@ -1,0 +1,173 @@
+{
+  "id": "sokoban",
+  "name": "Sokoban Puzzle",
+  "version": "1.0.0",
+  "author": "GameForge",
+  "category": "Puzzle",
+  "tags": ["2d", "puzzle", "sokoban", "logic"],
+  "thumbnail": "assets/sokoban.jpeg",
+  "description": "Classic Sokoban-style box-pushing puzzle template with level editor metadata, undo/redo, solution checker, hints, timer/move counter, analytics and save slots.",
+  "settings": {
+    "grid": { "tileSize": 64 },
+    "defaultBoardSize": { "cols": 10, "rows": 8 },
+    "undoLimit": 100,
+    "hintCost": 5,
+    "timerEnabled": false,
+    "leaderboardEnabled": false,
+    "save": { "autoSave": true, "slots": 3, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": false, "endpoint": "/api/analytics" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US", "es-ES", "hi-IN"] },
+    "accessibility": { "highContrast": false, "uiScale": 1.0 }
+  },
+  "assets": {
+    "images": [
+      { "id": "floor", "src": "assets/sokoban/floor.png", "size": { "w": 64, "h": 64 } },
+      { "id": "wall", "src": "assets/sokoban/wall.png", "size": { "w": 64, "h": 64 } },
+      { "id": "box", "src": "assets/sokoban/box.png", "size": { "w": 64, "h": 64 } },
+      { "id": "goal", "src": "assets/sokoban/goal.png", "size": { "w": 64, "h": 64 } },
+      { "id": "player", "src": "assets/sokoban/player.png", "size": { "w": 64, "h": 64 } }
+    ],
+    "audio": [
+      { "id": "sfx_push", "src": "assets/audio/sokoban/push.wav" },
+      { "id": "sfx_win", "src": "assets/audio/sokoban/win.wav" },
+      { "id": "sfx_undo", "src": "assets/audio/sokoban/undo.wav" }
+    ]
+  },
+  "layers": [
+    { "id": "tilemap", "type": "tilemap", "properties": { "tileSize": 64 } },
+    { "id": "entities", "type": "entityLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "board_system",
+      "type": "sokobanBoard",
+      "layer": "tilemap",
+      "properties": {
+        "cols": 10,
+        "rows": 8,
+        "tileSize": 64,
+        "tileTypes": ["floor", "wall", "goal"],
+        "entityTypes": ["player", "box"],
+        "levelSource": "levels",
+        "editorMeta": { "snapGrid": 64, "exportFormat": "json" }
+      }
+    },
+    {
+      "id": "ui_moves",
+      "type": "uiText",
+      "x": 16,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Moves: {level.moves}", "bindTo": "level.moves", "fontSize": 18 }
+    },
+    {
+      "id": "ui_time",
+      "type": "uiText",
+      "x": 16,
+      "y": 48,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Time: {level.time}", "bindTo": "level.time", "fontSize": 18 }
+    },
+    {
+      "id": "btn_undo",
+      "type": "uiButton",
+      "x": 1180,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "text": "Undo", "onClick": "undoMove" }
+    },
+    {
+      "id": "btn_redo",
+      "type": "uiButton",
+      "x": 1180,
+      "y": 56,
+      "layer": "ui",
+      "properties": { "text": "Redo", "onClick": "redoMove" }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredSmall", "title": "Paused", "buttons": [{ "text": "Resume", "action": "togglePause" }, { "text": "Main Menu", "action": "toMainMenu" }] }
+    },
+    {
+      "id": "overlay_win",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredModal", "title": "Puzzle Solved!", "subtitle": "Nice work.", "buttons": [{ "text": "Next", "action": "loadNextLevel" }, { "text": "Replay", "action": "restartLevel" }] }
+    },
+    {
+      "id": "overlay_hint",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "bottomPanel", "title": "Hint", "buttons": [{ "text": "Show Hint (cost 5)", "action": "showHint" }, { "text": "Close", "action": "closeOverlay" }] }
+    }
+  ],
+  "levels": [
+    {
+      "id": "s1_easy",
+      "name": "Box Basics",
+      "cols": 7,
+      "rows": 6,
+      "layout": {
+        "tiles": [
+          "WWWWWWW",
+          "W.....W",
+          "W.BP..W",
+          "W..G..W",
+          "W.....W",
+          "WWWWWWW"
+        ],
+        "legend": { "W": "wall", ".": "floor", "B": "box", "P": "player", "G": "goal" }
+      },
+      "objective": { "type": "placeBoxesOnGoals", "boxCount": 1 },
+      "moves": 20,
+      "hint": "Push the box north then east to the goal",
+      "solution": ["up","right","right"]
+    },
+    {
+      "id": "s2_medium",
+      "name": "Two Boxes",
+      "cols": 8,
+      "rows": 6,
+      "layout": {
+        "tiles": [
+          "WWWWWWWW",
+          "W......W",
+          "W.BB.P.W",
+          "W..GG..W",
+          "W......W",
+          "WWWWWWWW"
+        ],
+        "legend": { "W": "wall", ".": "floor", "B": "box", "P": "player", "G": "goal" }
+      },
+      "objective": { "type": "placeBoxesOnGoals", "boxCount": 2 },
+      "moves": 40,
+      "hint": "Work left box into the left goal first",
+      "solution": ["left","up","right","right","down","left"]
+    }
+  ],
+  "events": [
+    { "trigger": "onMove", "action": [{ "type": "increment", "params": { "path": "level.moves" } }, { "type": "playSound", "params": { "id": "sfx_push" } }] },
+    { "trigger": "onUndo", "action": [{ "type": "playSound", "params": { "id": "sfx_undo" } }] },
+    { "trigger": "onPuzzleSolved", "action": [{ "type": "playSound", "params": { "id": "sfx_win" } }, { "type": "showOverlay", "params": { "overlayId": "overlay_win" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "puzzle_solved", "levelId": "{level.id}", "moves": "{level.moves}", "time": "{level.time}" } } }] },
+    { "trigger": "onRequestHint", "action": [{ "type": "chargeCurrency", "params": { "amount": 5 } }, { "type": "showOverlay", "params": { "overlayId": "overlay_hint" } }] },
+    { "trigger": "onPauseToggled", "action": [{ "type": "toggleOverlay", "params": { "overlayId": "overlay_pause" } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "up": ["ArrowUp","W"], "down": ["ArrowDown","S"], "left": ["ArrowLeft","A"], "right": ["ArrowRight","D"], "undo": ["Z"], "redo": ["Y"], "pause": ["P"] }, "controllerSupport": true },
+    "save": { "autoSave": true, "slots": 3, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": false, "endpoint": "/api/analytics" },
+    "levelEditor": { "enabled": true, "exportFormat": "sokoban-json", "snapGrid": 64 }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "pause_title": "Paused", "hint_title": "Hint", "win_title": "Puzzle Solved!", "undo": "Undo", "redo": "Redo" },
+      "es-ES": { "pause_title": "Pausado", "hint_title": "Pista", "win_title": "¡Puzzle Resuelto!", "undo": "Deshacer", "redo": "Rehacer" }
+    }
+  },
+  "uiHints": { "controls": "Arrow keys / WASD to move, Z to undo, Y to redo, P to pause", "tips": ["Plan before you push — boxes can become stuck","Use undo to try alternate approaches","Hints cost coins but guide you toward a solution"] },
+  "meta": { "created_at": "2025-09-18T00:00:00Z", "updated_at": "2025-09-18T00:00:00Z", "notes": "Sokoban template: includes undo/redo, level editor metadata, solution entries for verification, hint system, and analytics save stubs. Implement engine handlers for undo stack, solution validator, and hint generator." }
+}

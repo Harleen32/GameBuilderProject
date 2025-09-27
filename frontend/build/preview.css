@@ -1,0 +1,338 @@
+/* preview.css — larger readable scale + improved layout spacing
+   Replace your existing preview.css with this file. */
+   /* ---------- Variables (tweak --base-font to globally scale) ---------- */
+/* Prevent preview page from moving */
+
+/* Grid stays stable */
+.grid {
+  display: grid;
+  grid-template-columns: 420px 1fr; /* left details fixed, right preview flexible */
+  gap: var(--gutter);
+  align-items: start;
+  min-height: 540px; /* lock min height */
+}
+
+/* Device frame lock */
+.device-frame {
+  padding: 14px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(12,12,16,0.5));
+  border: 1px solid rgba(255,255,255,0.02);
+  position: relative; /* allow overlay msg */
+}
+
+.device-frame-inner {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  min-height: 480px;   /* fixed box height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Game preview iframe always fills box */
+.game-preview {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* Overlay message instead of below */
+.preview-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--muted);
+  background: rgba(0,0,0,0.6);
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.device-frame.show-msg .preview-msg {
+  opacity: 1;
+  pointer-events: all;
+}
+/* --- Smaller Page Layout --- */
+
+/* Shrink max container width */
+:root {
+  --max-w: 1000px;   /* was 1320px */
+  --sidebar-w: 220px; /* was 280px */
+  --base-font: 17px;  /* slightly larger text */
+}
+
+/* Centered site container */
+.site-container,
+.top-nav,
+.main-layout,
+.footer {
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 20px auto;
+}
+
+/* Grid tighter */
+.grid {
+  grid-template-columns: 340px 1fr; /* narrower details col */
+  gap: 20px;
+  min-height: 420px;
+}
+
+/* Device frame smaller */
+.device-frame-inner {
+  min-height: 360px;   /* was 480px */
+  aspect-ratio: 16/10; /* smaller preview box */
+}
+
+/* Sidebar narrower */
+.sidebar {
+  width: var(--sidebar-w);
+  padding: 14px;
+}
+
+/* Font adjustments */
+.page-title {
+  font-size: clamp(18px, 2vw, 26px); /* smaller headline */
+}
+
+.details h3,
+.preview h3 {
+  font-size: 1rem;
+}
+
+.detail-row {
+  font-size: 0.95rem;
+}
+
+.preview-msg {
+  font-size: 0.95rem;
+}
+
+   :root{
+  --base-font: 16px;         /* increase to scale everything (try 16-18) */
+  --max-w: 1280px;          /* slightly wider container */
+  --bg: #05060a;
+  --panel: rgba(18,20,26,0.62);
+  --glass-border: rgba(255,255,255,0.04);
+  --neon-1:#00ffd5;
+  --neon-2:#7ef5c8;
+  --neon-3:#5aa6ff;
+  --muted:#9fbcc8;
+  --text:#ecf9f7;
+  --glass-shadow: 0 22px 72px rgba(0,0,0,0.6);
+  --focus: 0 0 30px rgba(0,255,213,0.12);
+  --radius: 14px;
+  --sidebar-w: 260px;      /* wider sidebar */
+  --gutter: 24px;
+}
+
+/* ---------- Reset & base ---------- */
+*{box-sizing:border-box}
+html { font-size: var(--base-font); }
+body {
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  background:
+    radial-gradient(1000px 420px at 10% 10%, rgba(78,180,255,0.02), transparent 6%),
+    radial-gradient(800px 320px at 90% 80%, rgba(0,255,200,0.02), transparent 6%),
+    var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing: antialiased;
+  line-height:1.5;
+
+  /* font feature settings — standard and prefixed */
+  font-feature-settings: "liga" 1;
+  -webkit-font-feature-settings: "liga" 1;
+}
+
+
+/* central container */
+.site-container {
+  width: calc(100% - 48px);
+  max-width: var(--max-w);
+  margin: 20px auto;
+  padding: 0;
+}
+
+/* glass panel common */
+.glass{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--glass-shadow);
+}
+
+/* ---------- Top nav (bigger, centered) ---------- */
+.top-nav {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:16px 22px;
+  border-radius: var(--radius);
+}
+
+/* left / center / right layout */
+.nav-left { display:flex; gap:14px; align-items:center; min-width:200px; }
+.logo { font-family: 'Orbitron', sans-serif; color:var(--neon-1); font-weight:700; font-size:1.125rem; }
+.project-name { color:var(--muted); font-weight:600; font-size:0.95rem; }
+
+.nav-center {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  min-width:300px;
+}
+.page-title {
+  margin:0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;        /* larger main title */
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+.status-wrap { display:flex; gap:8px; align-items:center; }
+
+.nav-right { display:flex; gap:10px; align-items:center; flex-shrink:0; }
+
+/* make header buttons larger */
+.btn {
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.03);
+  background:transparent;
+  color:var(--text);
+  font-weight:700;
+  cursor:pointer;
+  font-size:0.95rem;
+}
+.btn.primary { background: linear-gradient(90deg,var(--neon-1),var(--neon-3)); color:#031512; border:none; box-shadow: 0 12px 36px rgba(0,200,180,0.07);}
+.btn.secondary { background: rgba(255,255,255,0.02); }
+
+.btn.small { padding:8px 10px; font-size:0.9rem; }
+
+/* status badge larger */
+.status-badge {
+  padding:8px 14px; border-radius:999px; font-weight:800; font-size:0.95rem;
+  border:1px solid rgba(255,255,255,0.02);
+}
+.status-badge.offline { color:var(--muted); background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); }
+.status-badge.online { color:#021612; background: linear-gradient(90deg, rgba(0,255,213,0.12), rgba(126,245,200,0.06)); border:1px solid rgba(0,255,213,0.12); }
+
+/* ---------- Main layout (wider gutters, bigger sidebar) ---------- */
+.main-layout {
+  display:flex;
+  gap: var(--gutter);
+  align-items:flex-start;
+  margin-top: var(--gutter);
+}
+
+/* sidebar larger */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: 200px;
+  padding:18px;
+  flex-shrink:0;
+}
+
+/* menu items bigger and more roomy */
+.menu { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.menu-item {
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  padding:12px 14px;
+  border-radius:10px;
+  text-align:left;
+  cursor:pointer;
+  font-weight:700;
+  font-size:1rem;
+}
+.menu-item.active { color:var(--neon-1); background: linear-gradient(90deg, rgba(0,255,213,0.04), rgba(126,245,200,0.02)); }
+
+/* content column keeps more vertical rhythm */
+.content { flex:1; display:flex; flex-direction:column; gap:18px; }
+
+/* game info card: larger thumbnail + bigger title */
+.game-info { padding:16px; }
+.game-meta { display:flex; gap:18px; align-items:center; }
+.game-thumb {
+  width:110px; height:110px;
+  border-radius:12px; object-fit:cover;
+  border:1px solid rgba(255,255,255,0.03);
+  box-shadow: inset 0 -6px 12px rgba(0,0,0,0.25);
+}
+.meta-title { margin:0; font-family:'Orbitron',sans-serif; color:var(--neon-2); font-size:1.4rem; }
+.meta-desc { margin:8px 0 0; color:var(--muted); font-size:1rem; }
+
+/* ---------- Grid: Details + Preview (increase preview size) ---------- */
+.grid {
+  display:grid;
+  grid-template-columns: 380px 1fr;  /* wider left column for details */
+  gap: var(--gutter);
+  align-items:start;
+}
+
+/* details card: increased padding and font */
+.details {
+  padding:20px;
+  border-radius:12px;
+}
+.details h3 { margin:0 0 12px 0; font-family:'Orbitron',sans-serif; color:var(--neon-1); font-size:1.1rem; }
+.details-list { margin:0; padding:0; }
+.detail-row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px dashed rgba(255,255,255,0.03); color:var(--muted); font-size:1rem; }
+.detail-row dt { font-weight:800; color:var(--text); }
+.details-actions { margin-top:14px; display:flex; gap:10px; }
+
+/* preview card: more padding and taller frame */
+.preview { padding:20px; border-radius:12px; }
+.preview h3 { margin:0 0 12px 0; font-family:'Orbitron',sans-serif; color:var(--neon-3); font-size:1.05rem; }
+
+/* make device frame taller and keep aspect ratio */
+.device-frame { padding:14px; border-radius:12px; background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(12,12,16,0.5)); border:1px solid rgba(255,255,255,0.02); }
+.device-frame-inner { width:100%; aspect-ratio: 16 / 9; border-radius:10px; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center; min-height:420px; }
+.game-preview { width:100%; height:100%; border:0; display:block; }
+
+/* preview message larger */
+.preview-msg { margin-top:14px; text-align:center; color:var(--muted); font-weight:800; }
+
+/* footer spacing */
+.footer { margin:26px auto 60px; text-align:center; color:#7fb9b1; padding:12px 6px; }
+
+/* ---------- Responsive rules (tablet & mobile) ---------- */
+@media (max-width: 1100px) {
+  :root { --sidebar-w: 240px; }
+  .page-title { font-size:24px; }
+  .meta-title { font-size:1.2rem; }
+  .device-frame-inner { min-height:380px; }
+}
+
+@media (max-width: 880px) {
+  /* stack header */
+  .top-nav { flex-direction:column; align-items:stretch; gap:12px; padding:14px; }
+  .nav-center { align-items:flex-start; text-align:left; padding-left:6px; }
+  .nav-right { justify-content:flex-start; flex-wrap:wrap; gap:8px; }
+
+  /* stack layout */
+  .main-layout { flex-direction:column; gap:18px; padding: 0 12px; }
+  .sidebar { width:100%; order:2; }
+  .content { order:1; }
+  .grid { grid-template-columns: 1fr; }
+  .device-frame-inner { aspect-ratio: 4/3; min-height:260px; }
+}
+
+/* accessibility focus */
+button:focus, a:focus { outline:none; box-shadow: var(--focus); transform: translateY(-1px); }
+
+/* small utilities for debugging (remove later) */
+.layout-debug { outline: 1px dashed rgba(255,255,255,0.03); }

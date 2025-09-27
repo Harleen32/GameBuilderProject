@@ -1,7 +1,7 @@
 // src/pages/HomePage.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom"; // if you use react-router; harmless if not used in your app
-import "./home.css";
+import "./Home.css";
 import TemplatesList from "../components/TemplatesList"; // optional - your component earlier
 
 // lightweight fetch helper (you can swap with your editor-integration.js helpers)

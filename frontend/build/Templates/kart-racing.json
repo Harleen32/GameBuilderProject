@@ -1,0 +1,107 @@
+{
+  "id": "kart-racing",
+  "name": "Kart Racing",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Racing / Casual",
+  "tags": ["3d","racing","kart","casual","party"],
+  "thumbnail": "assets/kart.jpeg",
+  "description": "Arcade-style 3D kart racing template with power-ups, drift boosts, simple physics, local split-screen, online matchmaking, track editor, party modes, vehicle customization, cosmetic progression, replay/ghost systems, live ops hooks, accessibility and monetization endpoints.",
+  "settings": {
+    "physics": { "fixedTimestepMs": 16, "gravity": -9.81, "arcadeFriction": 0.9 },
+    "kart": { "baseSpeed": 140, "accel": 8, "handling": 0.9, "driftBoostFactor": 1.35, "driftStages": 3 },
+    "powerups": { "enabled": true, "pool": ["banana","boost","shield","missile","oil","lightning","triple_shell","magnet","shrink"], "weightedRNG": true, "rngBiasByPosition": true },
+    "players": { "maxLocalPlayers": 4, "onlineMax": 12 },
+    "tracks": { "streaming": false, "defaultLengthM": 1200, "dynamicWeather": true, "hazardsEnabled": true },
+    "modes": ["grand_prix","time_trial","battle_arena","copilot","coin_runner","balloon_battle"],
+    "ai": { "opponentCount": 11, "rubberBanding": true, "itemBiasing": true },
+    "replay": { "enabled": true, "maxSeconds": 900, "exportEndpoint": "/api/exportReplay", "ghostUploadEndpoint": "/api/uploadGhost" },
+    "matchmaking": { "ranked": true, "mmrEndpoint": "/api/matchmaking", "crossplay": true },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "metrics": ["itemUsage","positionBias","driftUsage","collisionCounts","matchmakingStats"] },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "steeringAssist": true, "autoAccelerate": false, "uiScale": 1.0, "colorblindMode": "on-request", "motionSicknessReduction": true },
+    "monetization": { "cosmetics": true, "seasonPass": true, "iap": { "enabled": true }, "storeEndpoint": "/api/store" },
+    "liveOps": { "enabled": true, "dailyMissionsEndpoint": "/api/daily", "rotatingTracksEndpoint": "/api/rotatingTracks" }
+  },
+  "assets": {
+    "models": [
+      { "id": "kart_cute_01", "src": "assets/kart/models/kart_cute_01.glb" },
+      { "id": "kart_bike_01", "src": "assets/kart/models/kart_bike_01.glb" },
+      { "id": "track_candy", "src": "assets/kart/tracks/candy.glb" },
+      { "id": "arena_battle", "src": "assets/kart/tracks/arena_battle.glb" },
+      { "id": "track_dynamic_rain", "src": "assets/kart/tracks/dynamic_rain.glb" }
+    ],
+    "audio": [
+      { "id": "sfx_boost", "src": "assets/audio/kart/boost.wav" },
+      { "id": "sfx_hit", "src": "assets/audio/kart/hit.wav" },
+      { "id": "sfx_lightning", "src": "assets/audio/kart/lightning.wav" },
+      { "id": "bgm_menu", "src": "assets/audio/kart/bgm_menu.mp3", "loop": true }
+    ],
+    "particles": [
+      { "id": "particle_boost", "template": { "frames": 6, "lifeMs": 400, "size": 28 } },
+      { "id": "particle_rain_splash", "template": { "frames": 6, "lifeMs": 300, "size": 16 } }
+    ]
+  },
+  "layers": [
+    { "id": "world3d", "type": "3dScene" },
+    { "id": "karts", "type": "entityLayer" },
+    { "id": "powerups", "type": "entityLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" },
+    { "id": "cinematic", "type": "cinematicLayer" }
+  ],
+  "objects": [
+    { "id": "player_kart_1", "type": "kart", "layer": "karts", "x": 0, "y": 0, "z": 0, "properties": { "model": "kart_cute_01", "playerIndex": 1, "speed": 0, "customization": { "paint": "default", "wheels": "standard", "glider": null } } },
+    { "id": "ui_lap", "type": "uiText", "layer": "ui", "x": 16, "y": 16, "properties": { "textTemplate": "Lap: {race.currentLap}/{race.totalLaps}", "bindTo": "race.currentLap" } },
+    { "id": "overlay_results", "type": "uiOverlay", "layer": "overlays", "properties": { "visible": false, "title": "Results", "buttons": [{ "text": "Next Race", "action": "nextRace" }, { "text": "Menu", "action": "toMenu" }] } }
+  ],
+  "powerupDefs": [
+    { "id": "banana", "effect": "drop_obstacle", "durationSec": 0 },
+    { "id": "boost", "effect": "speed_mult", "durationSec": 2.5 },
+    { "id": "shield", "effect": "absorbs_one_hit", "durationSec": 6 },
+    { "id": "missile", "effect": "homing_projectile", "durationSec": 0 },
+    { "id": "oil", "effect": "slip_area", "durationSec": 4 },
+    { "id": "lightning", "effect": "stun_leading", "durationSec": 0 },
+    { "id": "triple_shell", "effect": "multi_projectile", "durationSec": 0 },
+    { "id": "magnet", "effect": "attract_items", "durationSec": 6 },
+    { "id": "shrink", "effect": "reduce_speed_of_target", "durationSec": 5 }
+  ],
+  "itemBalancing": { "enabled": true, "positionBuckets": [1,2,3,4,5,6,7,8,9,10,11,12], "weightsByBucket": { "1": { "common": 0.1, "rare": 0.02 }, "12": { "common": 0.6, "rare": 0.15 } } },
+  "ai": {
+    "profiles": [{ "id": "ai_easy", "consistency": 0.6 }, { "id": "ai_pro", "consistency": 0.95 }],
+    "rubberBanding": { "enabled": true, "strength": 0.25 }
+  },
+  "trackEditor": { "enabled": true, "exportEndpoint": "/api/exportTrack", "tools": ["splineEditor","propPainter"], "presets": ["candy","space","jungle"], "hazardTool": true },
+  "modes": [
+    { "id": "grand_prix", "races": 3, "scoring": "points" },
+    { "id": "time_trial", "ghosts": true },
+    { "id": "battle_arena", "maxPlayers": 8 },
+    { "id": "coin_runner", "maxPlayers": 8 },
+    { "id": "balloon_battle", "maxPlayers": 8 }
+  ],
+  "customization": {
+    "vehicles": { "paintSlots": 3, "wheels": ["standard","sport","fat"], "gliders": ["none","wing"], "upgrades": ["engine","handling","boost"] },
+    "cosmetics": { "hats": [], "stickers": [], "emotes": [] },
+    "progression": { "xpPerRace": 100, "levels": 60, "seasonPass": true }
+  },
+  "replay": { "ghosts": true, "uploadEndpoint": "/api/uploadGhost", "downloadEndpoint": "/api/getGhosts", "shareEndpoint": "/api/shareReplay" },
+  "online": { "matchmaking": "/api/matchmaking", "ranked": true, "antiCheat": { "enabled": true, "reportEndpoint": "/api/anticheat/report" } },
+  "events": [
+    { "trigger": "onPowerupCollected", "action": [{ "type": "applyPowerup", "params": { "powerup": "{powerup.id}", "target": "{player.id}" } }, { "type": "playSound", "params": { "id": "sfx_boost" } }, { "type": "recordMetric", "params": { "metric": "powerup_collected" } }] },
+    { "trigger": "onLapComplete", "action": [{ "type": "recordMetric", "params": { "metric": "lap_time", "value": "{lap.time}" } }, { "type": "submitLeaderboard", "params": { "board": "kart_lap", "score": "{lap.time}" } }] },
+    { "trigger": "onRaceEnd", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_results" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "race_end", "results": "{race.results}" } } }] }
+  ],
+  "systems": {
+    "input": { "bindings": { "steer": ["Axis_X"], "accelerate": ["Axis_Y"], "brake": ["Space"], "usePowerup": ["X"], "drift": ["LShift"] }, "controllerSupport": true, "remappable": true },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics" },
+    "multiplayer": { "netSyncEndpoint": "/api/match", "matchmaking": "/api/matchmaking", "crossplay": true },
+    "monetization": { "storeEndpoint": "/api/store", "iap": { "enabled": true } },
+    "liveOps": { "dailyEndpoint": "/api/daily", "eventsEndpoint": "/api/liveEvents" }
+  },
+  "localization": {
+    "strings": { "en-US": { "race_start": "Go!", "race_complete": "Race Complete", "powerup": "Power-up" }, "es-ES": { "race_start": "¡Ya!", "race_complete": "Carrera Completa", "powerup": "Objeto" }, "fr-FR": { "race_start": "Partez!", "race_complete": "Course Terminée", "powerup": "Objet" } }
+  },
+  "uiHints": { "controls": "Use analog or keys to steer, press drift to charge a boost, collect power-ups to upset opponents.", "tips": ["Drift through corners to build boost","Use shield to block missiles","Drop banana behind you to block pursuers"] },
+  "meta": { "created_at": "2025-09-18T00:00:00Z", "updated_at": "2025-09-18T00:00:00Z", "notes": "Kart Racing v1.1.0 — Added expanded power-up pool (lightning, triple shell, magnet, shrink), item balancing (position-based weighted RNG), track hazards & dynamic weather, vehicle customization & cosmetics, expanded modes (coin runner, balloon battle), replay & ghost upload endpoints, ranked matchmaking/crossplay, anti-cheat report endpoint, live ops endpoints, and platform/localization updates. For production: populate cosmetics assets, tune item weights, and implement server-side matchmaking and anti-cheat services." }
+}

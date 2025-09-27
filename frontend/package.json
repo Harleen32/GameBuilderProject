@@ -19,10 +19,6 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.0",
-    "eslint": "^8.50.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-react": "^7.33.0",
-    "husky": "^8.0.0",
     "lint-staged": "^14.0.0",
     "prettier": "^2.8.0"
   },
@@ -36,8 +32,7 @@
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --max-warnings=0",
     "lint:fix": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "clean": "rimraf build node_modules .cache",
-    "prepare": "husky install"
+    "clean": "rimraf build node_modules .cache"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx,json,css,md}": [

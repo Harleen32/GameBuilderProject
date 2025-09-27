@@ -1,0 +1,400 @@
+{
+  "id": "metroidvania",
+  "name": "Metroidvania",
+  "version": "1.0.2",
+  "author": "GameForge",
+  "category": "2D",
+  "tags": ["2d", "platformer", "exploration", "metroidvania"],
+  "thumbnail": "assets/metroidvania.jpeg",
+  "description": "Exploration-driven platformer with interconnected maps, unlockable abilities, save points, NPCs, shops, secrets and mini-boss encounters. Includes quests, dialogue, save slots + cloud sync, controller mappings and accessibility options.",
+  "settings": {
+    "mapSize": { "width": 8000, "height": 2000 },
+    "playerStart": { "x": 320, "y": 1600 },
+    "saveIntervalSec": 300,
+    "fastTravelEnabled": true,
+    "minimapEnabled": true,
+    "fogOfWar": true,
+    "defaultSpawnPoint": "start_gate",
+    "save": {
+      "slots": 3,
+      "autoSave": true,
+      "autoSaveIntervalSec": 300,
+      "cloudSync": {
+        "enabled": false,
+        "endpoint": "/api/savecloud",
+        "authRequired": true,
+        "conflictResolution": "latestWins" 
+      }
+    },
+    "controller": {
+      "enabled": true,
+      "defaultMapping": {
+        "moveLeft": "dpad_left",
+        "moveRight": "dpad_right",
+        "jump": "button_a",
+        "dash": "button_b",
+        "grapple": "button_x",
+        "interact": "button_y",
+        "pause": "start"
+      },
+      "rebindable": true
+    },
+    "accessibility": {
+      "subtitles": true,
+      "subtitleSize": "medium",
+      "colorblindMode": "off",
+      "uiScale": 1.0,
+      "highContrast": false,
+      "autoPlayCutscenes": "skipAvailable"
+    }
+  },
+  "assets": {
+    "images": [
+      { "id": "tileset", "src": "assets/metroidvania/tileset_atlas.png", "tileSize": 32 },
+      { "id": "bg_far", "src": "assets/metroidvania/bg_far.png", "size": { "w": 4096, "h": 1024 } },
+      { "id": "bg_near", "src": "assets/metroidvania/bg_near.png", "size": { "w": 4096, "h": 1024 } },
+      { "id": "player", "src": "assets/metroidvania/player_sheet.png", "frames": 8, "size": { "w": 48, "h": 64 } },
+      { "id": "player_shadow", "src": "assets/metroidvania/player_shadow.png" },
+      { "id": "bat_enemy", "src": "assets/metroidvania/bat.png", "frames": 4, "size": { "w": 40, "h": 28 } },
+      { "id": "mini_boss", "src": "assets/metroidvania/mini_boss.png", "frames": 6, "size": { "w": 128, "h": 96 } },
+      { "id": "checkpoint_flag", "src": "assets/metroidvania/checkpoint_flag.png", "size": { "w": 48, "h": 96 } },
+      { "id": "ability_icon_double", "src": "assets/metroidvania/icons/double_jump.png", "size": { "w": 32, "h": 32 } },
+      { "id": "ability_icon_dash", "src": "assets/metroidvania/icons/dash.png", "size": { "w": 32, "h": 32 } },
+      { "id": "ability_icon_grapple", "src": "assets/metroidvania/icons/grapple.png", "size": { "w": 32, "h": 32 } }
+    ],
+    "audio": [
+      { "id": "sfx_jump", "src": "assets/audio/metroidvania/jump.wav" },
+      { "id": "sfx_hurt", "src": "assets/audio/metroidvania/hurt.wav" },
+      { "id": "sfx_checkpoint", "src": "assets/audio/metroidvania/checkpoint.wav" },
+      { "id": "bgm_overworld", "src": "assets/audio/metroidvania/overworld_loop.mp3", "loop": true },
+      { "id": "bgm_boss", "src": "assets/audio/metroidvania/boss_loop.mp3", "loop": true }
+    ],
+    "tilemaps": [
+      { "id": "world_map", "src": "assets/metroidvania/world_map.json" },
+      { "id": "dungeon_1", "src": "assets/metroidvania/dungeon_1.json" },
+      { "id": "dungeon_2", "src": "assets/metroidvania/dungeon_2.json" }
+    ]
+  },
+  "layers": [
+    { "id": "bg_far", "type": "parallax", "properties": { "image": "bg_far", "speed": 0.12 } },
+    { "id": "bg_near", "type": "parallax", "properties": { "image": "bg_near", "speed": 0.35 } },
+    { "id": "tilemap", "type": "tilemap", "properties": { "tilemapId": "world_map", "tileset": "tileset" } },
+    { "id": "entities", "type": "entityLayer" },
+    { "id": "particles", "type": "particleLayer" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "minimap", "type": "miniMapLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "start_gate",
+      "type": "spawnPoint",
+      "x": 320,
+      "y": 1600,
+      "layer": "entities",
+      "properties": { "name": "Start Gate", "autorunScript": null }
+    },
+    {
+      "id": "player1",
+      "type": "player",
+      "x": 320,
+      "y": 1600,
+      "width": 48,
+      "height": 64,
+      "sprite": "player",
+      "layer": "entities",
+      "properties": {
+        "health": 8,
+        "maxHealth": 8,
+        "speed": 200,
+        "jumpForce": 520,
+        "dash": { "enabled": false, "distance": 240, "cooldown": 1.4 },
+        "doubleJump": false,
+        "grapple": { "enabled": false, "range": 300 },
+        "abilities": { "doubleJump": false, "dash": false, "grapple": false },
+        "inventory": { "gold": 0, "keys": [] },
+        "collisionBox": { "w": 36, "h": 58 },
+        "savePoint": "start_gate",
+        "bind": { "health": "ui_health", "gold": "ui_gold" }
+      }
+    },
+    {
+      "id": "checkpoint_1",
+      "type": "checkpoint",
+      "x": 820,
+      "y": 1520,
+      "sprite": "checkpoint_flag",
+      "layer": "entities",
+      "properties": { "activateOnEnter": true, "savePlayerState": true, "sound": "sfx_checkpoint" }
+    },
+    {
+      "id": "shop_1",
+      "type": "npc",
+      "x": 1400,
+      "y": 1480,
+      "sprite": null,
+      "layer": "entities",
+      "properties": {
+        "role": "shopkeeper",
+        "dialogue": "Welcome, traveler. I sell upgrades and keys.",
+        "inventory": [
+          { "id": "heal_small", "price": 50, "effect": { "type": "heal", "amount": 3 } },
+          { "id": "double_jump_scroll", "price": 300, "effect": { "type": "grantAbility", "ability": "doubleJump" } },
+          { "id": "dash_scroll", "price": 450, "effect": { "type": "grantAbility", "ability": "dash" } }
+        ]
+      }
+    },
+    {
+      "id": "bat_patrol_1",
+      "type": "enemy",
+      "x": 600,
+      "y": 1360,
+      "sprite": "bat_enemy",
+      "layer": "entities",
+      "properties": { "health": 2, "patrolRadius": 180, "damage": 1, "behavior": "flyingPatrol" }
+    },
+    {
+      "id": "mini_boss_1",
+      "type": "enemy",
+      "x": 3600,
+      "y": 1400,
+      "sprite": "mini_boss",
+      "layer": "entities",
+      "properties": {
+        "isMiniBoss": true,
+        "health": 220,
+        "behavior": "patternedBoss",
+        "phases": [
+          { "phase": 1, "pattern": "slam", "projectiles": false },
+          { "phase": 2, "pattern": "summonMinions", "projectiles": true }
+        ],
+        "rewardOnDefeat": { "gold": 250, "ability": "grapple" }
+      }
+    },
+    {
+      "id": "secret_door_01",
+      "type": "interactive",
+      "x": 2020,
+      "y": 1420,
+      "layer": "entities",
+      "properties": { "requires": "secret_switch_01", "openAnimation": "door_open", "revealOnMap": false }
+    },
+    {
+      "id": "ui_health",
+      "type": "uiHealth",
+      "x": 16,
+      "y": 16,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "bindTo": "player1.health", "max": 8 }
+    },
+    {
+      "id": "ui_gold",
+      "type": "uiText",
+      "x": 16,
+      "y": 48,
+      "layer": "ui",
+      "properties": { "anchor": "top-left", "textTemplate": "Gold: {player.gold}", "bindTo": "player1.inventory.gold", "fontSize": 16 }
+    },
+    {
+      "id": "ui_minimap",
+      "type": "miniMap",
+      "x": 1120,
+      "y": 16,
+      "layer": "minimap",
+      "properties": { "anchor": "top-right", "mapSource": "world_map", "fogOfWar": true }
+    },
+    {
+      "id": "overlay_pause",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredSmall", "title": "Paused", "buttons": [ { "text": "Resume", "action": "togglePause" }, { "text": "Main Menu", "action": "toMainMenu" } ] }
+    },
+    {
+      "id": "overlay_gameover",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "centeredModal", "title": "Game Over", "subtitle": "You have fallen.", "buttons": [ { "text": "Respawn", "action": "respawnAtCheckpoint" }, { "text": "Main Menu", "action": "toMainMenu" } ] }
+    },
+    {
+      "id": "overlay_fasttravel",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "style": "leftPanel", "title": "Fast Travel", "contentSource": "player.checkpoints", "buttons": [ { "text": "Travel", "action": "fastTravelToSelected" }, { "text": "Close", "action": "closeOverlay" } ] }
+    }
+  ],
+  "quests": [
+    {
+      "id": "q_intro_find_key",
+      "title": "Find the Lost Key",
+      "giver": "npc_old_guard",
+      "type": "fetch",
+      "description": "Find the red key in the nearby ruins and return to the Old Guard.",
+      "objective": { "item": "key_red", "count": 1 },
+      "rewards": { "gold": 100, "xp": 50 },
+      "state": "available",
+      "progress": 0,
+      "uiHint": { "showOnMap": true, "markerIcon": "ability_icon_grapple" }
+    },
+    {
+      "id": "q_help_smith",
+      "title": "Help the Smith",
+      "giver": "npc_smith",
+      "type": "delivery",
+      "description": "Deliver 5 iron ore to the smith to receive an upgrade.",
+      "objective": { "item": "iron_ore", "count": 5 },
+      "rewards": { "gold": 200, "item": "double_jump_scroll" },
+      "state": "locked",
+      "progress": 0,
+      "prerequisites": [ "q_intro_find_key" ]
+    }
+  ],
+  "dialogues": [
+    {
+      "id": "dialogue_old_guard_1",
+      "npcId": "npc_old_guard",
+      "lines": [
+        { "id": "l1", "speaker": "Old Guard", "text": "Ah — you're awake. The ruins to the east hide a key we need.", "audio": null, "choices": [ { "text": "I'll find it.", "goto": "l2" } ] },
+        { "id": "l2", "speaker": "Old Guard", "text": "Bring it back and I'll reward you.", "audio": null, "choices": [ { "text": "Understood.", "action": { "type": "offerQuest", "params": { "questId": "q_intro_find_key" } } } ] }
+      ],
+      "subtitles": true
+    }
+  ],
+  "events": [
+    {
+      "trigger": "onEnterCheckpoint",
+      "target": "checkpoint_1",
+      "action": [
+        { "type": "saveGame", "params": {} },
+        { "type": "playSound", "params": { "id": "sfx_checkpoint" } },
+        { "type": "showToast", "params": { "text": "Checkpoint reached" } }
+      ]
+    },
+    {
+      "trigger": "onInteract",
+      "target": "shop_1",
+      "action": [
+        { "type": "openShop", "params": { "shopId": "shop_1" } }
+      ]
+    },
+    {
+      "trigger": "onEnemyDefeated",
+      "conditions": { "enemyId": "mini_boss_1" },
+      "action": [
+        { "type": "grantPlayer", "params": { "gold": 250 } },
+        { "type": "grantAbility", "params": { "ability": "grapple" } },
+        { "type": "playMusic", "params": { "id": "bgm_overworld" } },
+        { "type": "revealMapArea", "params": { "areaId": "dungeon_1_exit" } }
+      ]
+    },
+    {
+      "trigger": "onAcquireAbility",
+      "conditions": { "ability": "doubleJump" },
+      "action": [
+        { "type": "setPlayerProperty", "params": { "path": "player1.abilities.doubleJump", "value": true } },
+        { "type": "showToast", "params": { "text": "Double Jump unlocked!" } },
+        { "type": "unlockMapRegion", "params": { "regionId": "high_cliff" } }
+      ]
+    },
+    {
+      "trigger": "onAcquireAbility",
+      "conditions": { "ability": "dash" },
+      "action": [
+        { "type": "setPlayerProperty", "params": { "path": "player1.dash.enabled", "value": true } },
+        { "type": "showToast", "params": { "text": "Dash unlocked!" } }
+      ]
+    },
+    {
+      "trigger": "onPlayerDeath",
+      "action": [
+        { "type": "respawnAtCheckpoint", "params": {} },
+        { "type": "showOverlay", "params": { "overlayId": "overlay_gameover" } }
+      ]
+    },
+    {
+      "trigger": "onFastTravelRequested",
+      "action": [
+        { "type": "openOverlay", "params": { "overlayId": "overlay_fasttravel" } }
+      ]
+    },
+    {
+      "trigger": "onDialogueComplete",
+      "action": [
+        { "type": "evaluateDialogueActions", "params": {} }
+      ]
+    },
+    {
+      "trigger": "onQuestProgress",
+      "action": [
+        { "type": "updateQuestUI", "params": {} },
+        {
+          "type": "checkQuestCompletion",
+          "params": {
+            "onComplete": [
+              { "type": "grantPlayerRewards", "params": { "questId": "{questId}" } },
+              { "type": "showToast", "params": { "text": "Quest complete!" } }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "systems": {
+    "physics": { "enabled": true, "gravity": 1600, "maxFallSpeed": 900 },
+    "input": {
+      "bindings": {
+        "left": ["ArrowLeft", "A"],
+        "right": ["ArrowRight", "D"],
+        "jump": ["Space", "W", "ArrowUp", "button_a"],
+        "dash": ["Shift", "button_b"],
+        "grapple": ["E", "button_x"],
+        "interact": ["E", "button_y"],
+        "pause": ["P", "start"]
+      },
+      "controllerSupport": true,
+      "rebindingUI": true
+    },
+    "camera": { "type": "boundedFollow", "target": "player1", "lerp": 0.12, "boundsPadding": 64 },
+    "map": { "fogOfWar": true, "minimapEnabled": true, "fastTravel": true },
+    "ai": { "patrol": true, "aggroRange": 240 },
+    "save": {
+      "autoSave": true,
+      "autoSaveIntervalSec": 300,
+      "slots": 3,
+      "cloudSync": {
+        "enabled": false,
+        "endpoint": "/api/savecloud",
+        "onSaveCall": true
+      }
+    },
+    "dialogue": {
+      "systemEnabled": true,
+      "subtitles": { "enabled": true, "fontSize": "medium", "maxCharsPerLine": 60, "showSpeaker": true },
+      "localizationReady": true
+    },
+    "quests": {
+      "systemEnabled": true,
+      "autoTrack": true,
+      "persistent": true
+    },
+    "accessibility": {
+      "subtitles": true,
+      "colorblindMode": "off",
+      "uiScaleMin": 0.8,
+      "uiScaleMax": 1.5,
+      "highContrast": false
+    }
+  },
+  "uiHints": {
+    "controls": "Arrow keys/A-D to move, Space to jump, Shift to dash (when unlocked), E to grapple (when unlocked), P to pause. Controller supported.",
+    "tips": [
+      "Talk to NPCs to accept quests and learn about hidden areas",
+      "Save at checkpoints and use fast travel to move quickly between unlocked points",
+      "Use controller bindings for best experience. Rebind keys in Settings if needed"
+    ]
+  },
+  "meta": {
+    "created_at": "2025-09-18T00:00:00Z",
+    "updated_at": "2025-09-18T00:00:00Z",
+    "notes": "Patched v1.0.2: Added Quest system, Dialogue trees (example), Save slots + cloud-sync stub, controller mapping + rebind UI, and accessibility toggles (subtitles, colorblind, UI scale). Dialogue/actions/quests are hooked into events; implement engine handlers for evaluateDialogueActions, offerQuest, grantPlayerRewards, cloud save endpoints."
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "id": "fps-arena",
+  "name": "3D FPS Arena",
+  "version": "1.1.0",
+  "author": "GameForge",
+  "category": "Shooters",
+  "tags": ["3d","fps","arena","multiplayer"],
+  "thumbnail": "assets/fps.jpeg",
+  "description": "Multiplayer 3D FPS arena template with movement, weapons, hit registration, server-authoritative stubs, matchmaking hooks, bot AI, weapon balancing, rounds, spectate, replays, anti-cheat hooks, analytics, accessibility and monetization.",
+  "settings": {
+    "gameMode": "deathmatch",
+    "roundTimeSec": 300,
+    "maxPlayers": 12,
+    "respawnDelaySec": 3,
+    "tickRate": 60,
+    "serverAuthority": true,
+    "antiCheat": { "enabled": true, "reportEndpoint": "/api/anticheat/report", "metricsEndpoint": "/api/anticheat/metrics" },
+    "save": { "autoSave": true, "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "heatmapEndpoint": "/api/heatmap" },
+    "localization": { "defaultLocale": "en-US", "supported": ["en-US","es-ES","fr-FR","de-DE","hi-IN"] },
+    "accessibility": { "subtitles": true, "uiScale": 1.0, "colorblindMode": "protanopia", "controllerRemap": true, "ttsKillFeed": false },
+    "monetization": { "battlePass": { "enabled": true, "seasonId": "s1" }, "iap": { "enabled": true }, "storeEndpoint": "/api/store" },
+    "matchmaking": { "ranked": true, "mmrEndpoint": "/api/matchmaking/mmr" },
+    "replay": { "enabled": true, "uploadEndpoint": "/api/uploadReplay" }
+  },
+  "assets": {
+    "models": [
+      { "id": "player_male", "src": "assets/fps/models/player_male.glb" },
+      { "id": "player_female", "src": "assets/fps/models/player_female.glb" },
+      { "id": "weapon_rifle", "src": "assets/fps/models/rifle.glb" },
+      { "id": "weapon_shotgun", "src": "assets/fps/models/shotgun.glb" },
+      { "id": "weapon_sniper", "src": "assets/fps/models/sniper.glb" },
+      { "id": "weapon_smg", "src": "assets/fps/models/smg.glb" },
+      { "id": "weapon_rocket", "src": "assets/fps/models/rocket.glb" },
+      { "id": "map_arena_01", "src": "assets/fps/maps/arena_01.glb" },
+      { "id": "map_arena_02", "src": "assets/fps/maps/arena_02.glb" },
+      { "id": "map_small_streets", "src": "assets/fps/maps/small_streets.glb" }
+    ],
+    "audio": [
+      { "id": "sfx_shot_rifle", "src": "assets/audio/fps/rifle_shot.wav" },
+      { "id": "sfx_shot_shotgun", "src": "assets/audio/fps/shotgun_shot.wav" },
+      { "id": "sfx_reload", "src": "assets/audio/fps/reload.wav" },
+      { "id": "sfx_hit", "src": "assets/audio/fps/hit.wav" },
+      { "id": "bgm_lobby", "src": "assets/audio/fps/bgm_lobby.mp3", "loop": true }
+    ]
+  },
+  "layers": [
+    { "id": "world", "type": "3dScene" },
+    { "id": "ui", "type": "uiLayer" },
+    { "id": "overlays", "type": "overlayLayer" }
+  ],
+  "objects": [
+    {
+      "id": "player_template",
+      "type": "playerTemplate",
+      "layer": "world",
+      "properties": {
+        "modelOptions": ["player_male","player_female"],
+        "health": 100,
+        "armor": 0,
+        "movement": { "walkSpeed": 5.2, "sprintMultiplier": 1.55, "jumpHeight": 1.2 },
+        "hitbox": { "height": 1.8, "radius": 0.35 },
+        "loadout": ["weapon_rifle"]
+      }
+    },
+    {
+      "id": "ui_killfeed",
+      "type": "uiList",
+      "layer": "ui",
+      "x": 16,
+      "y": 16,
+      "properties": { "bindTo": "round.kills", "maxItems": 10 }
+    },
+    {
+      "id": "ui_hud",
+      "type": "uiPanel",
+      "layer": "ui",
+      "x": 16,
+      "y": 600,
+      "properties": { "elements": ["ammoCounter","healthBar","miniScoreboard"] }
+    },
+    {
+      "id": "overlay_matchmaking",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Searching for Match", "spinner": true }
+    },
+    {
+      "id": "overlay_round_end",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Round Over", "buttons": [{ "text": "Rematch", "action": "requestRematch" }, { "text": "Exit", "action": "toLobby" }] }
+    },
+    {
+      "id": "overlay_spectate",
+      "type": "uiOverlay",
+      "layer": "overlays",
+      "properties": { "visible": false, "title": "Spectating", "subtitle": "Use arrows to cycle players", "buttons": [{ "text": "Exit", "action": "toLobby" }] }
+    }
+  ],
+  "weapons": [
+    { "id": "weapon_rifle", "name": "Assault Rifle", "damage": 26, "fireRateRpm": 750, "magazine": 30, "reloadSec": 2.2, "range": 70, "recoil": { "vertical": 1.2, "horizontal": 0.6 }, "attachments": ["scope","barrel","mag"], "skinable": true },
+    { "id": "weapon_shotgun", "name": "Tactical Shotgun", "damage": 9, "pellets": 8, "fireRateRpm": 90, "magazine": 8, "reloadSec": 2.6, "range": 16, "spread": 8.5, "skinable": true },
+    { "id": "weapon_sniper", "name": "Sniper Rifle", "damage": 150, "fireRateRpm": 40, "magazine": 5, "reloadSec": 3.2, "range": 300, "scopeZoom": 8, "skinable": true },
+    { "id": "weapon_smg", "name": "SMG", "damage": 18, "fireRateRpm": 900, "magazine": 40, "reloadSec": 2.0, "range": 35, "recoil": { "vertical": 0.8, "horizontal": 0.5 }, "skinable": true },
+    { "id": "weapon_rocket", "name": "Rocket Launcher", "damage": 250, "fireRateRpm": 30, "magazine": 1, "reloadSec": 3.6, "range": 200, "aoe": 4.5, "skinable": true }
+  ],
+  "attachments": [
+    { "id": "scope", "type": "optic", "options": ["2x","4x","6x","8x"] },
+    { "id": "barrel", "type": "barrel", "options": ["compensator","suppressor"] },
+    { "id": "mag", "type": "magazine", "options": ["extended","fast"] }
+  ],
+  "bots": [
+    { "id": "bot_easy", "skill": "easy", "accuracy": 0.45, "aggression": 0.4 },
+    { "id": "bot_hard", "skill": "hard", "accuracy": 0.83, "aggression": 0.9 }
+  ],
+  "maps": [
+    { "id": "arena_01", "model": "map_arena_01", "size": { "w": 140, "h": 140 }, "spawnPoints": [{ "x": 10, "y": 0, "z": 10 }, { "x": 130, "y": 0, "z": 130 }, { "x": 70, "y": 0, "z": 20 }] },
+    { "id": "arena_02", "model": "map_arena_02", "size": { "w": 160, "h": 160 }, "spawnPoints": [{ "x": 20, "y": 0, "z": 20 }, { "x": 140, "y": 0, "z": 140 }] },
+    { "id": "small_streets", "model": "map_small_streets", "size": { "w": 90, "h": 90 }, "spawnPoints": [{ "x": 10, "y": 0, "z": 10 }, { "x": 80, "y": 0, "z": 80 }] }
+  ],
+  "modes": [
+    { "id": "deathmatch", "teamBased": false, "scoreToWin": 50 },
+    { "id": "team_deathmatch", "teamBased": true, "scoreToWin": 100 }
+  ],
+  "rounds": [
+    { "id": "round_1", "timeSec": 300, "respawnDelay": 3 }
+  ],
+  "achievements": [
+    { "id": "first_kill", "name": "First Kill", "condition": "Record your first kill" },
+    { "id": "sharpshooter", "name": "Sharpshooter", "condition": "100 headshots overall" },
+    { "id": "unstoppable", "name": "Unstoppable", "condition": "10 kill streak" }
+  ],
+  "events": [
+    { "trigger": "onPlayerKilled", "action": [{ "type": "addStat", "params": { "player": "{killer.id}", "stat": "kills", "amount": 1 } }, { "type": "addStat", "params": { "player": "{victim.id}", "stat": "deaths", "amount": 1 } }, { "type": "spawnRagdoll", "params": { "player": "{victim.id}" } }, { "type": "recordMetric", "params": { "metric": "player_killed" } }] },
+    { "trigger": "onRoundEnd", "action": [{ "type": "showOverlay", "params": { "overlayId": "overlay_round_end" } }, { "type": "callAPI", "params": { "endpoint": "/api/analytics", "method": "POST", "body": { "event": "round_end", "winner": "{round.winner}", "scores": "{round.scores}" } } }] },
+    { "trigger": "onMatchmade", "action": [{ "type": "callAPI", "params": { "endpoint": "/api/matchmaking/mmr", "method": "POST", "body": { "event": "match_found", "players": "{match.players}" } } }, { "type": "showOverlay", "params": { "overlayId": "overlay_matchmaking", "visible": false } }] }
+  ],
+  "systems": {
+    "network": { "authoritativeServer": true, "tickRate": 60, "snapshotCompression": "delta" },
+    "antiCheat": { "enabled": true, "reportEndpoint": "/api/anticheat/report", "metricsEndpoint": "/api/anticheat/metrics" },
+    "replay": { "enabled": true, "uploadEndpoint": "/api/uploadReplay" },
+    "save": { "cloudSyncEndpoint": "/api/savecloud" },
+    "analytics": { "enabled": true, "endpoint": "/api/analytics", "heatmapEndpoint": "/api/heatmap", "metrics": ["accuracy","headshot_rate","latency","movement_validation_failures"] },
+    "matchmaking": { "endpoint": "/api/matchmaking/mmr" },
+    "store": { "endpoint": "/api/store" }
+  },
+  "localization": {
+    "strings": {
+      "en-US": { "searching": "Searching", "round_over": "Round Over", "respawning": "Respawning...", "achievement_unlocked": "Achievement Unlocked!" },
+      "es-ES": { "searching": "Buscando", "round_over": "Ronda Terminada", "respawning": "Reapareciendo...", "achievement_unlocked": "¡Logro Desbloqueado!" },
+      "fr-FR": { "searching": "Recherche", "round_over": "Fin de manche", "respawning": "Réapparition...", "achievement_unlocked": "Succès débloqué!" },
+      "de-DE": { "searching": "Suchen", "round_over": "Runde Vorbei", "respawning": "Wiederbeleben...", "achievement_unlocked": "Erfolg freigeschaltet!" },
+      "hi-IN": { "searching": "खोज रहा है", "round_over": "राउंड समाप्त", "respawning": "पुनरुत्थान...", "achievement_unlocked": "उपलब्धि अनलॉक हुई!" }
+    }
+  },
+  "uiHints": { "controls": "WASD to move, mouse to aim, left click to fire. Use R to reload and Space to jump. Press Tab to open scoreboard.", "tips": ["Aim for the head for bonus damage","Use cover and peek fire","Watch the minimap for incoming enemies"] },
+  "meta": { "created_at": "2025-09-18T00:00:00Z", "updated_at": "2025-09-18T00:00:00Z", "notes": "v1.1.0 — Added weapons (SMG, rocket), attachments system, additional maps, extended localization (FR/DE/HI), HUD ammo/health/miniscoreboard, spectator overlay, leaderboards/store endpoints, achievements, analytics heatmap & anti-cheat metrics, controller remapping and TTS hook for killfeed. Implement server-side hit registration, anti-cheat rules, matchmaking and store endpoints for production." }
+}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#001014" />
+  <title>Game Preview • GameForge</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="preview.css" />
+</head>
+<body class="dark" data-page="preview">
+
+  <!-- Central container for layout -->
+  <div class="site-container">
+
+    <!-- Top Navigation -->
+    <header class="top-nav glass" role="banner" aria-label="Preview header">
+      <div class="nav-left">
+        <div class="logo">🎮 GameBuilder</div>
+        <div id="projectName" class="project-name">Preview</div>
+      </div>
+
+      <div class="nav-center">
+        <h1 id="gameTitle" class="page-title">Untitled Game</h1>
+        <div class="status-wrap">
+          <span id="statusBadge" class="status-badge offline">Stopped</span>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <button id="editBtn" class="btn">🎨 Edit</button>
+        <button id="publishBtn" class="btn primary">🚀 Publish</button>
+        <button id="downloadBtn" class="btn secondary">⬇️ Download</button>
+        <button id="cancelEditBtn" class="btn secondary">❌ Cancel</button>
+        <button id="themeToggleBtn" class="btn">🌓</button>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar glass">
+        <ul class="menu">
+          <li><button class="menu-item active">🏠 Dashboard</button></li>
+          <li><button class="menu-item">🎮 Games</button></li>
+          <li><button class="menu-item">🖼️ Assets</button></li>
+          <li><button class="menu-item">⚙️ Settings</button></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <main class="content">
+        <!-- Game Info -->
+        <section class="game-info glass">
+          <div class="game-meta">
+            <img id="gameThumb" class="game-thumb" src="https://via.placeholder.com/88" alt="Game thumbnail">
+            <div class="meta-text">
+              <h2 id="gameTitleMeta" class="meta-title">Untitled Game</h2>
+              <p id="gameDesc" class="meta-desc">No description yet.</p>
+              <div class="meta-sub">👤 <span id="gameAuthor">Anonymous</span> • 🕒 <span id="gameUpdated">—</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Details + Preview -->
+        <div class="grid">
+          <!-- Details -->
+          <section class="details glass">
+            <h3>📋 Game Details</h3>
+            <dl class="details-list">
+              <div class="detail-row"><dt>Type</dt><dd id="gameType">–</dd></div>
+              <div class="detail-row"><dt>Levels</dt><dd id="gameLevels">–</dd></div>
+              <div class="detail-row"><dt>Enemies</dt><dd id="gameEnemies">–</dd></div>
+              <div class="detail-row"><dt>Generated</dt><dd id="gameGeneratedAt">–</dd></div>
+            </dl>
+            <div class="details-actions">
+              <button id="reloadBtn" class="btn small">🔄 Reload</button>
+              <button id="fullscreenBtn" class="btn small">⛶ Fullscreen</button>
+            </div>
+          </section>
+
+          <!-- Preview -->
+          <section class="preview glass">
+            <div class="preview-header">
+              <h3>🕹️ Live Preview</h3>
+            </div>
+            <div class="device-frame">
+              <div class="device-frame-inner">
+                <iframe id="gameFrame" class="game-preview" src="" title="Game preview" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
+              </div>
+            </div>
+            <p id="previewMsg" class="preview-msg">⚠️ No game data found. Please generate a game first.</p>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Made with ❤️ using AI • © 2025 GameBuilder</p>
+    </footer>
+  </div>
+
+  <script src="preview.js"></script>
+</body>
+</html>
