@@ -10,9 +10,9 @@ export default function TemplatesList({ onOpen }) {
 
   // Build API base safely
   const API_BASE = (process.env.REACT_APP_API_BASE || "").replace(/\/+$/, "");
-  const TEMPLATES_URL = (API_BASE ? `${API_BASE}/api/templates` : `/api/templates`);
+  const TEMPLATES_URL = API_BASE ? `${API_BASE}/api/templates` : `/api/templates`;
 
-    useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
@@ -24,13 +24,15 @@ export default function TemplatesList({ onOpen }) {
       .then(async (res) => {
         if (!res.ok) {
           const text = await res.text().catch(() => "");
-          throw new Error(`API ${res.status} ${res.statusText}${text ? ` — ${text.slice(0,120)}` : ""}`);
+          throw new Error(
+            `API ${res.status} ${res.statusText}${text ? ` — ${text.slice(0, 120)}` : ""}`
+          );
         }
         const ct = res.headers.get("content-type") || "";
         if (!ct.includes("application/json")) {
           const text = await res.text().catch(() => "");
           throw new Error(
-            `Unexpected response (not JSON). Got "${ct}". First bytes: ${text?.slice(0,80) || "(empty)"}`
+            `Unexpected response (not JSON). Got "${ct}". First bytes: ${text?.slice(0, 80) || "(empty)"}`
           );
         }
         return res.json();
@@ -62,14 +64,22 @@ export default function TemplatesList({ onOpen }) {
     return () => {
       mounted = false;
     };
-  }, []);
-
+  }, [TEMPLATES_URL]); // satisfy react-hooks/exhaustive-deps without disabling it
 
   if (loading) {
     return (
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12 }}>
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} style={{ borderRadius: 8, overflow: "hidden", background: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", minHeight: 170 }}>
+          <div
+            key={i}
+            style={{
+              borderRadius: 8,
+              overflow: "hidden",
+              background: "#fff",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              minHeight: 170,
+            }}
+          >
             <div style={{ height: 100, background: "#eee" }} />
             <div style={{ padding: 8 }}>
               <div style={{ width: "60%", height: 12, background: "#eee", marginBottom: 6 }} />
@@ -147,7 +157,14 @@ export default function TemplatesList({ onOpen }) {
                   e.stopPropagation();
                   navigate(`/editor?template=${encodeURIComponent(t.id)}`);
                 }}
-                style={{ padding: "6px 10px", borderRadius: 6, border: "none", cursor: "pointer", background: "#0b63ff", color: "#fff" }}
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: "none",
+                  cursor: "pointer",
+                  background: "#0b63ff",
+                  color: "#fff",
+                }}
                 aria-label={`Open editor for ${t.name}`}
               >
                 Edit
@@ -157,7 +174,13 @@ export default function TemplatesList({ onOpen }) {
                   e.stopPropagation();
                   navigate(`/templates/${encodeURIComponent(t.id)}`);
                 }}
-                style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.08)", background: "#fff", cursor: "pointer" }}
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  background: "#fff",
+                  cursor: "pointer",
+                }}
                 aria-label={`Preview ${t.name}`}
               >
                 Preview
