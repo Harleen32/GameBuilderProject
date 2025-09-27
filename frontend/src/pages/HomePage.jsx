@@ -1,12 +1,13 @@
 // src/pages/HomePage.jsx
 import React, { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom"; // if you use react-router; harmless if not used in your app
+import { Link } from "react-router-dom";
 import "./Home.css";
-import TemplatesList from "../components/TemplatesList"; // optional - your component earlier
+import TemplatesList from "../components/TemplatesList";
 
-// lightweight fetch helper (you can swap with your editor-integration.js helpers)
+// ✅ updated fetch to use REACT_APP_API_BASE
 async function fetchTemplatesFromApi() {
-  const res = await fetch("/api/templates"); // replace with REACT_APP_API_BASE if needed
+  const API = process.env.REACT_APP_API_BASE || "";
+  const res = await fetch(`${API}/api/templates`);
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Failed to load templates: ${res.status} ${res.statusText} ${text}`);
@@ -24,22 +25,29 @@ export default function HomePage() {
     setLoading(true);
     fetchTemplatesFromApi()
       .then((data) => {
-        if (!cancelled) setTemplates(Array.isArray(data) ? data : []);
+        if (!cancelled) setTemplates(Array.isArray(data) ? data : data.items || []);
       })
       .catch((err) => {
         console.warn("Failed to fetch templates", err);
         if (!cancelled) setError(err);
       })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const exampleTemplates = useMemo(() => [
-    { id: 'space-shooter', title: 'Space Shooter', cover: '/assets/templates/space-shooter/cover.svg' },
-    { id: 'platformer', title: 'Platformer', cover: '/assets/templates/platformer/cover.svg' },
-    { id: 'racing', title: 'Racing', cover: '/assets/templates/racing/cover.svg' },
-    { id: 'rpg', title: 'RPG / Adventure', cover: '/assets/templates/rpg/cover.svg' },
-  ], []);
+  const exampleTemplates = useMemo(
+    () => [
+      { id: "space-shooter", title: "Space Shooter", cover: "/assets/templates/space-shooter/cover.svg" },
+      { id: "platformer", title: "Platformer", cover: "/assets/templates/platformer/cover.svg" },
+      { id: "racing", title: "Racing", cover: "/assets/templates/racing/cover.svg" },
+      { id: "rpg", title: "RPG / Adventure", cover: "/assets/templates/rpg/cover.svg" },
+    ],
+    []
+  );
 
   return (
     <div className="gb-home">
@@ -48,22 +56,18 @@ export default function HomePage() {
           <h1 className="gb-title">Game Builder</h1>
 
           <nav className="gb-nav" aria-label="Main navigation">
-            {/* Prefer router Link in SPA; fallback to <a> if Link not available */}
-            {typeof Link !== "undefined" ? (
-              <>
-                <Link to="/" className="gb-nav-link">Home</Link>
-                <Link to="/templates" className="gb-nav-link">Templates</Link>
-                <Link to="/editor" className="gb-nav-link">Editor</Link>
-                <Link to="/docs" className="gb-nav-link">Docs</Link>
-              </>
-            ) : (
-              <>
-                <a href="/" className="gb-nav-link">Home</a>
-                <a href="/templates" className="gb-nav-link">Templates</a>
-                <a href="/editor" className="gb-nav-link">Editor</a>
-                <a href="/docs" className="gb-nav-link">Docs</a>
-              </>
-            )}
+            <Link to="/" className="gb-nav-link">
+              Home
+            </Link>
+            <Link to="/templates" className="gb-nav-link">
+              Templates
+            </Link>
+            <Link to="/editor" className="gb-nav-link">
+              Editor
+            </Link>
+            <Link to="/docs" className="gb-nav-link">
+              Docs
+            </Link>
           </nav>
         </div>
       </header>
@@ -73,11 +77,16 @@ export default function HomePage() {
           <div className="gb-hero-inner">
             <h2 id="hero-heading">Build games fast. Ship faster.</h2>
             <p className="gb-lead">
-              Create, edit and publish game templates — with an integrated editor, live previews and simple asset handling.
+              Create, edit and publish game templates — with an integrated editor, live previews and simple asset
+              handling.
             </p>
             <div className="gb-cta-row">
-              <Link className="gb-btn gb-btn-primary" to="/editor" aria-label="Open Editor">Open Editor</Link>
-              <Link className="gb-btn gb-btn-ghost" to="/templates" aria-label="Browse Templates">Browse Templates</Link>
+              <Link className="gb-btn gb-btn-primary" to="/editor" aria-label="Open Editor">
+                Open Editor
+              </Link>
+              <Link className="gb-btn gb-btn-ghost" to="/templates" aria-label="Browse Templates">
+                Browse Templates
+              </Link>
             </div>
           </div>
 
@@ -116,32 +125,41 @@ export default function HomePage() {
 
           <div aria-live="polite" aria-atomic="true" style={{ minHeight: 40, marginBottom: 12 }}>
             {loading && <span>Loading templates…</span>}
-            {error && <span role="alert" style={{ color: 'salmon' }}>Failed to load templates.</span>}
+            {error && (
+              <span role="alert" style={{ color: "salmon" }}>
+                Failed to load templates.
+              </span>
+            )}
           </div>
 
-          {/* Prefer your TemplatesList component if available */}
           {templates && templates.length > 0 ? (
             <div className="gb-templates-grid" role="list">
-              {templates.map(t => (
+              {templates.map((t) => (
                 <a key={t.id} className="gb-card" role="listitem" href={`/templates/${t.id}`}>
                   <div className="gb-card-thumb" aria-hidden="true">
-                    {t.cover ? <img src={t.cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} /> : '🎮'}
+                    {t.cover ? (
+                      <img
+                        src={t.cover}
+                        alt=""
+                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8 }}
+                      />
+                    ) : (
+                      "🎮"
+                    )}
                   </div>
                   <div className="gb-card-body">
-                    <strong>{t.title}</strong>
+                    <strong>{t.title || t.name}</strong>
                     <small>{t.subtitle || t.description || t.type || t.id}</small>
                   </div>
                 </a>
               ))}
             </div>
           ) : (
-            // fallback: use local example list or your TemplatesList component
             <div className="gb-templates-grid">
-              {/* If you have TemplatesList component, render it here */}
               {TemplatesList ? (
-                <TemplatesList onOpen={(id) => window.location.href = `/templates/${id}`} />
+                <TemplatesList onOpen={(id) => (window.location.href = `/templates/${id}`)} />
               ) : (
-                exampleTemplates.map(t => (
+                exampleTemplates.map((t) => (
                   <a key={t.id} className="gb-card" href={`/templates/${t.id}`}>
                     <div className="gb-card-thumb">🚀</div>
                     <div className="gb-card-body">
@@ -157,7 +175,7 @@ export default function HomePage() {
       </main>
 
       <footer className="gb-footer" role="contentinfo">
-        <div className="gb-footer-inner" style={{ maxWidth: 1200, margin: '0 auto', padding: '12px 18px' }}>
+        <div className="gb-footer-inner" style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 18px" }}>
           <small>© {new Date().getFullYear()} Game Builder — Built with care.</small>
         </div>
       </footer>
