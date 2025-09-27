@@ -21,40 +21,42 @@ app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// Strict CORS (adjust domains)
+// ✅ Updated CORS with deployed frontend URL
 const allowed = [
-  'http://localhost:3000',
-  'https://your-frontend-domain.com'
+  'http://localhost:3000', 
+  'https://game-builder-project-pvrn.vercel.app' // your Vercel frontend URL
 ];
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true);              // allow curl/postman
-    if (allowed.includes(origin)) return cb(null, true);
-    cb(new Error('Not allowed by CORS'));
-  },
-  credentials: true
-}));
+
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true); // allow curl/postman/no origin
+      if (allowed.includes(origin)) return cb(null, true);
+      cb(new Error('Not allowed by CORS'));
+    },
+    credentials: true
+  })
+);
 
 // Static (optional)
 app.use('/uploads', express.static('uploads'));
 
-// Rate limit whole API (you can also mount per-route)
+// Rate limit whole API
 app.use('/api', rateLimiter);
 
-/// ... your existing middleware and routes ...
-
+// API Routes
 app.use('/api/templates', templatesRoutes);
 app.use('/api/projects', projectsRoutes);
-app.use('/api/ai',       aiRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
-// ✅ Root route for the Render homepage
+// ✅ Root route for Render health check
 app.get('/', (_req, res) => {
   res.send('Backend is running 🚀');
 });
 
-// Centralized error handling MUST stay last
+// Error handling MUST stay last
 app.use(errorHandler);
 
 module.exports = app;
