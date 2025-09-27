@@ -12,7 +12,7 @@ export default function TemplatesList({ onOpen }) {
   const API_BASE = (process.env.REACT_APP_API_BASE || "").replace(/\/+$/, "");
   const TEMPLATES_URL = (API_BASE ? `${API_BASE}/api/templates` : `/api/templates`);
 
-  useEffect(() => {
+    useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
@@ -62,9 +62,8 @@ export default function TemplatesList({ onOpen }) {
     return () => {
       mounted = false;
     };
-    // Intentionally not adding TEMPLATES_URL to deps to avoid re-fetch loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   if (loading) {
     return (
