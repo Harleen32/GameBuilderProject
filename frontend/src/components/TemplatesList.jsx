@@ -2,41 +2,50 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-/**
- * TemplatesList
- * Props:
- *  - onOpen(template)  optional callback called when a card is clicked
- *
- * Expects backend endpoint: GET /api/templates -> { items: [ { _id, name, description, thumbnailUrl, tags } ], total, page, limit }
- * If your backend returns an array instead, the component will adapt (it accepts either { items } or plain array).
- */
 export default function TemplatesList({ onOpen }) {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // Build API base safely
+  const API_BASE = (process.env.REACT_APP_API_BASE || "").replace(/\/+$/, "");
+  const TEMPLATES_URL = (API_BASE ? `${API_BASE}/api/templates` : `/api/templates`);
+
   useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
 
-    fetch("/api/templates")
-      .then((res) => {
-        if (!res.ok) throw new Error(`API ${res.status}`);
+    fetch(TEMPLATES_URL, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(`API ${res.status} ${res.statusText}${text ? ` — ${text.slice(0,120)}` : ""}`);
+        }
+        const ct = res.headers.get("content-type") || "";
+        if (!ct.includes("application/json")) {
+          const text = await res.text().catch(() => "");
+          throw new Error(
+            `Unexpected response (not JSON). Got "${ct}". First bytes: ${text?.slice(0,80) || "(empty)"}`
+          );
+        }
         return res.json();
       })
       .then((data) => {
         if (!mounted) return;
-        // Support two shapes:
-        // 1) { items: [...] }  2) [ ... ]
         const items = Array.isArray(data) ? data : data.items || [];
-        // Normalize id field: prefer _id -> id
         const normalized = items.map((t) => ({
           id: t._id || t.id || t.name,
           name: t.name || t.title || t.id || "Untitled",
           description: t.description || "",
-          thumbnailUrl: t.thumbnailUrl || t.cover || `/assets/templates/${(t._id || t.id || t.name)}.png`,
+          thumbnailUrl:
+            t.thumbnailUrl ||
+            t.cover ||
+            `/assets/templates/${encodeURIComponent(t._id || t.id || t.name)}.png`,
           tags: t.tags || [],
           raw: t,
         }));
@@ -53,10 +62,11 @@ export default function TemplatesList({ onOpen }) {
     return () => {
       mounted = false;
     };
+    // Intentionally not adding TEMPLATES_URL to deps to avoid re-fetch loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
-    // Simple skeleton grid
     return (
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12 }}>
         {Array.from({ length: 6 }).map((_, i) => (
@@ -75,8 +85,13 @@ export default function TemplatesList({ onOpen }) {
   if (error) {
     return (
       <div style={{ padding: 12 }}>
-        <div style={{ color: "crimson", marginBottom: 8 }}>Error: {error}</div>
-        <button onClick={() => window.location.reload()} style={{ padding: "8px 12px" }}>Retry</button>
+        <div style={{ color: "crimson", marginBottom: 8 }}>
+          Error: {error}
+          {API_BASE ? "" : " (Tip: set REACT_APP_API_BASE in Vercel to your Render URL)"}
+        </div>
+        <button onClick={() => window.location.reload()} style={{ padding: "8px 12px" }}>
+          Retry
+        </button>
       </div>
     );
   }
@@ -84,7 +99,7 @@ export default function TemplatesList({ onOpen }) {
   if (!templates.length) {
     return (
       <div style={{ padding: 12, color: "#444" }}>
-        No templates found. You can seed templates from your backend or add some JSON files to <code>frontend/public/</code>.
+        No templates found. Seed your backend or add JSON files to <code>frontend/public/</code>.
       </div>
     );
   }
@@ -117,14 +132,13 @@ export default function TemplatesList({ onOpen }) {
             }}
             onClick={() => {
               onOpen && onOpen(t.raw || t);
-              // navigate to template detail
               navigate(`/templates/${encodeURIComponent(t.id)}`);
             }}
           />
           <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
               <div style={{ fontWeight: 700 }}>{t.name}</div>
-              <div style={{ fontSize: 12, color: "#666" }}>{t.tags.slice(0,2).join(", ")}</div>
+              <div style={{ fontSize: 12, color: "#666" }}>{t.tags.slice(0, 2).join(", ")}</div>
             </div>
             <div style={{ fontSize: 13, color: "#666", flex: 1 }}>{t.description || t.id}</div>
 
@@ -132,7 +146,6 @@ export default function TemplatesList({ onOpen }) {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  // open editor with template id
                   navigate(`/editor?template=${encodeURIComponent(t.id)}`);
                 }}
                 style={{ padding: "6px 10px", borderRadius: 6, border: "none", cursor: "pointer", background: "#0b63ff", color: "#fff" }}
@@ -140,7 +153,6 @@ export default function TemplatesList({ onOpen }) {
               >
                 Edit
               </button>
-
               <button
                 onClick={(e) => {
                   e.stopPropagation();
